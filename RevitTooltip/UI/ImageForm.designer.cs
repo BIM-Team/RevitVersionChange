@@ -80,9 +80,9 @@ namespace Revit.Addin.RevitTooltip.UI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
             this.Name = "ImageForm";
             this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.TopMost = true;
             this.VisibleChanged += new System.EventHandler(this.ImageForm_VisibleChanged);
