@@ -48,7 +48,11 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// 通过传入的Signal，查询与之对应的所有的测点
 		///传入的Signal应该是测量数据的signal
         /// </summary>
-		List<string> SelectAllEntities(string ExcelSignal);			
+		List<string> SelectAllEntities(string ExcelSignal);
 
+        /// <summary>
+        /// 复制MySQL中的数据到Sqlite中
+        /// </summary>
+        bool LoadDataToSqlite();
     }
 }

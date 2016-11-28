@@ -132,6 +132,8 @@
     <Compile Include="Intface\IExcelReader.cs" />
     <Compile Include="Intface\IMysqlUtil.cs" />
     <Compile Include="Intface\ISQLiteHelper.cs" />
+    <Compile Include="Intface\MysqlUtil.cs" />
+    <Compile Include="Intface\SQLiteHelper.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

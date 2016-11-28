@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Revit.Addin.RevitTooltip.Dto;
+using MySql.Data.MySqlClient;
 
 namespace Revit.Addin.RevitTooltip.Intface
 {
@@ -57,10 +58,10 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// </summary>
 		bool ModifyThreshold(string signal, double Total_hold, double Diff_hold);
 
-		/// <summary>
-        /// 复制MySQL中的数据到Sqlite中
+        /// <summary>
+        /// 查询MySQL中的表数据，复制数据到Sqlite中
         /// </summary>
-        bool LoadDataToSqlite();
+        MySqlDataReader LoadTableData(string tablename);
 
     }
 }
