@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Autodesk.Revit.UI;
+using Revit.Addin.RevitTooltip.Dto;
 
 namespace Revit.Addin.RevitTooltip
 {
@@ -30,9 +31,16 @@ namespace Revit.Addin.RevitTooltip
             InitializeComponent();
         }
 
-        public void Update(System.Collections.IEnumerable itemsSource)
+        public void Update(InfoEntityData infoEntityData)
         {
-            elementInfoHost.Update( itemsSource);
+            List<ParameterData> list = new List<ParameterData>();
+            if (infoEntityData != null&& infoEntityData.Data!=null) {
+            Dictionary<string,string> data = infoEntityData.Data;
+                foreach (string key in data.Keys) {
+                    list.Add(new ParameterData(key, data[key]));
+                }
+            }
+            elementInfoHost.Update(list);
         }
 
         public static ElementInfoPanel GetInstance()

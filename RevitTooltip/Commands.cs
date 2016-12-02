@@ -71,13 +71,8 @@ namespace Revit.Addin.RevitTooltip
         {
             try
             {
-                SettingsForm setForm = new SettingsForm(commandData.Application.ActiveUIDocument.Document);
-                if (setForm.ShowDialog() == DialogResult.OK)
-                {
-                    // Õ∑≈
-                    setForm.Dispose();
-                }
-
+                NewSettings settingForm = new NewSettings(App._app.settings);
+                settingForm.Show();
                 return Result.Succeeded;
             }
             catch (Exception ex)
@@ -97,7 +92,7 @@ namespace Revit.Addin.RevitTooltip
             return Result.Succeeded;
         }
 
-        public static string LoadFromFile()
+        public static string[] LoadFromFile()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = Res.String_SelectExcelFile;
@@ -105,12 +100,12 @@ namespace Revit.Addin.RevitTooltip
             ofd.FilterIndex = 0;
             ofd.RestoreDirectory = true;
             ofd.Filter = "Excel 97-2003 Workbook(*.xls)|*.xls";
-            ofd.Multiselect = false;
+            ofd.Multiselect = true;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                return ofd.FileName;
+                return ofd.FileNames;
             }
-            return string.Empty;
+            return null;
         }
     }
 

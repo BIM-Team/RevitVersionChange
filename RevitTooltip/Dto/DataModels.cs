@@ -29,6 +29,16 @@ namespace Revit.Addin.RevitTooltip.Dto
             get { return this.tableDesc; }
             set { this.tableDesc = value; }
         }
+        /// <summary>
+        /// 用于查询返回
+        /// 累计阈值
+        /// </summary>
+        public float Total_hold { get; set; }
+        /// <summary>
+        /// 用于查询返回
+        /// 相邻阈值
+        /// </summary>
+        public float Diff_hold { get; set; }
     }
     /// <summary>
     /// 对应于InfoTable某个entity和其相关的所有Info数据
@@ -84,29 +94,29 @@ namespace Revit.Addin.RevitTooltip.Dto
             get { return this.date; }
             set { this.date = value; }
         }
-        double maxValue;
+        float maxValue;
         /// <summary>
         /// 对应于DrawTable中的最大值
         /// </summary>
-        public double MaxValue
+        public float MaxValue
         {
             get { return this.maxValue; }
             set { this.maxValue = value; }
         }
-        double midValue;
+        float midValue;
         /// <summary>
         /// 对应于DrawTable中的中位数
         /// </summary>
-        public double MidValue
+        public float MidValue
         {
             get { return this.midValue; }
             set { this.midValue = value; }
         }
-        double minValue;
+        float minValue;
         /// <summary>
         /// 对应于DrawTable中的最小值
         /// </summary>
-        public double MinValue
+        public float MinValue
         {
             get { return this.minValue; }
             set { this.minValue = value; }
@@ -207,6 +217,26 @@ namespace Revit.Addin.RevitTooltip.Dto
         {
             get { return this.drawRows; }
             set { this.drawRows = value; }
+        }
+    }
+    public class ParameterData 
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+
+        public ParameterData(string name, string value)
+        {
+            Name = name;
+            Value = value;
+        }
+        public override bool Equals(object obj)
+        {
+            ParameterData o = (ParameterData)obj;
+            return this.Value.Equals(o.Value) && this.Name.Equals(o.Name);
+        }
+        public override int GetHashCode()
+        {
+            return (this.Name + this.Value).GetHashCode();
         }
     }
 }

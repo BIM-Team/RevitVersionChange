@@ -10,36 +10,59 @@ using System.IO;
 using Res = Revit.Addin.RevitTooltip.Properties.Resources;
 using System.Windows.Media.Imaging;
 using System.Diagnostics;
-using Revit.Addin.RevitTooltip.Util;
 using Revit.Addin.RevitTooltip.UI;
 using System.Threading;
 using System;
+using Revit.Addin.RevitTooltip.Intface;
+using Revit.Addin.RevitTooltip.Impl;
+using Revit.Addin.RevitTooltip.Dto;
 
 namespace Revit.Addin.RevitTooltip
 {
 
     /// <summary>
-    /// External application handling a modeless 
-    /// form and the Idling event, based on the 
-    /// ModelessForm_IdlingEvent SDK sample.
+    /// 插件主程序入口
     /// </summary>
     public class App : IExternalApplication
     {
         /// <summary>
-        /// Singleton external application class instance.
+        /// 单列模式
         /// </summary>
         internal static App _app = null;
 
         private string m_previousDocPathName = null;
-        // internal Document currentDoc=null;
-        internal static RevitTooltip settings = null;
-        ElementInfoPanel m_elementInfoPanel = null;
-        private int m_selectedElementId = -1;
-        UIControlledApplication m_uiApp = null;
-        
-
         /// <summary>
-        /// Provide access to singleton class instance.
+        /// 模型相关的配置
+        /// 原本存放在模型中间
+        /// </summary>
+        internal RevitTooltip settings = null;
+        internal RevitTooltip Settings
+        {
+            set {
+                if (null == this.settings || !this.settings.Equals(value)) {
+                    this.settings = value;
+                    this.mysql = new MysqlUtil(value);
+                }
+            }
+        }
+        /// <summary>
+        /// 属性面板
+        /// </summary>
+        ElementInfoPanel m_elementInfoPanel = null;
+        /// <summary>
+        /// 绘图的控制面板
+        /// </summary>
+        ImageControl m_ImageControl = null;
+        /// <summary>
+        /// 用于记录当前选择的内容；用于判断是否和前一次选择的内容相同
+        /// </summary>
+        private int m_selectedElementId = -1;
+        /// <summary>
+        /// UI_APP
+        /// </summary>
+        UIControlledApplication m_uiApp = null;
+        /// <summary>
+        /// 获取单例
         /// </summary>
         public static App Instance
         {
@@ -53,47 +76,82 @@ namespace Revit.Addin.RevitTooltip
         /// 点击弹出折线图面板
         /// </summary>
         internal PushButton SurveyImageInfoButton { get; set; }
-        /// <summary>
-        /// 点击加载excel
-        /// </summary>
-        internal PushButton LoadExcelButton { get; set; }
-        internal PushButton LoadExcelToSQLiteButton { get; set; }
+
+        ///// <summary>
+        ///// 点击加载excel
+        ///// </summary>
+        //internal PushButton LoadExcelButton { get; set; }
+        ///// <summary>
+        ///// 加载Excel表到SQLite数据库
+        ///// </summary>
+        //internal PushButton LoadExcelToSQLiteButton { get; set; }
 
         /// <summary>
-        /// 点击重新加载::加载到SQLite
+        /// 点击重新加载:从Mysql加载到SQLite
         /// </summary>
         internal PushButton ReloadDataButton { get; set; }
-        //internal PushButton TooltipOnButton { get; set; }
-        //internal PushButton TooltipOffButton { get; set; }
+        /// <summary>
+        /// MySQL的实例对象
+        /// </summary>
+        private IMysqlUtil mysql = null;
+        /// <summary>
+        /// MySQL的实例对象
+        /// </summary>
+        public IMysqlUtil MySql {
+        get { return this.mysql; }
+        }
+        private ISQLiteHelper sqlite = null;
+        /// <summary>
+        /// 返回SQLite实例
+        /// </summary>
+        public ISQLiteHelper Sqlite {
+        get { return this.sqlite;            }
+        }
+        //记录当前打开的文档
+        private Document current_doc;
+        /// <summary>
+        /// 获取当前打开的文档
+        /// </summary>
+        public Document CurrentDoc {
+        get { return this.current_doc; }
+        }
+
 
         public Result OnStartup(UIControlledApplication app)
         {
-
+            //UI对象
             m_uiApp = app;
+            //APP的引用
             _app = this;
+            //事件绑定：打开了一个文档的视图
             app.ViewActivated += OnViewActivated;
+            //事件绑定：闲置事件
             app.Idling += IdlingHandler;
+            
+
             //加载格式文件
             string file = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), "MahApps.Metro.dll");
             if (File.Exists(file))
                 System.Reflection.Assembly.LoadFrom(file);
             //属性面板
             m_elementInfoPanel = ElementInfoPanel.GetInstance();
-            //
+            m_ImageControl = new ImageControl() ;
+            //注册Dockable面板
             app.RegisterDockablePane(new DockablePaneId(m_elementInfoPanel.Id), "构件信息", m_elementInfoPanel);
+            app.RegisterDockablePane(new DockablePaneId(m_ImageControl.Id),"测点信息", m_ImageControl);
             //
-            // Assembly members initialization 
+            //
             string tabName = Res.String_AppTabName;
             string addinAssembly = this.GetType().Assembly.Location;
             string addinDir = Path.GetDirectoryName(addinAssembly);
             string userManual = Path.Combine(addinDir, "help.pdf");
             //
-            // Ribbon suites firstly
+            // 创建帮助选项
             ContextualHelp cHelp = new ContextualHelp(ContextualHelpType.Url, userManual);
             app.CreateRibbonTab(tabName);
             RibbonPanel ribbonPanel = app.CreateRibbonPanel(tabName, Res.String_AppPanelName);
 
-            // settings
+            // 设置按钮
             PushButton cmdButton = (PushButton)ribbonPanel.AddItem(
                 new PushButtonData("Tooltip_Settings", Res.CommandName_Settings,
                     addinAssembly, "Revit.Addin.RevitTooltip.CmdSettings"));
@@ -101,29 +159,32 @@ namespace Revit.Addin.RevitTooltip
             cmdButton.Image = cmdButton.LargeImage = image;
             cmdButton.ToolTip = Res.CommandDescription_Settings;
             cmdButton.SetContextualHelp(cHelp);
-            ribbonPanel.AddSeparator();
-            //load excel file to DB
-            LoadExcelButton = (PushButton)ribbonPanel.AddItem(
-                    new PushButtonData("LoadExcelToDB", Res.CommandName_Import,
-                        addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadExcelToDB"));
-            image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
-            LoadExcelButton.Image = LoadExcelButton.LargeImage = image;
-            LoadExcelButton.ToolTip = Res.CommandDescription_Import;
-            LoadExcelButton.SetContextualHelp(cHelp);
+            //添加分割
             ribbonPanel.AddSeparator();
 
-            //load excel file to SQLite
-            LoadExcelToSQLiteButton = (PushButton)ribbonPanel.AddItem(
-                    new PushButtonData("LoadExcelToSQLite", Res.CommandName_Import_SQLite,
-                        addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadExcelToSQLite"));
-            image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
-            LoadExcelToSQLiteButton.Image = LoadExcelToSQLiteButton.LargeImage = image;
-            LoadExcelToSQLiteButton.ToolTip = Res.CommandDescription_Import_SQLite;
-            LoadExcelToSQLiteButton.SetContextualHelp(cHelp);
-            ribbonPanel.AddSeparator();
+
+            ////load excel file to DB
+            //LoadExcelButton = (PushButton)ribbonPanel.AddItem(
+            //        new PushButtonData("LoadExcelToDB", Res.CommandName_Import,
+            //            addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadExcelToDB"));
+            //image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
+            //LoadExcelButton.Image = LoadExcelButton.LargeImage = image;
+            //LoadExcelButton.ToolTip = Res.CommandDescription_Import;
+            //LoadExcelButton.SetContextualHelp(cHelp);
+            //ribbonPanel.AddSeparator();
+
+            ////load excel file to SQLite
+            //LoadExcelToSQLiteButton = (PushButton)ribbonPanel.AddItem(
+            //        new PushButtonData("LoadExcelToSQLite", Res.CommandName_Import_SQLite,
+            //            addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadExcelToSQLite"));
+            //image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
+            //LoadExcelToSQLiteButton.Image = LoadExcelToSQLiteButton.LargeImage = image;
+            //LoadExcelToSQLiteButton.ToolTip = Res.CommandDescription_Import_SQLite;
+            //LoadExcelToSQLiteButton.SetContextualHelp(cHelp);
+            //ribbonPanel.AddSeparator();
 
             //////////////////////////////////////////////////////////////////////////
-            // dock panel
+            //点击显示属性面板
             ElementInfoButton = (PushButton)ribbonPanel.AddItem(
                     new PushButtonData("ElementInfo", Res.Command_ElementInfo,
                         addinAssembly, "Revit.Addin.RevitTooltip.CmdElementInfo"));
@@ -131,8 +192,9 @@ namespace Revit.Addin.RevitTooltip
             ElementInfoButton.Image = ElementInfoButton.LargeImage = image;
             ElementInfoButton.ToolTip = Res.CommandDescription_TooltipOn;
             ElementInfoButton.SetContextualHelp(cHelp);
-            // Tooltip off 
+            //添加分割
             ribbonPanel.AddSeparator();
+            //打开绘图面板
             SurveyImageInfoButton = (PushButton)ribbonPanel.AddItem(
                 new PushButtonData("SurveyImageInfo", Res.Command_SurveyImageInfo,
                     addinAssembly, "Revit.Addin.RevitTooltip.CmdSurveyImageInfo"));
@@ -140,9 +202,9 @@ namespace Revit.Addin.RevitTooltip
             SurveyImageInfoButton.Image = SurveyImageInfoButton.LargeImage = image;
             SurveyImageInfoButton.ToolTip = Res.CommandDescription_SurveyImage;
             SurveyImageInfoButton.SetContextualHelp(cHelp);
-            //
+            //添加分割
             ribbonPanel.AddSeparator();
-            //reload
+            //从Mysql导入数据到Mysql
             ReloadDataButton = (PushButton)ribbonPanel.AddItem(
                 new PushButtonData("CommandReloadSQLiteData", Res.Command_ReloadExcelData,
                     addinAssembly, "Revit.Addin.RevitTooltip.CommandReloadSQLiteData"));
@@ -150,7 +212,7 @@ namespace Revit.Addin.RevitTooltip
             ReloadDataButton.Image = ReloadDataButton.LargeImage = image;
             ReloadDataButton.ToolTip = Res.CommandDescription_ReloadExcelData;
             ReloadDataButton.SetContextualHelp(cHelp);
-            // Tooltip off 
+            // 分割
             ribbonPanel.AddSeparator();
 
             // About\Help
@@ -165,6 +227,7 @@ namespace Revit.Addin.RevitTooltip
             helpButtonData.ToolTip = Properties.Resources.CommandDescription_Help;
             helpButtonData.SetContextualHelp(cHelp);
             ribbonPanel.AddStackedItems(aboutButtonData, helpButtonData);
+
             return Result.Succeeded;
 
 
@@ -194,16 +257,15 @@ namespace Revit.Addin.RevitTooltip
 
         private void OnViewActivated(object sender, ViewActivatedEventArgs e)
         {
-            settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
-            //load project settings when document changed
+            
             try
             {
                 if (string.IsNullOrEmpty(m_previousDocPathName) || m_previousDocPathName != e.Document.PathName)
                 {
-                   
-                    m_previousDocPathName = e.Document.PathName;
+                   settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
+                   m_previousDocPathName = e.Document.PathName;
                 }
-                //hide the info panel if not registered
+                //重新打开视图则隐藏Panel
                 DockablePane panel = m_uiApp.GetDockablePane(new DockablePaneId(ElementInfoPanel.GetInstance().Id));
                 if (panel != null)
                 {
@@ -247,8 +309,6 @@ namespace Revit.Addin.RevitTooltip
                 //存放实体
                 string entity = string.Empty;
                 bool isSurvey = false;
-                MysqlUtil mysql = null;
-
                 // ElementInfoPanel
 #if(Since2016)
                 Element selectElement = uidoc.Document.GetElement(uidoc.Selection.GetElementIds().FirstOrDefault());
@@ -257,28 +317,24 @@ namespace Revit.Addin.RevitTooltip
 #endif
                 if (selectElement != null)
                 {
-                Category category = selectElement.Category;
                     entity = Utils.GetParameterValueAsString(selectElement, Res.String_ParameterName);
                     if (!string.IsNullOrEmpty(entity))
                     {
                         isSurvey = Res.String_ParameterSurveyType.Equals(selectElement.Name);
-                        mysql = MysqlUtil.CreateInstance();
+                        
                         if (m_selectedElementId != selectElement.Id.IntegerValue)
                         {
                             m_selectedElementId = selectElement.Id.IntegerValue;
                             // isSurvey = true;
                             if (!isSurvey)
                             {//不是测量数据
-                             //mysql 
-                             // List<ParameterData> parameterDataList = mysql.SelectEntityData(entity);
                              //sqlite
-                                List<ParameterData> parameterDataList = SQLiteHelper.CreateInstance().SelectEntityData(entity);
-                                ElementInfoPanel.GetInstance().Update(parameterDataList);
+                                InfoEntityData infoEntityData = Sqlite.SelectInfoData(entity);
+                                ElementInfoPanel.GetInstance().Update(infoEntityData);
                             }
                             else
                             {//测量数据绘制折线图
                                 ImageForm.GetInstance().EntityName = entity;
-                                // ImageForm.GetInstance().EntityName = "CX1";
                             }
                         }
                     }
@@ -288,37 +344,13 @@ namespace Revit.Addin.RevitTooltip
                     if (m_selectedElementId != -1)
                     {//清空数据
                         m_selectedElementId = -1;
-                        ElementInfoPanel.GetInstance().Update(new List<ParameterData>());
+                        ElementInfoPanel.GetInstance().Update(null);
                     }
                 }
             }
         }
 
-        public class ParameterData : IComparable<ParameterData>
-        {
-            public string Name { get; set; }
-            public string Value { get; set; }
-
-            public ParameterData(string name, string value)
-            {
-                Name = name;
-                Value = value;
-            }
-            public override bool Equals(object obj)
-            {
-                ParameterData o = (ParameterData)obj;
-                return this.Value.Equals(o.Value)&&this.Name.Equals(o.Name);
-            }
-            public override int GetHashCode()
-            {
-                return (this.Name+this.Value).GetHashCode();
-            }
-
-            public int CompareTo(ParameterData other)
-            {
-                return Convert.ToInt32(this.Value.Substring(Res.String_Reg.Length))- Convert.ToInt32(other.Value.Substring(Res.String_Reg.Length));
-            }
-        }
+        
 
         /// <summary>
         /// Gets help document

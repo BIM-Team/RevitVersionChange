@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG
 
-41330342311
+51381706403
 
-25310635652
-27357644097
-Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageInfo.xaml;
+371103604762
+30168524903
+Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageControl.xaml;UI\ImageInfo.xaml;
 
-True
+False
 

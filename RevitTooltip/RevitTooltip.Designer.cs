@@ -8,81 +8,18 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System;
-
 namespace Revit.Addin.RevitTooltip {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
-    public sealed partial class RevitTooltip : global::System.Configuration.ApplicationSettingsBase, ICloneable
-    {
+    internal sealed partial class RevitTooltip : global::System.Configuration.ApplicationSettingsBase {
         
         private static RevitTooltip defaultInstance = ((RevitTooltip)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RevitTooltip())));
         
         public static RevitTooltip Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("施工BIM数据-检测.xlsx")]
-        public string SurveyFile {
-            get {
-                return ((string)(this["SurveyFile"]));
-            }
-            set {
-                this["SurveyFile"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public double AlertNumber {
-            get {
-                return ((double)(this["AlertNumber"]));
-            }
-            set {
-                this["AlertNumber"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public double AlertNumberAdd {
-            get {
-                return ((double)(this["AlertNumberAdd"]));
-            }
-            set {
-                this["AlertNumberAdd"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("施工BIM数据-基础.xlsx")]
-        public string FoundationFile {
-            get {
-                return ((string)(this["FoundationFile"]));
-            }
-            set {
-                this["FoundationFile"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("施工BIM数据-地墙.xlsx")]
-        public string UnderWallFile {
-            get {
-                return ((string)(this["UnderWallFile"]));
-            }
-            set {
-                this["UnderWallFile"] = value;
             }
         }
         
@@ -180,25 +117,6 @@ namespace Revit.Addin.RevitTooltip {
             set {
                 this["SqliteFileName"] = value;
             }
-        }
-
-        public object Clone()
-        {
-            RevitTooltip newOne = new RevitTooltip();
-            newOne.SurveyFile = this.SurveyFile;
-            newOne.AlertNumber = this.AlertNumber;
-            newOne.AlertNumberAdd = this.AlertNumberAdd;
-            newOne.FoundationFile = this.FoundationFile;
-            newOne.UnderWallFile = this.UnderWallFile;
-            newOne.DfServer = this.DfServer;
-            newOne.DfDB = this.DfDB;
-            newOne.DfPort = this.DfPort;
-            newOne.DfUser = this.DfUser;
-            newOne.DfCharset = this.DfCharset;
-            newOne.DfPassword = this.DfPassword;
-            newOne.SqliteFileName = this.SqliteFileName;
-            newOne.SqliteFilePath = this.SqliteFilePath;
-            return newOne;
         }
     }
 }

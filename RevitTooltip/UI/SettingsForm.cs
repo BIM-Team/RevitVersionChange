@@ -65,7 +65,7 @@ namespace Revit.Addin.RevitTooltip
 
             try
             {
-                RevitTooltip settings = App.settings;
+                RevitTooltip settings = App._app.settings;
                 if (null == settings)
                 {
                     settings = RevitTooltip.Default;

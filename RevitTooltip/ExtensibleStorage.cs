@@ -47,11 +47,6 @@ namespace Revit.Addin.RevitTooltip
             {
                 return settings;
             }
-            settings.AlertNumber = double.Parse(tooltipEntity.Get<string>("AlertNumber"));
-            settings.FoundationFile = tooltipEntity.Get<string>("FoundationFile");
-            settings.AlertNumberAdd = double.Parse(tooltipEntity.Get<string>("AlertNumberAdd"));
-            settings.SurveyFile = tooltipEntity.Get<string>("SurveyFile");
-            settings.UnderWallFile = tooltipEntity.Get<string>("UnderWallFile");
             settings.DfServer = tooltipEntity.Get<string>("DfServer");
             settings.DfDB = tooltipEntity.Get<string>("DfDB");
             settings.DfPort = tooltipEntity.Get<string>("DfPort");

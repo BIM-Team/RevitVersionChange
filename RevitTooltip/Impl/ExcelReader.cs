@@ -108,7 +108,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                                         string value = eHelper.GetCellValue(r, c);
                                         if (!string.IsNullOrWhiteSpace(value))
                                         {
-                                            double dValue = Math.Round(Convert.ToDouble(value),2,MidpointRounding.AwayFromZero);
+                                            float dValue = Convert.ToSingle(string.Format("%.2f",value));
                                             double date = Convert.ToDouble(eHelper.GetCellValue(0, c));
                                             DateTime dateTime;
                                             try
@@ -159,9 +159,9 @@ namespace Revit.Addin.RevitTooltip.Impl
                                 if (string.IsNullOrWhiteSpace(_min)){
                                     continue;
                                 }
-                                double min = Math.Round(Convert.ToDouble(_min),2,MidpointRounding.AwayFromZero);
-                                double mid = min;
-                                double max = min;
+                                float min = Convert.ToSingle(string.Format("%.2f",_min));
+                                float mid = min;
+                                float max = min;
                                 int minCount = 0;
                                 int maxCount = 0;
 
@@ -170,7 +170,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                                     string value = eHelper.GetCellValue(r, c);
                                     if (!string.IsNullOrWhiteSpace(value))
                                     {
-                                        double dValue = Math.Round(Convert.ToDouble(value),2,MidpointRounding.AwayFromZero);
+                                        float  dValue =Convert.ToSingle(string.Format("%.2f",value));
                                         text.Append(eHelper.GetCellValue(r, 0) + ":" + dValue + ";");
                                         //计算最小值
                                         if (min > dValue)

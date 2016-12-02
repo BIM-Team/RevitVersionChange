@@ -121,7 +121,9 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="Dto\DataModels.cs" />
     <Compile Include="ExtensibleStorage.cs" />
     <Compile Include="Impl\ExcelReader.cs" />
+    <Compile Include="Impl\MysqlUtil.cs" />
     <Compile Include="Intface\IExcelReader.cs" />
     <Compile Include="Intface\IMysqlUtil.cs" />
     <Compile Include="Intface\ISQLiteHelper.cs" />
@@ -155,6 +158,9 @@
     <Compile Include="UI\ElementInfoPanel.xaml.cs">
       <DependentUpon>ElementInfoPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\ImageControl.xaml.cs">
+      <DependentUpon>ImageControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\ImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -163,6 +169,18 @@
     </Compile>
     <Compile Include="UI\ImageInfo.xaml.cs">
       <DependentUpon>ImageInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\NewImageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\NewImageForm.Designer.cs">
+      <DependentUpon>NewImageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\NewSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\NewSettings.Designer.cs">
+      <DependentUpon>NewSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\ProcessBarForm.cs">
       <SubType>Form</SubType>
@@ -209,6 +227,12 @@
     <EmbeddedResource Include="UI\ImageForm.resx">
       <DependentUpon>ImageForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\NewImageForm.resx">
+      <DependentUpon>NewImageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\NewSettings.resx">
+      <DependentUpon>NewSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ProcessBarForm.resx">
       <DependentUpon>ProcessBarForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -253,6 +277,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\ImageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\ImageInfo.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -261,7 +289,9 @@
   <ItemGroup>
     <None Include="Resources\refresh.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\butn.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterClean">
     <Delete Files="$(AppData)\Autodesk\REVIT\Addins\2013\WinTooltip.addin" />
