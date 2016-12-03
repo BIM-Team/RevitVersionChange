@@ -693,7 +693,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         ///在选定的某种Excel的基础上新建一个Group
         ///传入Signal标志
         /// </summary>
-        public bool AddKeyGroup(string Signal, string GroupName)
+        public Group AddKeyGroup(string Signal, string GroupName)
         {
             bool flag = false;
             int IdExcel = getIdExcel(Signal);
@@ -959,7 +959,22 @@ namespace Revit.Addin.RevitTooltip.Impl
             return reader;
         }
 
-        public List<ExcelTable> ListCurrentThreshold()
+        public List<ExcelTable> ListExcelsMessage()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Group> loadGroupForAExcel(string signal)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<KeyTableRow> loadKeyNameForAGroup(int group_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<KeyTableRow> loadKeyNameForAExcel(string signal)
         {
             throw new NotImplementedException();
         }

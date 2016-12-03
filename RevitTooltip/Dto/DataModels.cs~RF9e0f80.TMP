@@ -252,27 +252,9 @@ namespace Revit.Addin.RevitTooltip.Dto
     }
     /// <summary>
     /// 对应于Keytable
-    /// 仅用于查询时使用
+    /// 仅用于查询
     /// </summary>
-    public class KeyTableRow {
-        /// <summary>
-        /// Id
-        /// </summary>
+    public class KeyTable {
         int Id { get; set; }
-        /// <summary>
-        /// 和KeyTable中的keyName对应
-        /// </summary>
-        string KeyName { get; set; }
-        public override bool Equals(object obj)
-        {
-            if (((KeyTableRow)obj).Equals(this.Id)) {
-            return true;
-            }
-            return false;
-        }
-        public override int GetHashCode()
-        {
-            return this.Id.GetHashCode();
-        }
     }
 }

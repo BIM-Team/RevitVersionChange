@@ -23,7 +23,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         ///在选定的某种Excel的基础上新建一个Group
         ///传入Signal标志
         /// </summary>
-        bool AddKeyGroup(string Signal, string GroupName);
+        Group AddKeyGroup(string Signal, string GroupName);
 
         /// <summary>
         /// 删除一个Group
@@ -53,10 +53,11 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// </summary>
         bool ModifyEntityRemark(string EntityName, string Remark);
         /// <summary>
-        /// 查询当前所有表的阈值
+        /// 查询当前Excel表信息
+        /// 可用于查询当前阈值和分组时使用
         /// </summary>
         /// <returns>返回一个ExcelTable</returns>
-        List<ExcelTable> ListCurrentThreshold();
+        List<ExcelTable> ListExcelsMessage();
         /// <summary>
         /// 修改阈值Total_hold和Diff_hold
         ///修改某一种Excel表的阈值，这里的Excel表必须是测量数据表
@@ -67,6 +68,24 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// 查询MySQL中的表数据，复制数据到Sqlite中
         /// </summary>
         MySqlDataReader LoadTableData(string tablename);
+        /// <summary>
+        /// 查询一种表的分组信息
+        /// </summary>
+        /// <param name="signal">表的简称</param>
+        /// <returns></returns>
+        List<Group> loadGroupForAExcel(string signal);
+        /// <summary>
+        /// 通过Group_Id查询所有与之相关的KeyName
+        /// </summary>
+        /// <param name="group_id"></param>
+        /// <returns></returns>
+        List<KeyTableRow> loadKeyNameForAGroup(int group_id);
+        /// <summary>
+        /// 通过Signal来查询与之相关的所有的KeyName
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <returns></returns>
+        List<KeyTableRow> loadKeyNameForAExcel(string signal);
 
     }
 }
