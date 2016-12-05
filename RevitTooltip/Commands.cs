@@ -113,7 +113,7 @@ namespace Revit.Addin.RevitTooltip
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
-    public class CommandReloadSQLiteData : TooltipCommandBase
+    public class CmdLoadSQLiteData : TooltipCommandBase
     {
         public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -182,7 +182,7 @@ namespace Revit.Addin.RevitTooltip
     {
         public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            if (!File.Exists(Path.Combine(App.settings.SqliteFilePath, App.settings.SqliteFileName)))
+            if (!File.Exists(Path.Combine(App.Instance.settings.SqliteFilePath, App.Instance.settings.SqliteFileName)))
             {
                 MessageBox.Show("本地数据文件不存在，请先更新");
                 return Result.Succeeded;
@@ -195,59 +195,57 @@ namespace Revit.Addin.RevitTooltip
     }
 
     [Transaction(TransactionMode.Manual)]
-    public class CmdSurveyImageInfo : TooltipCommandBase
+    public class CmdImageControl : TooltipCommandBase
     {
         public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            commandData.Application.Idling += App.Instance.IdlingHandler;
-            if (!File.Exists(Path.Combine(App.settings.SqliteFilePath, App.settings.SqliteFileName))) {
+            if (!File.Exists(Path.Combine(App.Instance.settings.SqliteFilePath, App.Instance.settings.SqliteFileName))) {
                 MessageBox.Show("本地数据文件不存在，请先更新");
                 return Result.Succeeded;
             }
-            ImageForm imageForm = ImageForm.GetInstance();
-
-            imageForm.CommandData = commandData;
-            imageForm.Show();
+            DockablePane imagePanel = commandData.Application.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
+            imagePanel.Show();
+            commandData.Application.Idling += App.Instance.IdlingHandler;
             return Result.Succeeded;
         }
     }
 
-    [Transaction(TransactionMode.Manual)]
-    public class CmdLoadExcelToDB : TooltipCommandBase
-    {
-        public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            //消息对话框确认
-            if (MessageBox.Show("确认导入Excel表格数据到Mysql数据库？","",MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-            {
-                return Result.Succeeded;
-            }
-            ProcessBarForm processBarForm = new ProcessBarForm( MysqlUtil.CreateInstance());
-            if (processBarForm.ShowDialog() == DialogResult.OK) {
-            processBarForm.Dispose();
-            }    
-            return Result.Succeeded;
-        }
-    }
-    [Transaction(TransactionMode.Manual)]
-    public class CmdLoadExcelToSQLite : TooltipCommandBase
-    {
-        public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
+    //[Transaction(TransactionMode.Manual)]
+    //public class CmdLoadExcelToDB : TooltipCommandBase
+    //{
+    //    public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
+    //    {
+    //        //消息对话框确认
+    //        if (MessageBox.Show("确认导入Excel表格数据到Mysql数据库？","",MessageBoxButtons.OKCancel) == DialogResult.Cancel)
+    //        {
+    //            return Result.Succeeded;
+    //        }
+    //        ProcessBarForm processBarForm = new ProcessBarForm( MysqlUtil.CreateInstance());
+    //        if (processBarForm.ShowDialog() == DialogResult.OK) {
+    //        processBarForm.Dispose();
+    //        }    
+    //        return Result.Succeeded;
+    //    }
+    //}
+    //[Transaction(TransactionMode.Manual)]
+    //public class CmdLoadExcelToSQLite : TooltipCommandBase
+    //{
+    //    public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
+    //    {
 
-            //消息对话框确认
-            if (MessageBox.Show("确认导入Excel表格数据到本地数据库？", "", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-            {
-                return Result.Succeeded;
-            }
-            ProcessBarForm processBarForm = new ProcessBarForm(SQLiteHelper.CreateInstance());
-            if (processBarForm.ShowDialog() == DialogResult.OK)
-            {
-                processBarForm.Dispose();
-            }
-            return Result.Succeeded;
-        }
-    }
+    //        //消息对话框确认
+    //        if (MessageBox.Show("确认导入Excel表格数据到本地数据库？", "", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
+    //        {
+    //            return Result.Succeeded;
+    //        }
+    //        ProcessBarForm processBarForm = new ProcessBarForm(SQLiteHelper.CreateInstance());
+    //        if (processBarForm.ShowDialog() == DialogResult.OK)
+    //        {
+    //            processBarForm.Dispose();
+    //        }
+    //        return Result.Succeeded;
+    //    }
+    //}
 
 
 }

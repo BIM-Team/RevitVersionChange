@@ -1,5 +1,4 @@
 ﻿using Autodesk.Revit.UI;
-using Revit.Addin.RevitTooltip.Dto;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,16 +36,11 @@ namespace Revit.Addin.RevitTooltip.UI
                 _image = new ImageControl();
             }
             return _image;
+           
             } 
         private void dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            EntityTable selectedItem = this.dataGrid.SelectedItem as EntityTable;
-            DateTime? start = this.startTime.SelectedDate as DateTime?;
-            DateTime? end = this.startTime.SelectedDate as DateTime?;
-            NewImageForm.Instance().EntityData= App.Instance.Sqlite.SelectDrawEntityData(selectedItem.EntityName, start, end);
-            if (!NewImageForm.Instance().Visible) {
-            NewImageForm.Instance().Show();
-            }
+
         }
         public void setDataSource(IEnumerable itemsSource) {
             dataGrid.ItemsSource = itemsSource;

@@ -1,38 +1,36 @@
 ﻿using Revit.Addin.RevitTooltip.Dto;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Revit.Addin.RevitTooltip.UI
 {
     public partial class NewImageForm : Form
     {
-        public NewImageForm()
+        private static NewImageForm _form;
+        public static NewImageForm Instance() {
+            if (_form != null) {
+                _form = new NewImageForm();
+            }
+            return _form;
+        }
+        private NewImageForm()
         {
             InitializeComponent();
         }
-        /// <summary>
-        /// 数据，根据这个数据绘制折线图
-        /// </summary>
-        private List<DrawData> data;
 
+        private DrawEntityData _entityData;
         /// <summary>
-        /// 数据，根据这个数据绘制折线图
+        /// 保存某一个实体的数据
         /// </summary>
-        public List<DrawData> Data {
-            get {
-                return this.data;
-            }
+        public DrawEntityData EntityData{
             set {
-                if (!value.Equals(this.data)) {
-                    this.data = value;
-                    this.panel1.Invalidate(this.panel1.ClientRectangle);
+                if (!value.Equals(this._entityData))
+                {
+                this._entityData = value;
+                this.panel1.Invalidate(this.panel1.ClientRectangle);
                 }
             }
         }
@@ -46,11 +44,14 @@ namespace Revit.Addin.RevitTooltip.UI
             float startX = 40, endX = width - 10;
             float startY = height - 30, endY = 10;
             Font font = new Font("Arial", 9, System.Drawing.FontStyle.Regular);
-            if (null == data || data.Count == 0)
+            if (null == _entityData || _entityData.Data.Count == 0)
             {
                 g.DrawString("没有数据", font, Brushes.Black, (startX + endX - g.MeasureString("没有数据", font).Width) / 2, (startY + endY) / 2);
                 return;
             }
+            List<DrawData> data = _entityData.Data;
+            float diff_hold = _entityData.Diff_hold;
+            float total_hold = _entityData.Total_hold;
             int length = data.Count;
             int div = length / 5;
 
@@ -122,7 +123,7 @@ namespace Revit.Addin.RevitTooltip.UI
 
                     if (value_b != 0)
                     {
-                        if (value > App.settings.AlertNumber)
+                        if (value > total_hold)
                         {
                             if (Math.Abs(x - x_b) < 1 || Math.Abs(y - y_b) < 1)
                             {
@@ -134,7 +135,7 @@ namespace Revit.Addin.RevitTooltip.UI
                             }
 
                         }
-                        else if (Math.Abs(value - value_b) > App.settings.AlertNumberAdd)
+                        else if (Math.Abs(value - value_b) > diff_hold)
                         {
 
                             if (Math.Abs(x - x_b) < 1 || Math.Abs(y - y_b) < 1)
@@ -158,9 +159,9 @@ namespace Revit.Addin.RevitTooltip.UI
                     value_b = value;
 
                 }
-                float alert = (float)(startY - App.settings.AlertNumber * divY);
-                g.DrawString(App.settings.AlertNumber.ToString(), font, Brushes.Red, startX -
-                    g.MeasureString(App.settings.AlertNumber.ToString(), font).Width, alert - g.MeasureString(App.settings.AlertNumber.ToString(), font).Height / 2);
+                float alert = (float)(startY - total_hold * divY);
+                g.DrawString(total_hold.ToString(), font, Brushes.Red, startX -
+                    g.MeasureString(total_hold.ToString(), font).Width, alert - g.MeasureString(total_hold.ToString(), font).Height / 2);
                 g.DrawLine(dotPen1, startX, alert, endX, alert);
                 mypen.Dispose();
                 mypen1.Dispose();

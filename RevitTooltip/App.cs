@@ -28,7 +28,7 @@ namespace Revit.Addin.RevitTooltip
         /// <summary>
         /// 单列模式
         /// </summary>
-        internal static App _app = null;
+        private static App _app = null;
 
         private string m_previousDocPathName = null;
         /// <summary>
@@ -42,6 +42,7 @@ namespace Revit.Addin.RevitTooltip
                 if (null == this.settings || !this.settings.Equals(value)) {
                     this.settings = value;
                     this.mysql = new MysqlUtil(value);
+                    this.sqlite = new SqliteHelper(value);
                 }
             }
         }
@@ -89,7 +90,7 @@ namespace Revit.Addin.RevitTooltip
         /// <summary>
         /// 点击重新加载:从Mysql加载到SQLite
         /// </summary>
-        internal PushButton ReloadDataButton { get; set; }
+        internal PushButton LoadDataToSqliteButton { get; set; }
         /// <summary>
         /// MySQL的实例对象
         /// </summary>
@@ -135,7 +136,7 @@ namespace Revit.Addin.RevitTooltip
                 System.Reflection.Assembly.LoadFrom(file);
             //属性面板
             m_elementInfoPanel = ElementInfoPanel.GetInstance();
-            m_ImageControl = new ImageControl() ;
+            m_ImageControl = ImageControl.Instance();
             //注册Dockable面板
             app.RegisterDockablePane(new DockablePaneId(m_elementInfoPanel.Id), "构件信息", m_elementInfoPanel);
             app.RegisterDockablePane(new DockablePaneId(m_ImageControl.Id),"测点信息", m_ImageControl);
@@ -197,21 +198,21 @@ namespace Revit.Addin.RevitTooltip
             //打开绘图面板
             SurveyImageInfoButton = (PushButton)ribbonPanel.AddItem(
                 new PushButtonData("SurveyImageInfo", Res.Command_SurveyImageInfo,
-                    addinAssembly, "Revit.Addin.RevitTooltip.CmdSurveyImageInfo"));
+                    addinAssembly, "Revit.Addin.RevitTooltip.CmdImageControl"));
             image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
             SurveyImageInfoButton.Image = SurveyImageInfoButton.LargeImage = image;
             SurveyImageInfoButton.ToolTip = Res.CommandDescription_SurveyImage;
             SurveyImageInfoButton.SetContextualHelp(cHelp);
             //添加分割
             ribbonPanel.AddSeparator();
-            //从Mysql导入数据到Mysql
-            ReloadDataButton = (PushButton)ribbonPanel.AddItem(
+            //从Mysql导入数据到Sqlite
+            LoadDataToSqliteButton = (PushButton)ribbonPanel.AddItem(
                 new PushButtonData("CommandReloadSQLiteData", Res.Command_ReloadExcelData,
-                    addinAssembly, "Revit.Addin.RevitTooltip.CommandReloadSQLiteData"));
+                    addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadSQLiteData"));
             image = Utils.ConvertFromBitmap(Res.refresh);
-            ReloadDataButton.Image = ReloadDataButton.LargeImage = image;
-            ReloadDataButton.ToolTip = Res.CommandDescription_ReloadExcelData;
-            ReloadDataButton.SetContextualHelp(cHelp);
+            LoadDataToSqliteButton.Image = LoadDataToSqliteButton.LargeImage = image;
+            LoadDataToSqliteButton.ToolTip = Res.CommandDescription_ReloadExcelData;
+            LoadDataToSqliteButton.SetContextualHelp(cHelp);
             // 分割
             ribbonPanel.AddSeparator();
 
@@ -262,7 +263,7 @@ namespace Revit.Addin.RevitTooltip
             {
                 if (string.IsNullOrEmpty(m_previousDocPathName) || m_previousDocPathName != e.Document.PathName)
                 {
-                   settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
+                   Settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
                    m_previousDocPathName = e.Document.PathName;
                 }
                 //重新打开视图则隐藏Panel
@@ -270,6 +271,10 @@ namespace Revit.Addin.RevitTooltip
                 if (panel != null)
                 {
                     panel.Hide();
+                }
+                DockablePane imageControl= m_uiApp.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
+                if (imageControl != null) {
+                    imageControl.Hide();
                 }
                 
             }

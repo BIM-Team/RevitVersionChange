@@ -79,7 +79,6 @@ namespace Revit.Addin.RevitTooltip.Dto
             get { return this.groupMsg; }
             set { this.groupMsg = value; }
         }
-
     }
     /// <summary>
     /// 对应于某个测点的所有测量数据，时间序列数据
@@ -156,17 +155,7 @@ namespace Revit.Addin.RevitTooltip.Dto
             get { return this.data; }
             set { this.data = value; }
         }
-        /// <summary>
-        /// 用于查询返回
-        /// 累计阈值
-        /// </summary>
-        public float Total_hold { get; set; }
-        /// <summary>
-        /// 用于查询返回
-        /// 相邻阈值
-        /// </summary>
-        public float Diff_hold { get; set; }
-
+        
     }
     /// <summary>
     /// 一批待处理数据，一般为一个Excel中的数据，或者几张sheet的数据。
@@ -230,7 +219,7 @@ namespace Revit.Addin.RevitTooltip.Dto
             set { this.drawRows = value; }
         }
     }
-    public class ParameterData
+    public class ParameterData 
     {
         public string Name { get; set; }
         public string Value { get; set; }
@@ -285,18 +274,5 @@ namespace Revit.Addin.RevitTooltip.Dto
         {
             return this.Id.GetHashCode();
         }
-    }
-    /// <summary>
-    /// 仅用于查询，查询所有的EntityName
-    /// </summary>
-    public class EntityTable {
-        /// <summary>
-        /// 存放EntityId
-        /// </summary>
-        public int Id { get; set; }
-        /// <summary>
-        /// 存放EntityName
-        /// </summary>
-        public string EntityName { get; set; }
     }
 }

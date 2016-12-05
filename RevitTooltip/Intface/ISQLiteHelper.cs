@@ -22,7 +22,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         ///查询Entity时间序列数据
         ///根据传入的起始时间查询
         /// </summary>
-        DrawEntityData SelectDrawEntityData(string EntityName, DateTime StartTime, DateTime EndDate);
+        DrawEntityData SelectDrawEntityData(string EntityName, DateTime? StartTime, DateTime? EndDate);
 
 
         /// <summary>

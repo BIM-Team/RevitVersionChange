@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Revit.Addin.RevitTooltip.Util;
+using Revit.Addin.RevitTooltip.Dto;
 
 namespace Revit.Addin.RevitTooltip
 {
@@ -26,7 +27,7 @@ namespace Revit.Addin.RevitTooltip
         {
             try
             {
-                var parameters = (List<Revit.Addin.RevitTooltip.App.ParameterData>)dg.ItemsSource;
+                var parameters = (List<ParameterData>)dg.ItemsSource;
                 //确保第一例是测点编号列
                 //存放实体编号，用于更新该实体的备注
                 string entity = parameters[0].Value;
@@ -48,7 +49,7 @@ namespace Revit.Addin.RevitTooltip
 
         private void OnDGSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Revit.Addin.RevitTooltip.App.ParameterData pd = dg.SelectedItem as Revit.Addin.RevitTooltip.App.ParameterData;
+            ParameterData pd = dg.SelectedItem as ParameterData;
             if (pd.Name == "备注")
             {
                 var content = dg.Columns[0].GetCellContent(pd);
