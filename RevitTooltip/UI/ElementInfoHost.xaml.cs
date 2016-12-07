@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Revit.Addin.RevitTooltip.Util;
 using Revit.Addin.RevitTooltip.Dto;
 
 namespace Revit.Addin.RevitTooltip
@@ -34,10 +33,9 @@ namespace Revit.Addin.RevitTooltip
                 var comment = parameters.FirstOrDefault(p => p.Name == "备注").Value;
                 if (comment != null)
                 {
-                    if (!MysqlUtil.CreateInstance().ModifyEntityRemark(entity,comment))
+                    if (!App.Instance.MySql.ModifyEntityRemark(entity,comment))
                     {
                         MessageBox.Show("更新注释失败：");
-                            //+ SettingInfo.Instance.ErrorMessage);
                     }
                 }
             }

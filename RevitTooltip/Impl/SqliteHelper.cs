@@ -10,7 +10,7 @@ namespace Revit.Addin.RevitTooltip.Impl
     class SqliteHelper : ISQLiteHelper
     {
         public SqliteHelper(RevitTooltip settings) {
-            throw new NotImplementedException();
+            
         }
         public int InsertSheetInfo(SheetInfo sheetInfo)
         {
@@ -22,7 +22,7 @@ namespace Revit.Addin.RevitTooltip.Impl
             throw new NotImplementedException();
         }
 
-        public List<string> SelectAllEntities(string ExcelSignal)
+        public List<CEntityName> SelectAllEntities(string ExcelSignal)
         {
             throw new NotImplementedException();
         }
@@ -40,6 +40,11 @@ namespace Revit.Addin.RevitTooltip.Impl
         public DrawEntityData SelectDrawEntityData(string EntityName, DateTime? StartTime, DateTime? EndDate)
         {
             throw new NotImplementedException();
+        }
+
+        public List<ExcelTable> SelectDrawTypes()
+        {
+            return null;
         }
 
         public InfoEntityData SelectInfoData(string EntityName)

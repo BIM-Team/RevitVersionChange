@@ -108,7 +108,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                                         string value = eHelper.GetCellValue(r, c);
                                         if (!string.IsNullOrWhiteSpace(value))
                                         {
-                                            float dValue = Convert.ToSingle(string.Format("%.2f",value));
+                                            float dValue =  float.Parse(value);
+                                            dValue = (float)Math.Round(dValue, 2, MidpointRounding.AwayFromZero);
                                             double date = Convert.ToDouble(eHelper.GetCellValue(0, c));
                                             DateTime dateTime;
                                             try
@@ -159,7 +160,9 @@ namespace Revit.Addin.RevitTooltip.Impl
                                 if (string.IsNullOrWhiteSpace(_min)){
                                     continue;
                                 }
-                                float min = Convert.ToSingle(string.Format("%.2f",_min));
+
+                                float min = float.Parse(_min);
+                                min = (float)Math.Round(min,2,MidpointRounding.AwayFromZero);
                                 float mid = min;
                                 float max = min;
                                 int minCount = 0;
@@ -170,7 +173,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                                     string value = eHelper.GetCellValue(r, c);
                                     if (!string.IsNullOrWhiteSpace(value))
                                     {
-                                        float  dValue =Convert.ToSingle(string.Format("%.2f",value));
+                                        float dValue = float.Parse( value);
+                                        dValue = (float)Math.Round(dValue, 2, MidpointRounding.AwayFromZero);
                                         text.Append(eHelper.GetCellValue(r, 0) + ":" + dValue + ";");
                                         //计算最小值
                                         if (min > dValue)
@@ -240,7 +244,7 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             SheetInfo result = new SheetInfo();
             ExcelTable exceltable = new ExcelTable();
-            exceltable.TableDesc = parts[0];
+            exceltable.CurrentFile = parts[0];
             exceltable.Signal = parts[1];
             result.ExcelTableData = exceltable;
             result.Tag = parts[2].Equals("I");

@@ -163,15 +163,6 @@
     <Compile Include="UI\ImageControl.xaml.cs">
       <DependentUpon>ImageControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\ImageForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\ImageForm.designer.cs">
-      <DependentUpon>ImageForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\ImageInfo.xaml.cs">
-      <DependentUpon>ImageInfo.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UI\NewImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -184,26 +175,7 @@
     <Compile Include="UI\NewSettings.Designer.cs">
       <DependentUpon>NewSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\ProcessBarForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\ProcessBarForm.Designer.cs">
-      <DependentUpon>ProcessBarForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Utils.cs" />
-    <Compile Include="Util\ExcelReader.cs" />
-    <Compile Include="Util\IExcelReader.cs" />
-    <Compile Include="Util\IMysqlUtil.cs" />
-    <Compile Include="Util\IWriter.cs" />
-    <Compile Include="Util\MysqlUtil.cs" />
-    <Compile Include="Util\SheetInfo.cs" />
-    <Compile Include="Util\SQLiteHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
@@ -226,20 +198,11 @@
     <EmbeddedResource Include="UI\AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\ImageForm.resx">
-      <DependentUpon>ImageForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\NewImageForm.resx">
       <DependentUpon>NewImageForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\NewSettings.resx">
       <DependentUpon>NewSettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ProcessBarForm.resx">
-      <DependentUpon>ProcessBarForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\SettingsForm.resx">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -282,10 +245,6 @@
     <Page Include="UI\ImageControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\ImageInfo.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

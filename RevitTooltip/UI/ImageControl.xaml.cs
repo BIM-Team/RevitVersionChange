@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Globalization;
 
 namespace Revit.Addin.RevitTooltip.UI
 {
@@ -30,6 +31,8 @@ namespace Revit.Addin.RevitTooltip.UI
         private ImageControl()
         {
             InitializeComponent();
+           // List<ExcelTable> allTypes = App.Instance.Sqlite.SelectDrawTypes();
+            //this.comboBox.ItemsSource = allTypes;
         }
         private static ImageControl _image;
         public static ImageControl Instance(){
@@ -40,7 +43,7 @@ namespace Revit.Addin.RevitTooltip.UI
             } 
         private void dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            EntityTable selectedItem = this.dataGrid.SelectedItem as EntityTable;
+            CEntityName selectedItem = this.dataGrid.SelectedItem as CEntityName;
             DateTime? start = this.startTime.SelectedDate as DateTime?;
             DateTime? end = this.startTime.SelectedDate as DateTime?;
             NewImageForm.Instance().EntityData= App.Instance.Sqlite.SelectDrawEntityData(selectedItem.EntityName, start, end);
@@ -80,5 +83,14 @@ namespace Revit.Addin.RevitTooltip.UI
             data.InitialState = new DockablePaneState();
             data.InitialState.DockPosition = DockPosition.Left;
         }
+
+        private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ExcelTable excel = this.comboBox.SelectedItem as ExcelTable;
+            List<CEntityName> all_entity = App.Instance.Sqlite.SelectAllEntities(excel.Signal);
+            this.dataGrid.ItemsSource = all_entity;
+            
+        }
     }
+    
 }

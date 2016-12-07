@@ -339,7 +339,8 @@ namespace Revit.Addin.RevitTooltip
                             }
                             else
                             {//测量数据绘制折线图
-                                ImageForm.GetInstance().EntityName = entity;
+                                DrawEntityData drawEntityData = App.Instance.Sqlite.SelectDrawEntityData(entity,null,null);
+                                NewImageForm.Instance().EntityData = drawEntityData;
                             }
                         }
                     }

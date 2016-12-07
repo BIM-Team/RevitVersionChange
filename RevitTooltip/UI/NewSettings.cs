@@ -45,6 +45,7 @@ namespace Revit.Addin.RevitTooltip.UI
         }
         internal NewSettings(RevitTooltip settings)
         {
+            InitializeComponent();
             if (settings != null) {
                 this.textAddr.Text = settings.DfServer;
                 this.textDB.Text = settings.DfDB;
@@ -55,7 +56,6 @@ namespace Revit.Addin.RevitTooltip.UI
                 this.textSqliteName.Text = settings.SqliteFileName;
             }
             excelReader = new ExcelReader();
-            InitializeComponent();
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -142,9 +142,9 @@ namespace Revit.Addin.RevitTooltip.UI
                 newSetting.DfPassword = this.textPass.Text.Trim();
                 newSetting.SqliteFilePath = this.textSqlitePath.Text.Trim();
                 newSetting.SqliteFileName = this.textSqliteName.Text.Trim();
-                App._app.Settings = newSetting;
-                ExtensibleStorage.StoreTooltipInfo(App._app.CurrentDoc.ProjectInformation, newSetting);
-                App._app.CurrentDoc.Save();
+                App.Instance.Settings = newSetting;
+                ExtensibleStorage.StoreTooltipInfo(App.Instance.CurrentDoc.ProjectInformation, newSetting);
+                App.Instance.CurrentDoc.Save();
             }
         }
 
@@ -159,7 +159,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 this.progressBar1.Value = 0;
                 for (int i=0;i< fileNames.Length;i++) {
                     SheetInfo info = this.excelReader.loadExcelData(fileNames[i]);
-                    App._app.MySql.InsertSheetInfo(info);
+                    App.Instance.MySql.InsertSheetInfo(info);
                     this.progressBar1.Value =(int) ((i + 1.0) / fileNames.Length) * progressBar1.Maximum;
                 }   
                     this.IsInMySql = true;
@@ -178,7 +178,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 this.progressBar1.Value = 0;
                 for (int i=0;i<fileNames.Length;i++) {
                    SheetInfo info= this.excelReader.loadExcelData(fileNames[i]);
-                    App._app.Sqlite.InsertSheetInfo(info);
+                    App.Instance.Sqlite.InsertSheetInfo(info);
                     this.progressBar1.Value = (int)((i + 1.0) / fileNames.Length) * progressBar1.Maximum;
                 }
                     this.IsInSqlite = true;
@@ -190,19 +190,19 @@ namespace Revit.Addin.RevitTooltip.UI
         {
             TabPage p = e.TabPage;
             if (p == this.tabPageFile) {
-                if (App._app.MySql.IsReady())
+                if (App.Instance.MySql.IsReady())
                 {
-                    this.buttonInMysql.Enabled = false;
+                    this.buttonInMysql.Enabled = true;
                 }
                 else {
-                    this.buttonInMysql.Enabled = true;
+                    this.buttonInMysql.Enabled = false;
                 }
             }
             if (p == this.tabPageThreshold) {
-                if (App._app.MySql.IsReady())
+                if (App.Instance.MySql.IsReady())
                 {
                     this.dataGridView1.Enabled = true;
-                    List<ExcelTable> tables = App._app.MySql.ListExcelsMessage();                  this.dataGridView1.DataSource = tables;    
+                    List<ExcelTable> tables = App.Instance.MySql.ListExcelsMessage(false);                  this.dataGridView1.DataSource = tables;    
                 }
                 else {
                     this.dataGridView1.Enabled = false;
@@ -210,10 +210,10 @@ namespace Revit.Addin.RevitTooltip.UI
                 }
             }
             if (p == this.tabPagePro) {
-                if (App._app.MySql.IsReady())
+                if (App.Instance.MySql.IsReady())
                 {
                     this.splitContainer1.Enabled = true;
-                    this.combExcel.DataSource = App._app.MySql.ListExcelsMessage();
+                    this.combExcel.DataSource = App.Instance.MySql.ListExcelsMessage(true);
                 }
                 else {
                     this.splitContainer1.Enabled = false;
@@ -233,11 +233,11 @@ namespace Revit.Addin.RevitTooltip.UI
             float value = Convert.ToSingle(this.dataGridView1.CurrentCell.Value);
             if (col == 2)
             {
-                App._app.MySql.ModifyThreshold(Signal,value,0);
+                App.Instance.MySql.ModifyThreshold(Signal,value,0);
             }
             else if (col == 3)
             {
-                App._app.MySql.ModifyThreshold(Signal,0 ,value);
+                App.Instance.MySql.ModifyThreshold(Signal,0 ,value);
             }
             else {
                 throw new Exception("无效的编辑");
@@ -252,13 +252,13 @@ namespace Revit.Addin.RevitTooltip.UI
             if (!string.IsNullOrWhiteSpace(signal))
             {
                 //CombGroup
-                List<Group> groups = App._app.MySql.loadGroupForAExcel(signal);
+                List<Group> groups = App.Instance.MySql.loadGroupForAExcel(signal);
                 Group newOne = new Group();
                 newOne.GroupName = "新建";
                 groups.Add(newOne);
                 this.combGroup.DataSource = groups;
                 //dataGrid
-                List<KeyTableRow> data = App._app.MySql.loadKeyNameForAExcel(signal);
+                List<CKeyName> data = App.Instance.MySql.loadKeyNameForAExcel(signal);
                 this.dataGridView2.DataSource = data;
             }
             else {
@@ -274,8 +274,8 @@ namespace Revit.Addin.RevitTooltip.UI
                 throw new Exception("无效的选择");
             }
             int _id = Convert.ToInt32(id);
-            List<KeyTableRow> data=App._app.MySql.loadKeyNameForAGroup(_id);
-            List<KeyTableRow> datasource = (List<KeyTableRow>)this.combGroup.DataSource;
+            List<CKeyName> data=App.Instance.MySql.loadKeyNameForAGroup(_id);
+            List<CKeyName> datasource = (List<CKeyName>)this.combGroup.DataSource;
             //全部先重置
             foreach (DataGridViewRow row in this.dataGridView2.Rows)
             {
@@ -301,7 +301,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 }
                 else
                 {
-                    Group group = App._app.MySql.AddKeyGroup(signal, newGroup);
+                    Group group = App.Instance.MySql.AddKeyGroup(signal, newGroup);
                     List<Group> groups = (List<Group>)this.combGroup.DataSource;
                     groups.Add(group);
                     this.combGroup.Select(groups.Count - 1, 1);
@@ -323,7 +323,7 @@ namespace Revit.Addin.RevitTooltip.UI
                     keyName_id.Add(Convert.ToInt32(row.Cells[1].Value.ToString()));
                 }
             }
-            App._app.MySql.AddKeysToGroup(_id, keyName_id);
+            App.Instance.MySql.AddKeysToGroup(_id, keyName_id);
             MessageBox.Show("添加成功");
         }
 

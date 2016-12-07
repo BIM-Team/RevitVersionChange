@@ -16,9 +16,9 @@
     </Page.Resources>
     <Grid Background="White"  Visibility="Visible">
         <Grid.RowDefinitions >
-            <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -27,18 +27,36 @@
             <ColumnDefinition Width="auto"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Calendar  x:Name="startTime" HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0" Grid.ColumnSpan="2" Panel.ZIndex="10" Visibility="Hidden" SelectedDatesChanged="startTime_SelectedDatesChanged" Grid.RowSpan="5" Grid.Row="1"/>
-        <Calendar x:Name="endTime" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Top" Grid.ColumnSpan="2"  Panel.ZIndex="10" Visibility="Hidden" SelectedDatesChanged="endTime_SelectedDatesChanged" Grid.RowSpan="3" Grid.Row="3"/>
+        <Label x:Name="label2" Content="类型" HorizontalAlignment="Left"  Margin="0"  Grid.RowSpan="1" VerticalAlignment="Top"/>
+        <ComboBox x:Name="comboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="0"  VerticalAlignment="Top" Width="120" Text="{Binding TableDesc}" SelectionChanged="comboBox_SelectionChanged"/>
+        <Label x:Name="label" Content="开始时间" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Center" Grid.Row="1"/>
+        <TextBox x:Name="startBox"  HorizontalAlignment="Left" Height="23" Margin="0" TextWrapping="Wrap"  VerticalAlignment="Center" Width="120" GotFocus="startBox_GotFocus" Grid.Column="1" IsReadOnly="True" Grid.Row="1"/>
+        <Calendar  x:Name="startTime" HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0" Grid.ColumnSpan="2" Panel.ZIndex="10" Visibility="Hidden" SelectedDatesChanged="startTime_SelectedDatesChanged" Grid.RowSpan="5" Grid.Row="2"/>
+        <Label x:Name="label1" Content="结束时间" Grid.Row="3" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Center"/>
+        <TextBox x:Name="endBox" Grid.Column="1" Grid.Row="3"  HorizontalAlignment="Left" Height="23" Margin="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" GotFocus="endBox_GotFocus" IsReadOnly="True"/>
+        <Calendar x:Name="endTime" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Top" Grid.ColumnSpan="2"  Panel.ZIndex="10" Visibility="Hidden" SelectedDatesChanged="endTime_SelectedDatesChanged" Grid.RowSpan="4" Grid.Row="4"/>
         
-        <TextBox x:Name="startBox"  HorizontalAlignment="Left" Height="23" Margin="0" TextWrapping="Wrap"  VerticalAlignment="Center" Width="120" GotFocus="startBox_GotFocus" Grid.Column="1" IsReadOnly="True"/>
-        <TextBox x:Name="endBox" Grid.Column="1" Grid.Row="2"  HorizontalAlignment="Left" Height="23" Margin="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" GotFocus="endBox_GotFocus" IsReadOnly="True"/>
-        <Label x:Name="label" Content="开始时间" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Center"/>
-        <Label x:Name="label1" Content="结束时间" Grid.Row="2" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Center"/>
-        <Label x:Name="label2" Content="所有实体" HorizontalAlignment="Left"  Margin="0" Grid.Row="4" Grid.RowSpan="1" VerticalAlignment="Top"/>
         <DataGrid x:Name="dataGrid" HorizontalAlignment="Left" Margin="0,0,0,0"  VerticalAlignment="Top"   SelectionChanged="dataGrid_SelectionChanged" IsReadOnly="True" Grid.Row="5" Grid.ColumnSpan="2" >
+            <DataGrid.Resources>
+                
+                <Style TargetType="{x:Type DataGridRow}" x:Key="err" >
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self},Path=Item}" Value="error1" >
+                            <Setter Property="Background" Value="Gray"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self},Path=Value}" Value="error2" >
+                            <Setter Property="Background" Value="Gray"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self},Path=Value}" Value="error3" >
+                            <Setter Property="Background" Value="Gray"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Id}"  Header="Id"/>
-                <DataGridTextColumn Binding="{Binding EntityName}" Header="实体名"/>
+                <DataGridTextColumn Binding="{Binding Err}"  Header="错误"/>
+                <DataGridTextColumn Binding="{Binding EntityName}" Header="实体名" />
             </DataGrid.Columns>
         </DataGrid>
 

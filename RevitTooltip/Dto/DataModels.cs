@@ -11,61 +11,52 @@ namespace Revit.Addin.RevitTooltip.Dto
     /// </summary>
     public class ExcelTable
     {
-        string signal;
+        /// <summary>
+        /// 存放ExcelId
+        /// </summary>
+        public int? Id { get; set; }
+        
         /// <summary>
         /// 存放excel表的简写形式，如测斜CX
         /// </summary>
-        public string Signal
-        {
-            get { return signal; }
-            set { this.signal = value; }
-        }
-        string tableDesc;
+        public string Signal{  get;set;}
         /// <summary>
-        /// 存放excel表的中文描述
+        /// 存放excel表的中文描述，且是最新的Excel表，即是最后一次导入的Excel
         /// </summary>
-        public string TableDesc
-        {
-            get { return this.tableDesc; }
-            set { this.tableDesc = value; }
-        }
+        public string CurrentFile{get;set;}
         /// <summary>
         /// 用于查询返回
         /// 累计阈值
         /// </summary>
-        public float Total_hold { get; set; }
+        public float? Total_hold { get; set; }
         /// <summary>
         /// 用于查询返回
         /// 相邻阈值
         /// </summary>
-        public float Diff_hold { get; set; }
+        public float? Diff_hold { get; set; }
+        /// <summary>
+        /// 记录所有导入过的文件
+        /// </summary>
+        public string History { get; set; }
     }
     /// <summary>
     /// 对应于InfoTable某个entity和其相关的所有Info数据
     /// </summary>
     public class InfoEntityData
     {
-        string entityName;
+        
         /// <summary>
         /// 和EntityTable中的EntityName字段相对应
         /// </summary>
-        public string EntityName
-        {
-            get { return this.entityName; }
-            set { this.entityName = value; }
-        }
-        Dictionary<string, string> data;
+        public string EntityName { get; set; }
+        
         /// <summary>
         /// 直接用Dictionary类型来表示InfoTable中的键值对
         /// key:KeyTable中的keyName
         /// value:与之对应的value,对应于InfoTable中的value
         /// </summary>
-        public Dictionary<string, string> Data
-        {
-            get { return this.data; }
-            set { this.data = value; }
-        }
-        Dictionary<string, List<string>> groupMsg;
+        public Dictionary<string, string> Data { get; set; }
+        
         /// <summary>
         /// InfoTable的分组信息
         /// key:GroupName
@@ -74,11 +65,7 @@ namespace Revit.Addin.RevitTooltip.Dto
         ///该分组信息作为查询返回时，总是有一个未定义组，用于存放未进行分组的所以KeyName
         ///这样分组信息中的KeyName应该和Data中的KeyName总量是一样的。
         /// </summary>
-        public Dictionary<string, List<string>> GroupMsg
-        {
-            get { return this.groupMsg; }
-            set { this.groupMsg = value; }
-        }
+        public Dictionary<string, List<string>> GroupMsg { get; set; }
 
     }
     /// <summary>
@@ -173,62 +160,31 @@ namespace Revit.Addin.RevitTooltip.Dto
     /// </summary>
     public class SheetInfo
     {
-        ExcelTable excelTableData;
-        /// <summary>
-        /// 用于和ExcelTable交互的数据类型
-        /// </summary>
-        public ExcelTable ExcelTableData
-        {
-            get { return this.excelTableData; }
-            set { this.excelTableData = value; }
-        }
-        bool tag;
+        
+        public ExcelTable ExcelTableData{get;set;}
         /// <summary>
         /// 用于标识数据是InfoTable数据还是DrawTable数据
         /// True:InfoData
         /// Fale:DrawData
         /// </summary>
-        public bool Tag
-        {
-            get { return this.tag; }
-            set { this.tag = value; }
-        }
-        List<string> keyNames;
+        public bool Tag{get;set;}
         /// <summary>
         /// 用于插入KeyTable中的数据，保存所有的列名，即表头
         /// </summary>
-        public List<string> KeyNames
-        {
-            get { return this.keyNames; }
-            set { this.keyNames = value; }
-        }
-        List<string> entityNames;
+        public List<string> KeyNames { get; set; }
+        
         /// <summary>
         /// 用于插入EntityTable中的所用EntityName
         /// </summary>
-        public List<string> EntityNames
-        {
-            get { return this.entityNames; }
-            set { this.entityNames = value; }
-        }
-        List<InfoEntityData> infoRows;
+        public List<string> EntityNames { get; set; }
         /// <summary>
         /// 用于插入InfoTalbe中的数据类型
         /// </summary>
-        public List<InfoEntityData> InfoRows
-        {
-            get { return this.infoRows; }
-            set { this.infoRows = value; }
-        }
-        List<DrawEntityData> drawRows;
+        public List<InfoEntityData> InfoRows { get; set; }
         /// <summary>
         /// 用于插入到DrawTable中的数据类型
         /// </summary>
-        public List<DrawEntityData> DrawRows
-        {
-            get { return this.drawRows; }
-            set { this.drawRows = value; }
-        }
+        public List<DrawEntityData> DrawRows { get; set; }
     }
     public class ParameterData
     {
@@ -265,31 +221,34 @@ namespace Revit.Addin.RevitTooltip.Dto
     /// 对应于Keytable
     /// 仅用于查询时使用
     /// </summary>
-    public class KeyTableRow {
+    public class CKeyName {
         /// <summary>
         /// Id
         /// </summary>
-        int Id { get; set; }
+        public int Id { get; set; }
         /// <summary>
         /// 和KeyTable中的keyName对应
         /// </summary>
-        string KeyName { get; set; }
+        public string KeyName { get; set; }
+        /// <summary>
+        /// 在Excel表中的顺序
+        /// </summary>
+        public int Odr { get; set; }
         public override bool Equals(object obj)
         {
-            if (((KeyTableRow)obj).Equals(this.Id)) {
-            return true;
-            }
-            return false;
+            CKeyName o = (CKeyName)obj;
+
+            return this.KeyName.Equals(o.KeyName) && this.Odr == o.Odr;
         }
         public override int GetHashCode()
         {
-            return this.Id.GetHashCode();
+            return (this.KeyName+this.Odr).GetHashCode();
         }
     }
     /// <summary>
     /// 仅用于查询，查询所有的EntityName
     /// </summary>
-    public class EntityTable {
+    public class CEntityName {
         /// <summary>
         /// 存放EntityId
         /// </summary>
@@ -298,5 +257,20 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// 存放EntityName
         /// </summary>
         public string EntityName { get; set; }
+        /// <summary>
+        /// 标记其错误类型
+        /// err1,err2,err3,noErr
+        /// </summary>
+        public string ErrMsg { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            CEntityName o = (CEntityName)obj;
+            return this.EntityName.Equals(o.EntityName);
+        }
+        public override int GetHashCode()
+        {
+            return this.EntityName.GetHashCode();
+        }
     }
 }

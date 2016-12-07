@@ -1,21 +1,13 @@
 #region Namespaces
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
 #endregion
 
-using Res = Revit.Addin.RevitTooltip.Properties.Resources;
 using System.Windows.Forms;
 using Revit.Addin.RevitTooltip.UI;
-using Revit.Addin.RevitTooltip;
-using Revit.Addin.RevitTooltip.Util;
 
 namespace Revit.Addin.RevitTooltip
 {
@@ -71,7 +63,7 @@ namespace Revit.Addin.RevitTooltip
         {
             try
             {
-                NewSettings settingForm = new NewSettings(App._app.settings);
+                NewSettings settingForm = new NewSettings(App.Instance.settings);
                 settingForm.Show();
                 return Result.Succeeded;
             }
@@ -83,31 +75,7 @@ namespace Revit.Addin.RevitTooltip
         }
     }
 
-    [Transaction(TransactionMode.Manual)]
-    public class CmdLoadFile : TooltipCommandBase
-    {
-        public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            LoadFromFile();
-            return Result.Succeeded;
-        }
-
-        public static string[] LoadFromFile()
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = Res.String_SelectExcelFile;
-            ofd.DefaultExt = ".xls";
-            ofd.FilterIndex = 0;
-            ofd.RestoreDirectory = true;
-            ofd.Filter = "Excel 97-2003 Workbook(*.xls)|*.xls";
-            ofd.Multiselect = true;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                return ofd.FileNames;
-            }
-            return null;
-        }
-    }
+    
 
     #region CommandReloadExcelData
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
@@ -119,7 +87,7 @@ namespace Revit.Addin.RevitTooltip
         {
             try
             {
-                SQLiteHelper.CreateInstance().UpdateDB();
+                App.Instance.Sqlite.LoadDataToSqlite();
                 MessageBox.Show("数据更新成功");
                 return Result.Succeeded;
             }
@@ -206,6 +174,34 @@ namespace Revit.Addin.RevitTooltip
             DockablePane imagePanel = commandData.Application.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
             imagePanel.Show();
             commandData.Application.Idling += App.Instance.IdlingHandler;
+
+            //对模型的处理，后续可能删除
+        //Material color_red = null;
+        //Material color_gray = null;
+        //Material color_blue = null;
+        //FilteredElementCollector elementCollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
+        //IEnumerable<Material> allMaterial = elementCollector.OfClass(typeof(Material)).Cast<Material>();
+        //        foreach (Material elem in allMaterial)
+        //        {
+        //            if (elem.Name.Equals(Res.String_Color_Red))
+        //            {
+        //                color_red = elem;
+        //            }
+        //            if (elem.Name.Equals(Res.String_Color_Gray))
+        //            {
+        //                color_gray = elem;
+        //            }
+        //            if (elem.Name.Equals(Res.String_Color_Blue))
+        //            {
+        //                color_blue = elem;
+        //            }
+        //            if (color_gray != null && color_red != null&& color_blue!=null)
+        //            {
+        //                break;
+        //            }
+        //        }
+
+           
             return Result.Succeeded;
         }
     }
