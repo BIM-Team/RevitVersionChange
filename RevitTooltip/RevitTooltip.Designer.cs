@@ -15,11 +15,11 @@ namespace Revit.Addin.RevitTooltip {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
     internal sealed partial class RevitTooltip : global::System.Configuration.ApplicationSettingsBase {
         
-        private static RevitTooltip defaultInstance = ((RevitTooltip)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RevitTooltip())));
+        //private static RevitTooltip defaultInstance = ((RevitTooltip)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RevitTooltip())));
         
         public static RevitTooltip Default {
             get {
-                return defaultInstance;
+                return new RevitTooltip();
             }
         }
         
@@ -117,6 +117,23 @@ namespace Revit.Addin.RevitTooltip {
             set {
                 this["SqliteFileName"] = value;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            RevitTooltip o = (RevitTooltip)obj;
+            return this.DfCharset.Equals(o.DfCharset) &&
+                this.DfDB.Equals(o.DfDB) &&
+                this.DfPassword.Equals(o.DfPassword) &&
+                this.DfPort.Equals(o.DfPort) &&
+                this.DfServer.Equals(o.DfServer) &&
+                this.DfUser.Equals(o.DfUser) &&
+                this.SqliteFilePath.Equals(o.SqliteFilePath) &&
+                this.SqliteFileName.Equals(o.SqliteFileName);
+        }
+        public override int GetHashCode()
+        {
+            return (this.DfCharset + this.DfDB + this.DfPassword + this.DfPort + this.DfServer + this.DfUser + this.SqliteFileName + this.SqliteFilePath).GetHashCode();
         }
     }
 }

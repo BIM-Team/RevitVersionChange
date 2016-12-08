@@ -359,7 +359,6 @@ namespace Revit.Addin.RevitTooltip.Impl
                     }
                 }
                 buider.Remove(buider.Length - 1, 1);
-                string sql1 = buider.ToString();
                 new MySqlCommand(buider.ToString(), tran.Connection, tran).ExecuteNonQuery();
             }
 
@@ -440,30 +439,17 @@ namespace Revit.Addin.RevitTooltip.Impl
        /// <returns></returns>
         public bool ModifyThreshold(string signal, float Total_hold, float Diff_hold)
         {
-            if (Total_hold == 0 && Diff_hold == 0) {
-                throw new Exception("无效的阈值参数");
-            }
+            
             bool flag = false;
-            string sql1 = String.Format("Update ExcelTabel set Total_hold = '{0}', Diff_hold = '{1}' where ExcelSignal = '{2}'", Total_hold, Diff_hold, signal);
-            string sql2 = String.Format("Update ExcelTabel set Total_hold = '{0}' where ExcelSignal = '{1}'", Total_hold, signal);
-            string sql3 = String.Format("Update ExcelTabel set  Diff_hold = '{0}' where ExcelSignal = '{1}'", Diff_hold, signal);
-            string sql = null;
-            if (Total_hold == 0)
-            {
-                sql = sql3;
-            }
-            else if (Diff_hold == 0)
-            {
-                sql = sql2;
-            }
-            else {
-                sql = sql1;
-            }
+            string sql= String.Format("Update ExcelTable set Total_hold = '{0}', Diff_hold = '{1}' where ExcelSignal = '{2}'", Total_hold, Diff_hold, signal);
+           
             MySqlConnection conn = new MySqlConnection(this.connectMessage);
-            MySqlTransaction tran = conn.BeginTransaction();
-            MySqlCommand mycom = new MySqlCommand(sql,conn,tran);
+            MySqlTransaction tran = null;
             try
             {
+                conn.Open();
+                tran = conn.BeginTransaction();
+                MySqlCommand mycom = new MySqlCommand(sql,conn,tran);
                 mycom.ExecuteNonQuery();
                 tran.Commit();
                 flag = true;

@@ -31,6 +31,7 @@ namespace Revit.Addin.RevitTooltip
         private static App _app = null;
 
         private string m_previousDocPathName = null;
+        private bool isSettingChange = false;
         /// <summary>
         /// 模型相关的配置
         /// 原本存放在模型中间
@@ -43,6 +44,8 @@ namespace Revit.Addin.RevitTooltip
                     this.settings = value;
                     this.mysql = new MysqlUtil(value);
                     this.sqlite = new SqliteHelper(value);
+                    this.isSettingChange = true;
+                    
                 }
             }
         }
@@ -78,14 +81,6 @@ namespace Revit.Addin.RevitTooltip
         /// </summary>
         internal PushButton SurveyImageInfoButton { get; set; }
 
-        ///// <summary>
-        ///// 点击加载excel
-        ///// </summary>
-        //internal PushButton LoadExcelButton { get; set; }
-        ///// <summary>
-        ///// 加载Excel表到SQLite数据库
-        ///// </summary>
-        //internal PushButton LoadExcelToSQLiteButton { get; set; }
 
         /// <summary>
         /// 点击重新加载:从Mysql加载到SQLite
@@ -162,29 +157,6 @@ namespace Revit.Addin.RevitTooltip
             cmdButton.SetContextualHelp(cHelp);
             //添加分割
             ribbonPanel.AddSeparator();
-
-
-            ////load excel file to DB
-            //LoadExcelButton = (PushButton)ribbonPanel.AddItem(
-            //        new PushButtonData("LoadExcelToDB", Res.CommandName_Import,
-            //            addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadExcelToDB"));
-            //image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
-            //LoadExcelButton.Image = LoadExcelButton.LargeImage = image;
-            //LoadExcelButton.ToolTip = Res.CommandDescription_Import;
-            //LoadExcelButton.SetContextualHelp(cHelp);
-            //ribbonPanel.AddSeparator();
-
-            ////load excel file to SQLite
-            //LoadExcelToSQLiteButton = (PushButton)ribbonPanel.AddItem(
-            //        new PushButtonData("LoadExcelToSQLite", Res.CommandName_Import_SQLite,
-            //            addinAssembly, "Revit.Addin.RevitTooltip.CmdLoadExcelToSQLite"));
-            //image = Utils.ConvertFromBitmap(Res.tooltip_on.ToBitmap());
-            //LoadExcelToSQLiteButton.Image = LoadExcelToSQLiteButton.LargeImage = image;
-            //LoadExcelToSQLiteButton.ToolTip = Res.CommandDescription_Import_SQLite;
-            //LoadExcelToSQLiteButton.SetContextualHelp(cHelp);
-            //ribbonPanel.AddSeparator();
-
-            //////////////////////////////////////////////////////////////////////////
             //点击显示属性面板
             ElementInfoButton = (PushButton)ribbonPanel.AddItem(
                     new PushButtonData("ElementInfo", Res.Command_ElementInfo,
@@ -228,6 +200,8 @@ namespace Revit.Addin.RevitTooltip
             helpButtonData.ToolTip = Properties.Resources.CommandDescription_Help;
             helpButtonData.SetContextualHelp(cHelp);
             ribbonPanel.AddStackedItems(aboutButtonData, helpButtonData);
+            //设置成隐藏
+            this.SetPanelEnabled(false);
 
             return Result.Succeeded;
 
@@ -263,8 +237,11 @@ namespace Revit.Addin.RevitTooltip
             {
                 if (string.IsNullOrEmpty(m_previousDocPathName) || m_previousDocPathName != e.Document.PathName)
                 {
-                   Settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
+                   settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
+                   this.mysql = new MysqlUtil(settings);
+                   this.sqlite = new SqliteHelper(settings);
                    m_previousDocPathName = e.Document.PathName;
+                   current_doc = e.Document;
                 }
                 //重新打开视图则隐藏Panel
                 DockablePane panel = m_uiApp.GetDockablePane(new DockablePaneId(ElementInfoPanel.GetInstance().Id));
@@ -276,6 +253,7 @@ namespace Revit.Addin.RevitTooltip
                 if (imageControl != null) {
                     imageControl.Hide();
                 }
+                App.Instance.SetPanelEnabled(true);
                 
             }
             catch (System.Exception ex)
@@ -311,6 +289,13 @@ namespace Revit.Addin.RevitTooltip
 
             if (null != uidoc)
             {
+                //把settings保存至模型
+                if (isSettingChange) {
+                    ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation,settings);
+                    App.Instance.CurrentDoc.Save();
+                    isSettingChange = false;
+                }
+
                 //存放实体
                 string entity = string.Empty;
                 bool isSurvey = false;

@@ -143,9 +143,9 @@ namespace Revit.Addin.RevitTooltip.UI
                 newSetting.SqliteFilePath = this.textSqlitePath.Text.Trim();
                 newSetting.SqliteFileName = this.textSqliteName.Text.Trim();
                 App.Instance.Settings = newSetting;
-                ExtensibleStorage.StoreTooltipInfo(App.Instance.CurrentDoc.ProjectInformation, newSetting);
-                App.Instance.CurrentDoc.Save();
+                this.IsSettingChanged = false;
             }
+            button2.Enabled = true;
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -228,19 +228,18 @@ namespace Revit.Addin.RevitTooltip.UI
 
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            int col = e.ColumnIndex;
-            string Signal = this.dataGridView1.CurrentRow.Cells[0].Value.ToString();
-            float value = Convert.ToSingle(this.dataGridView1.CurrentCell.Value);
-            if (col == 2)
+            int row = e.RowIndex;
+            string Signal = this.dataGridView1.CurrentRow.Cells[1].Value.ToString();
+            try
             {
-                App.Instance.MySql.ModifyThreshold(Signal,value,0);
+                float Total_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[3].Value.ToString());
+                float Diff_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[4].Value.ToString());
+                App.Instance.MySql.ModifyThreshold(Signal, Total_hold, Diff_hold);
             }
-            else if (col == 3)
-            {
-                App.Instance.MySql.ModifyThreshold(Signal,0 ,value);
-            }
-            else {
-                throw new Exception("无效的编辑");
+            catch (Exception) {
+                this.dataGridView1.CancelEdit();
+                MessageBox.Show("无效的编辑");
+
             }
         }
 
