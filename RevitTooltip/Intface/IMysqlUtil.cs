@@ -6,12 +6,11 @@ namespace Revit.Addin.RevitTooltip.Intface
 {
     public interface IMysqlUtil
     {
-        
         /// <summary>
         /// 用测试语句测试当前Mysql的可用状态
         /// </summary>
-        /// <returns></returns>
-        bool IsReady();
+        bool IsReady { get; }
+        
         /// <summary>
         /// 插入SheetInfo
 		///返回成功完成了多少个Entity相关的数据
@@ -23,7 +22,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         ///在选定的某种Excel的基础上新建一个Group
         ///传入Signal标志
         /// </summary>
-        Group AddKeyGroup(string Signal, string GroupName);
+        Group AddNewGroup(string Signal, string GroupName);
 
         /// <summary>
         /// 删除一个Group
@@ -38,7 +37,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <summary>
         /// 添加一些属性名到某一Group
         /// </summary>
-        bool AddKeysToGroup(int Group_ID, List<int> Key_Ids);
+        bool AddKeysToGroup(int? Group_ID, List<int> Key_Ids);
 
         /// <summary>
         /// 列举所有的Info Excel等待分组，这里不包括测量数据的excel
@@ -76,13 +75,19 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// </summary>
         /// <param name="group_id"></param>
         /// <returns></returns>
-        List<CKeyName> loadKeyNameForAGroup(int group_id);
+        //List<CKeyName> loadKeyNameForAGroup(int group_id);
+        ///// <summary>
+        ///// 通过Signal来查询与之相关的所有的KeyName
+        ///// </summary>
+        ///// <param name="signal"></param>
+        ///// <returns></returns>
+        List<CKeyName> loadKeyNameForExcelAndGroup(string signal,int Group_id);
         /// <summary>
-        /// 通过Signal来查询与之相关的所有的KeyName
+        /// 修改Key的分组
         /// </summary>
-        /// <param name="signal"></param>
-        /// <returns></returns>
-        List<CKeyName> loadKeyNameForAExcel(string signal);
+        /// <param name="Group_id">为Null时，表示取消</param>
+        /// <param name="Key_id">KeyName的ID</param>
+        void updateKeyGroup(int? Group_id,int Key_id);
 
     }
 }

@@ -216,12 +216,28 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// </summary>
         public string GroupName { get; set; }
 
+        public override bool Equals(object obj)
+        {
+            Group o = (Group)obj;
+
+            return this.Id.Equals(o.Id) && this.GroupName.Equals(o.GroupName);
+        }
+        public override int GetHashCode()
+        {
+            return (this.GroupName+this.Id).GetHashCode();
+        }
+
     }
     /// <summary>
     /// 对应于Keytable
     /// 仅用于查询时使用
     /// </summary>
     public class CKeyName {
+        
+        /// <summary>
+        /// 仅用于初始化DataGrid的CheckBox列
+        /// </summary>
+        public bool IsCheck { get; set; }
         /// <summary>
         /// Id
         /// </summary>
@@ -242,7 +258,7 @@ namespace Revit.Addin.RevitTooltip.Dto
         }
         public override int GetHashCode()
         {
-            return (this.KeyName+this.Odr).GetHashCode();
+            return (this.KeyName + this.Odr).GetHashCode();
         }
     }
     /// <summary>

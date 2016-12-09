@@ -15,6 +15,19 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// 后续用这连接信息创建连接，不是每个类创建一个连接
         /// </summary>
         private string connectMessage;
+
+        private bool isReady = false;
+        /// <summary>
+        /// 返回此时Mysql的可用状态
+        /// </summary>
+        bool IMysqlUtil.IsReady
+        {
+            get
+            {
+                return this.isReady;
+            }
+        }
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -27,7 +40,10 @@ namespace Revit.Addin.RevitTooltip.Impl
                 ";port=" + settings.DfPort +
                 ";password=" + settings.DfPassword +
                 ";charset=" + settings.DfCharset;
-            
+            //测试Mysql的可用状态
+            this.isReady=CheckReady();
+
+
         }
         /// <summary>
         /// 初始化默认本地连接
@@ -35,12 +51,14 @@ namespace Revit.Addin.RevitTooltip.Impl
         private MysqlUtil()
         {
             this.connectMessage = "server= 127.0.0.1 ;user= root; database= hzj ;port= 3306;password= root;charset= utf8";
+            //测试Mysql的可用状态
+            this.isReady = CheckReady();
         }
         /// <summary>
         /// 查看数据库能否链接
         /// </summary>
         /// <returns></returns>
-        public bool IsReady()
+        private bool CheckReady()
         {
             bool result = false;
             MySqlConnection conn = new MySqlConnection(this.connectMessage);
@@ -510,24 +528,147 @@ namespace Revit.Addin.RevitTooltip.Impl
 
         public List<Group> loadGroupForAExcel(string signal)
         {
-            throw new NotImplementedException();
+            List<Group> groups = new List<Group>() ;
+            Group newOne = new Group();
+            newOne.Id = -1;
+            newOne.GroupName = "新建";
+            groups.Add(newOne);
+            string sql = string.Format("select ID,GroupName from GroupTable where ExcelSignal='{0}'", signal);
+            MySqlConnection conn = new MySqlConnection(this.connectMessage);
+            MySqlDataReader reader = null;
+            try
+            {
+                conn.Open();
+                MySqlCommand command = new MySqlCommand(sql, conn);
+                reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    Group one = new Group();
+                    one.Id = reader.GetInt32(0);
+                    one.GroupName = reader.GetString(1);
+                    groups.Add(one);
+                }
+
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally
+            {
+                reader.Close();
+                conn.Close();
+                conn.Dispose();
+            }
+            return groups;
         }
 
-        public List<CKeyName> loadKeyNameForAGroup(int group_id)
-        {
-            throw new NotImplementedException();
-        }
+        //public List<CKeyName> loadKeyNameForAGroup(int group_id)
+        //{
+        //    List<CKeyName> result = null;
+        //    MySqlConnection conn = new MySqlConnection(this.connectMessage);
+        //    MySqlDataReader reader = null;
+        //    string sql = string.Format("select ID,KeyName from KeyTable where Group_ID={0}", group_id);
+        //    try
+        //    {
+        //        conn.Open();
+        //        MySqlCommand command = new MySqlCommand(sql, conn);
+        //        reader = command.ExecuteReader();
+        //        if (reader.HasRows)
+        //        {
+        //            result = new List<CKeyName>();
+        //        }
+        //        while (reader.Read())
+        //        {
+        //            CKeyName one = new CKeyName();
+        //            one.Id = reader.GetInt32(0);
+        //            one.KeyName = reader.GetString(1);
+        //            result.Add(one);
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //    finally {
+        //        reader.Close();
+        //        conn.Close();
+        //        conn.Dispose();
+        //    }
+        //    return result;
+        //}
 
-        public List<CKeyName> loadKeyNameForAExcel(string signal)
+        public List<CKeyName> loadKeyNameForExcelAndGroup(string signal, int Group_id)
         {
-            throw new NotImplementedException();
+            List<CKeyName> result = null;
+            string sql = string.Format("Select ID,KeyName,Group_ID={1} from KeyTable where ExcelSignal='{0}'", signal, Group_id);
+            MySqlConnection conn = new MySqlConnection(this.connectMessage);
+            MySqlDataReader reader = null;
+            try
+            {
+                conn.Open();
+                MySqlCommand command = new MySqlCommand(sql, conn);
+                reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    result = new List<CKeyName>();
+                }
+                while (reader.Read())
+                {
+                    CKeyName one = new CKeyName();
+                    one.Id = reader.GetInt32(0);
+                    one.KeyName = reader.GetString(1);
+                    if (!reader.IsDBNull(2))
+                    {
+                    one.IsCheck = reader.GetBoolean(2);
+                    }
+                    result.Add(one);
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally {
+                reader.Close();
+                conn.Close();
+                conn.Dispose();
+            }
+            return result;
         }
 
        
 
-        public Group AddKeyGroup(string Signal, string GroupName)
+        public Group AddNewGroup(string Signal, string GroupName)
         {
-            throw new NotImplementedException();
+            Group result = null;
+            MySqlConnection conn = new MySqlConnection(this.connectMessage);
+            MySqlTransaction tran = null;
+            string sql = string.Format("alter table GroupTable auto_increment =1;Insert into GroupTable(ExcelSignal,GroupName) values ('{0}','{1}')", Signal, GroupName);
+            string select_sql = string.Format("Select ID from GroupTable where GroupName='{0}' and ExcelSignal='{1}'", GroupName,Signal);
+            try
+            {
+                conn.Open();
+                tran = conn.BeginTransaction();
+                MySqlCommand command = new MySqlCommand(sql, conn, tran);
+                command.ExecuteNonQuery();
+                tran.Commit();
+                command.CommandText = select_sql;
+                int id = Convert.ToInt32(command.ExecuteScalar());
+                result = new Group();
+                result.Id = id;
+                result.GroupName = GroupName;
+            }
+            catch (Exception)
+            {
+                tran.Rollback();
+                throw;
+            }
+            finally {
+                conn.Close();
+                conn.Dispose();
+            }
+            return result;
         }
 
         public bool DeleteKeyGroup(int Group_ID)
@@ -540,9 +681,59 @@ namespace Revit.Addin.RevitTooltip.Impl
             throw new NotImplementedException();
         }
 
-        public bool AddKeysToGroup(int Group_ID, List<int> Key_Ids)
+        public bool AddKeysToGroup(int? Group_ID, List<int> Key_Ids)
         {
-            throw new NotImplementedException();
+            bool result = false;
+            MySqlConnection conn = new MySqlConnection(this.connectMessage);
+            MySqlTransaction tran = null;
+            MySqlDataReader reader = null;
+            try
+            {
+                conn.Open();
+                tran = conn.BeginTransaction();
+                string select_sql = string.Format("Select ID from KeyTable where Group_ID={0};", Group_ID);
+                MySqlCommand command = new MySqlCommand(select_sql, conn, tran);
+                reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    StringBuilder buider1 = new StringBuilder();
+                    while (reader.Read())
+                    {
+                        buider1.Append(reader.GetInt32(0)).Append(",");
+                    }
+                    buider1.Remove(buider1.Length - 1, 1);
+                    string sql_reset = string.Format("update KeyTable set Group_ID=NULL where ID in ({0});", buider1.ToString());
+                    command.CommandText = sql_reset;
+                    reader.Close();
+                    command.ExecuteNonQuery();
+                }
+                else {
+                    reader.Close();
+                }
+
+                if (Key_Ids != null && Key_Ids.Count != 0) {
+                    StringBuilder buider = new StringBuilder();
+                    foreach (int i in Key_Ids) {
+                        buider.Append(i).Append(",");
+                    }
+                    buider.Remove(buider.Length - 1, 1);
+                command.CommandText = string.Format("update KeyTable set Group_ID={0} where ID in ({1});", Group_ID, buider.ToString()); ;
+                command.ExecuteNonQuery();
+                }
+                tran.Commit();
+                result = true;
+            }
+            catch (Exception)
+            {
+                tran.Rollback();
+                throw;
+            }
+            finally
+            {
+                conn.Close();
+                conn.Dispose();
+            }
+            return result;
         }
 
         public Dictionary<string, string> ListExcelToGroup()
@@ -553,6 +744,11 @@ namespace Revit.Addin.RevitTooltip.Impl
         public bool ModifyEntityRemark(string EntityName, string Remark)
         {
             throw new NotImplementedException();
+        }
+
+        public void updateKeyGroup(int? Group_id, int Key_id)
+        {
+            
         }
     }
 }
