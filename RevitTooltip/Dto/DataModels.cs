@@ -66,6 +66,11 @@ namespace Revit.Addin.RevitTooltip.Dto
         ///这样分组信息中的KeyName应该和Data中的KeyName总量是一样的。
         /// </summary>
         public Dictionary<string, List<string>> GroupMsg { get; set; }
+        /// <summary>
+        /// 存放实体备注
+        /// 目前仅用于查询
+        /// </summary>
+        public string Remark { get; set; }
 
     }
     /// <summary>

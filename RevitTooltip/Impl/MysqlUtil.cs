@@ -11,23 +11,41 @@ namespace Revit.Addin.RevitTooltip.Impl
     public class MysqlUtil : IMysqlUtil
     {
         /// <summary>
+        /// 保存一个实例供其他类使用
+        /// </summary>
+        private static MysqlUtil _mysql=null;
+        /// <summary>
+        /// 获取一个实例供其他类使用
+        /// </summary>
+        public static MysqlUtil Instance {
+            get { return _mysql; }
+        }
+        /// <summary>
         /// 保存连接信息
         /// 后续用这连接信息创建连接，不是每个类创建一个连接
         /// </summary>
         private string connectMessage;
-
+        ///// <summary>
+        ///// 返回连接信息
+        ///// </summary>
         private bool isReady = false;
+       
+        /// <summary>
+        /// 返回连接信息
+        /// </summary>
+        public string ConnectionMessage {
+            get { return this.connectMessage; }
+                }
         /// <summary>
         /// 返回此时Mysql的可用状态
         /// </summary>
-        bool IMysqlUtil.IsReady
+        public bool IsReady
         {
             get
             {
-                return this.isReady;
+                return isReady;
             }
         }
-
         /// <summary>
         /// 初始化
         /// </summary>
@@ -42,8 +60,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 ";charset=" + settings.DfCharset;
             //测试Mysql的可用状态
             this.isReady=CheckReady();
-
-
+            _mysql = this;
         }
         /// <summary>
         /// 初始化默认本地连接
@@ -53,6 +70,7 @@ namespace Revit.Addin.RevitTooltip.Impl
             this.connectMessage = "server= 127.0.0.1 ;user= root; database= hzj ;port= 3306;password= root;charset= utf8";
             //测试Mysql的可用状态
             this.isReady = CheckReady();
+            _mysql = this;
         }
         /// <summary>
         /// 查看数据库能否链接
@@ -74,9 +92,6 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             return result;
         }
-        
-        
-        
         /// <summary>
         /// 插入一个SheetInfo，只插入以前表中不存在的数据
         /// </summary>

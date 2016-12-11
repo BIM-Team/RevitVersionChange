@@ -10,6 +10,10 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// 用测试语句测试当前Mysql的可用状态
         /// </summary>
         bool IsReady { get; }
+        /// <summary>
+        /// 返回连接信息
+        /// </summary>
+        string ConnectionMessage { get; }
         
         /// <summary>
         /// 插入SheetInfo

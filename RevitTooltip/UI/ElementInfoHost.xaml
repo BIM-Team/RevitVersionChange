@@ -19,9 +19,9 @@
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DataGrid x:Name="dg" Margin="0" AutoGenerateColumns="False" SelectionChanged="OnDGSelectionChanged">
+        <DataGrid x:Name="dg" Margin="0" AutoGenerateColumns="False" SelectionChanged="OnDGSelectionChanged" IsReadOnly="True">
             <DataGrid.Columns>
-                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Name}" Header="属性名称" Width="5*" SortMemberPath="Name">
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Name}" Header="属性名称" Width="5*" >
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Style.Triggers>

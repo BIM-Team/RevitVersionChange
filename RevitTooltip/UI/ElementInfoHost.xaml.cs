@@ -19,6 +19,7 @@ namespace Revit.Addin.RevitTooltip
 
         public void Update( System.Collections.IEnumerable itemsSource)
         {
+            dg.ItemsSource = null;
             dg.ItemsSource = itemsSource;
         }
 

@@ -87,8 +87,9 @@ namespace Revit.Addin.RevitTooltip
         {
             try
             {
-                App.Instance.Sqlite.LoadDataToSqlite();
+                if (App.Instance.Sqlite.LoadDataToSqlite()) {
                 MessageBox.Show("数据更新成功");
+                }
                 return Result.Succeeded;
             }
             catch (Exception ex)

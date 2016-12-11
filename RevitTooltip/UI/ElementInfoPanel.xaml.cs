@@ -39,6 +39,8 @@ namespace Revit.Addin.RevitTooltip
                 foreach (string key in data.Keys) {
                     list.Add(new ParameterData(key, data[key]));
                 }
+            //添加备注列
+            list.Add(new ParameterData("备注", infoEntityData.Remark));
             }
             elementInfoHost.Update(list);
         }

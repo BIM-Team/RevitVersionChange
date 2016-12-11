@@ -39,13 +39,15 @@ namespace Revit.Addin.RevitTooltip
         internal RevitTooltip settings = null;
         internal RevitTooltip Settings
         {
-            set {
-                if (null == this.settings || !this.settings.Equals(value)) {
+            set
+            {
+                if (null == this.settings || !this.settings.Equals(value))
+                {
                     this.settings = value;
                     this.mysql = new MysqlUtil(value);
-                    this.sqlite = new SqliteHelper(value);
+                    this.sqlite = new SQLiteHelper(value);
                     this.isSettingChange = true;
-                    
+
                 }
             }
         }
@@ -93,23 +95,26 @@ namespace Revit.Addin.RevitTooltip
         /// <summary>
         /// MySQL的实例对象
         /// </summary>
-        public IMysqlUtil MySql {
-        get { return this.mysql; }
+        public IMysqlUtil MySql
+        {
+            get { return this.mysql; }
         }
         private ISQLiteHelper sqlite = null;
         /// <summary>
         /// 返回SQLite实例
         /// </summary>
-        public ISQLiteHelper Sqlite {
-        get { return this.sqlite;            }
+        public ISQLiteHelper Sqlite
+        {
+            get { return this.sqlite; }
         }
         //记录当前打开的文档
         private Document current_doc;
         /// <summary>
         /// 获取当前打开的文档
         /// </summary>
-        public Document CurrentDoc {
-        get { return this.current_doc; }
+        public Document CurrentDoc
+        {
+            get { return this.current_doc; }
         }
 
 
@@ -123,7 +128,7 @@ namespace Revit.Addin.RevitTooltip
             app.ViewActivated += OnViewActivated;
             //事件绑定：闲置事件
             app.Idling += IdlingHandler;
-            
+
 
             //加载格式文件
             string file = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), "MahApps.Metro.dll");
@@ -134,7 +139,7 @@ namespace Revit.Addin.RevitTooltip
             m_ImageControl = ImageControl.Instance();
             //注册Dockable面板
             app.RegisterDockablePane(new DockablePaneId(m_elementInfoPanel.Id), "构件信息", m_elementInfoPanel);
-            app.RegisterDockablePane(new DockablePaneId(m_ImageControl.Id),"测点信息", m_ImageControl);
+            app.RegisterDockablePane(new DockablePaneId(m_ImageControl.Id), "测点信息", m_ImageControl);
             //
             //
             string tabName = Res.String_AppTabName;
@@ -232,16 +237,16 @@ namespace Revit.Addin.RevitTooltip
 
         private void OnViewActivated(object sender, ViewActivatedEventArgs e)
         {
-            
+
             try
             {
                 if (string.IsNullOrEmpty(m_previousDocPathName) || m_previousDocPathName != e.Document.PathName)
                 {
-                   settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
-                   this.mysql = new MysqlUtil(settings);
-                   this.sqlite = new SqliteHelper(settings);
-                   m_previousDocPathName = e.Document.PathName;
-                   current_doc = e.Document;
+                    settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
+                    this.mysql = new MysqlUtil(settings);
+                    this.sqlite = new SQLiteHelper(settings);
+                    m_previousDocPathName = e.Document.PathName;
+                    current_doc = e.Document;
                 }
                 //重新打开视图则隐藏Panel
                 DockablePane panel = m_uiApp.GetDockablePane(new DockablePaneId(ElementInfoPanel.GetInstance().Id));
@@ -249,12 +254,13 @@ namespace Revit.Addin.RevitTooltip
                 {
                     panel.Hide();
                 }
-                DockablePane imageControl= m_uiApp.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
-                if (imageControl != null) {
+                DockablePane imageControl = m_uiApp.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
+                if (imageControl != null)
+                {
                     imageControl.Hide();
                 }
                 App.Instance.SetPanelEnabled(true);
-                
+
             }
             catch (System.Exception ex)
             {
@@ -290,8 +296,9 @@ namespace Revit.Addin.RevitTooltip
             if (null != uidoc)
             {
                 //把settings保存至模型
-                if (isSettingChange) {
-                    ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation,settings);
+                if (isSettingChange)
+                {
+                    ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation, settings);
                     App.Instance.CurrentDoc.Save();
                     isSettingChange = false;
                 }
@@ -311,7 +318,7 @@ namespace Revit.Addin.RevitTooltip
                     if (!string.IsNullOrEmpty(entity))
                     {
                         isSurvey = Res.String_ParameterSurveyType.Equals(selectElement.Name);
-                        
+
                         if (m_selectedElementId != selectElement.Id.IntegerValue)
                         {
                             m_selectedElementId = selectElement.Id.IntegerValue;
@@ -324,7 +331,7 @@ namespace Revit.Addin.RevitTooltip
                             }
                             else
                             {//测量数据绘制折线图
-                                DrawEntityData drawEntityData = App.Instance.Sqlite.SelectDrawEntityData(entity,null,null);
+                                DrawEntityData drawEntityData = App.Instance.Sqlite.SelectDrawEntityData(entity, null, null);
                                 NewImageForm.Instance().EntityData = drawEntityData;
                             }
                         }
@@ -341,7 +348,7 @@ namespace Revit.Addin.RevitTooltip
             }
         }
 
-        
+
 
         /// <summary>
         /// Gets help document
@@ -358,7 +365,7 @@ namespace Revit.Addin.RevitTooltip
         {
             return "BIMRevit2014-2016";
         }
-       
-        
+
+
     }
 }
