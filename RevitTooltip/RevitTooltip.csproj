@@ -107,10 +107,10 @@
       <HintPath>..\ThirdParty\Sqlite\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
-      <HintPath>..\Bin\2014\System.Net.Http.dll</HintPath>
+      <HintPath>bin\x64\Debug\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest">
-      <HintPath>..\Bin\2014\System.Net.Http.WebRequest.dll</HintPath>
+      <HintPath>bin\x64\Debug\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
@@ -132,8 +132,8 @@
     <Compile Include="Intface\IExcelReader.cs" />
     <Compile Include="Intface\IMysqlUtil.cs" />
     <Compile Include="Intface\ISQLiteHelper.cs" />
-    <Compile Include="Intface\MysqlUtil.cs" />
-    <Compile Include="Intface\SQLiteHelper.cs" />
+    <Compile Include="Impl\MysqlUtil.cs" />
+    <Compile Include="Impl\SQLiteHelper.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

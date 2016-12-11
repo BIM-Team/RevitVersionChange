@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Revit.Addin.RevitTooltip.Dto;
-using Revit.Addin.RevitTooltip.Impl;
+using Revit.Addin.RevitTooltip.Intface;
 using MySql.Data.MySqlClient;
+using System.Windows;
 
-namespace Revit.Addin.RevitTooltip.Intface
+namespace Revit.Addin.RevitTooltip.Impl
 {
     public class MysqlUtil : IDisposable, IMysqlUtil
     {
@@ -28,7 +29,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         private bool isBegin = false;
 
         //是否有备注
-        private int hasEntityRemark = 0;
+        private bool hasEntityRemark = false;
 
         /// <summary>
         /// 单例模式
@@ -73,7 +74,6 @@ namespace Revit.Addin.RevitTooltip.Intface
                 //conn = new MySqlConnection("server=" + settings.DfServer + ";user=" + settings.DfUser + ";database=" + settings.DfDB + ";port=" + settings.DfPort + ";password=" + settings.DfPassword + ";charset=" + settings.DfCharset);  //实例化连接
                 conn = new MySqlConnection("server= 127.0.0.1 ;user= root; database= hzj ;port= 3306;password= root;charset= utf8");  //实例化连接          
             }
-
         }
         /// <summary>
         /// 查看数据库能否链接
@@ -155,16 +155,16 @@ namespace Revit.Addin.RevitTooltip.Intface
 
                 myTran.Commit();    //事务提交
                 isBegin = false;
-                hasEntityRemark = 0;
+                hasEntityRemark = false;
                 return 1;
             }
             catch (Exception e)
             {
                 myTran.Rollback();    // 事务回滚
                 isBegin = false;
-                hasEntityRemark = 0;
+                hasEntityRemark = false;
                 //删除entitytable表中当前sheet的entity
-                DeleteCurrentEntity(sheetInfo, InsertIntoExcelTable(sheetInfo));
+                DeleteCurrentEntity(sheetInfo, InsertIntoExcelTable(sheetInfo)["IdExcel"]);
 
                 throw new Exception("事务操作出错，系统信息：" + e.Message);
             }
@@ -176,14 +176,14 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="sheetInfo"></param>
         private void InsertInfoData(SheetInfo sheetInfo)
         {
-            //插入到ExcelTable表,并返回ID
-			int IdExcel = InsertIntoExcelTable(sheetInfo);
+            //插入到ExcelTable表,并返回IdExcel和IdGroup
+            Dictionary<string, int> id = InsertIntoExcelTable(sheetInfo);
 
             //插入到KeyTable表，并返回当前表的键值对<属性名，ID>
-			Dictionary<string, int> CurrentKeys = InsertIntoKeyTable(sheetInfo.KeyNames, IdExcel);
+			Dictionary<string, int> CurrentKeys = InsertIntoKeyTable(sheetInfo.KeyNames, id);
 
             //插入到EntityTable表，并返回新插入的实体数据的键值对<实体名,ID>
-            Dictionary<string, int> UpdateEntities = InsertIntoEntityTable(sheetInfo.EntityNames, IdExcel);
+            Dictionary<string, int> UpdateEntities = InsertIntoEntityTable(sheetInfo.EntityNames, id["IdExcel"]);
 
             //插入到InfoTable表
             InsertIntoInfoTable(sheetInfo, CurrentKeys, UpdateEntities);
@@ -194,11 +194,11 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="sheetInfo"></param>
         private void InsertDrawData(SheetInfo sheetInfo)
         {
-			int IdExcel = InsertIntoExcelTable(sheetInfo);
+            Dictionary<string, int> id = InsertIntoExcelTable(sheetInfo);
 
-            Dictionary<string, int> UpdateEntities = InsertIntoEntityTable(sheetInfo.EntityNames, IdExcel);
+            Dictionary<string, int> UpdateEntities = InsertIntoEntityTable(sheetInfo.EntityNames, id["IdExcel"]);
 
-            InsertIntoDrawDataTable(sheetInfo, UpdateEntities, IdExcel);
+            InsertIntoDrawDataTable(sheetInfo, UpdateEntities, id["IdExcel"]);
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         public void DeleteAllData()
         {
             //关联表外键是级联删除
-            string sql = "delete from exceltable ";
+            string sql = "delete from Drawdatatable; delete from InfoTable; delete from EntityTable; delete from GroupTable; delete from KeyTable; delete from ExcelTable ";
             MySqlCommand mycom = new MySqlCommand(sql, this.conn, myTran);  //建立执行命令语句对象，其中myTran为事务
             try
             {
@@ -239,12 +239,12 @@ namespace Revit.Addin.RevitTooltip.Intface
                 throw e;
             }
         }
+
         /// <summary>
         /// 当插入一个sheet数据回滚时，删除当前sheet表的entity
         /// </summary>
         /// <param name="sheetInfo"></param>
         /// <param name="IdExcel"></param>
-
         private void DeleteCurrentEntity(SheetInfo sheetInfo, int IdExcel)
         {
             Dictionary<string, int> PeriousEntities = SelectEntities(IdExcel);
@@ -267,37 +267,79 @@ namespace Revit.Addin.RevitTooltip.Intface
             else
                 sql += ")";
 
-            MySqlCommand mycom = new MySqlCommand(sql, this.conn, myTran);  //建立执行命令语句对象，其中myTran为事务
-            try
-            {
-                mycom.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            ExecuteOneSql(sql);
 
         }
+
         /// <summary>
         /// 插入到ExcelTable表
-        /// 返回对应ID
+        /// 并返回IdExcel和IdGroup
         /// </summary>
         /// <param name="sheetInfo"></param>
         /// <returns></returns>
-        private int InsertIntoExcelTable(SheetInfo sheetInfo)
+        private Dictionary<string, int> InsertIntoExcelTable(SheetInfo sheetInfo)
         {
+            Dictionary<string, int> id = new Dictionary<string, int>();
 			bool isInfo = sheetInfo.Tag;
 			string signal = sheetInfo.ExcelTableData.Signal;
 			string tableDesc = sheetInfo.ExcelTableData.TableDesc;
-            int id = getIdExcel(signal);
-            if (id == 0)
+
+            int IdExcel = getIdExcel(signal);
+            int IdGroup = getIdGroup(IdExcel);
+            string currentTableDesc = GetTableDesc(signal);
+            bool hasTableDesc = false;
+
+            if (IdExcel == 0)
             {
-                String sql = GetInsertIntoExcelTableSql(isInfo,signal,tableDesc);
+                string sql = GetInsertIntoExcelTableSql(isInfo,signal,tableDesc);
                 ExecuteOneSql(sql);
-                id = getIdExcel(signal);
+                IdExcel = getIdExcel(signal);
+
+                //InfoTable插入到GroupTable
+                if(isInfo)
+                    IdGroup = InsertIntoGroupTable(IdExcel);
             }
-            //update数据库中的TableDesc******************待实现************************
+            else
+            {
+                string[] tableDesclist = currentTableDesc.Split(';');
+                foreach(string t in tableDesclist)
+                {
+                    if (t.Equals(tableDesc))
+                    {
+                        hasTableDesc = true;
+                    }
+                }
+                if (!hasTableDesc)
+                {
+                    string updateTableDesc = currentTableDesc + tableDesc;
+                    UpdateTableDesc(signal, updateTableDesc);
+                }
+            }
+            id.Add("IdExcel", IdExcel);
+            if (isInfo)
+                id.Add("IdGroup", IdGroup);
+
             return id;
+        }
+        /// <summary>
+        /// 插入“未分组”Group
+        /// </summary>
+        /// <param name="idExcel"></param>
+        /// <returns></returns>
+        private int InsertIntoGroupTable(int idExcel)
+        {
+            int idGroup = 0;
+            string sql = GetInsertIntoGroupTableSql(idExcel) + ";select @@IDENTITY ";
+            using (MySqlCommand mycom = new MySqlCommand(sql, this.conn, myTran))
+            {
+                try
+                {
+                    idGroup = Convert.ToInt32(mycom.ExecuteScalar());
+                    return idGroup;
+                }
+                catch { throw; }
+            }           
+
         }
         /// <summary>
         /// 插入属性到KeyTable表
@@ -306,16 +348,18 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="KeyNames"></param>
         /// <param name="IdExcel"></param>
         /// <returns></returns>
-        private Dictionary<string, int> InsertIntoKeyTable(List<string> KeyNames, int IdExcel)
+        private Dictionary<string, int> InsertIntoKeyTable(List<string> KeyNames, Dictionary<string, int> id)
         {
+            int IdExcel = id["IdExcel"];
+            int IdGroup = id["IdGroup"];
             Dictionary<string, int> PeriousKeys = SelectKeyNames(IdExcel);
             String sql = "";
             int n = 0;
             foreach (string name in KeyNames)
             {
-                if (name.Equals("备注"))
+                if (name.Equals("备注") || PeriousKeys.Keys.Contains("备注"))
                 {
-                    hasEntityRemark = 1;
+                    hasEntityRemark = true;
                     continue;
                 }
 
@@ -323,11 +367,15 @@ namespace Revit.Addin.RevitTooltip.Intface
                 if (!PeriousKeys.Keys.Contains(name))
                 {
                     if (n == 0)
-                        sql = GetInsertIntoKeyTableSql(IdExcel, name);
+                        sql = GetInsertIntoKeyTableSql(IdExcel, IdGroup, name);
                     else
-                        sql = sql + ",('" + IdExcel + "','" + name + "')";
+                        sql = sql + ",('" + IdExcel + "','" + IdGroup + "','"+ name + "')";
                     n++;
                 }
+            }
+            if (!hasEntityRemark)
+            {
+                sql = sql + ",('" + IdExcel + "','" + IdGroup + "','备注')";
             }
             ExecuteOneSql(sql);
             //获取更新后的<属性，ID>
@@ -346,7 +394,7 @@ namespace Revit.Addin.RevitTooltip.Intface
             Dictionary<string, int> UpdateEntities = new Dictionary<string, int>();
             List<string> UpdateEntityNames = new List<string>();
             Dictionary<string, int> PeriousEntities = SelectEntities(IdExcel);
-            String sql = "";
+            string sql = "";
             int n = 0;
             foreach (string entityName in EntityNames)
             {
@@ -370,7 +418,6 @@ namespace Revit.Addin.RevitTooltip.Intface
                 int id = getIdEntity(IdExcel, s);
                 UpdateEntities.Add(s, id);
             }
-
             return UpdateEntities;
         }
         /// <summary>
@@ -384,7 +431,7 @@ namespace Revit.Addin.RevitTooltip.Intface
             int IdKey;
             int IdEntity;
             List<string> SqlStringList = new List<string>();  // 用来存放多条SQL语句
-            String sql = "";
+            string sql = "";
             int n = 0;
 			foreach (InfoEntityData infoRow in sheetInfo.InfoRows)
 			{
@@ -512,7 +559,11 @@ namespace Revit.Addin.RevitTooltip.Intface
             Dictionary<string, int> Entities = new Dictionary<string, int>();
             String sql = "select distinct EntityName, ID from EntityTable where Excel_ID = " + IdExcel;
 
-            MySqlCommand mycom = new MySqlCommand(sql, this.conn, myTran);  //建立执行命令语句对象
+            MySqlCommand mycom = new MySqlCommand();
+            mycom.Connection = this.conn;
+            mycom.CommandText = sql;
+            if(isBegin)
+                mycom.Transaction = myTran;
             MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
             try
             {
@@ -568,6 +619,47 @@ namespace Revit.Addin.RevitTooltip.Intface
             }
         }
         /// <summary>
+        /// 获取当前Excel的TableDesc
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <returns></returns>
+        private string GetTableDesc(string signal)
+        {
+            string currentTableDesc = "";
+            string sql = String.Format("select tableDesc from ExcelTable where ExcelSignal = '{0}' ", signal);
+            MySqlCommand mycom = new MySqlCommand(sql, this.conn, myTran);  //建立执行命令语句对象
+            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
+            try
+            {
+                while (reader.Read())
+                {
+                    if (reader.HasRows)
+                    {
+                        currentTableDesc = reader.GetString(0);
+                    }
+                }
+                return currentTableDesc;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                reader.Close();
+            }
+        }
+        /// <summary>
+        /// 更新TableDesc
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <param name="updateTableDesc"></param>
+        private void UpdateTableDesc(string signal, string updateTableDesc)
+        {
+            string sql = String.Format("update ExcelTable set tableDesc = '{0}' where ExcelSignal = '{1}' ", updateTableDesc, signal);
+            ExecuteOneSql(sql);
+        }
+        /// <summary>
         /// 执行批量插入
         /// </summary>
         /// <param name="SqlStringList"></param>
@@ -597,11 +689,16 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// 执行单个sql语句，返回插入结果
         /// </summary>
         /// <param name="sql"></param>
-        private void ExecuteOneSql(String sql)
+        private void ExecuteOneSql(string sql)
         {
             if (sql.Equals(""))
                 return;
-            MySqlCommand mycom = new MySqlCommand(sql, this.conn, myTran);  //建立执行命令语句对象，其中myTran为事务
+
+            MySqlCommand mycom = new MySqlCommand();
+            mycom.Connection = this.conn;
+            mycom.CommandText = sql;
+            if (isBegin)
+                mycom.Transaction = myTran;
 
             try
             {
@@ -620,13 +717,13 @@ namespace Revit.Addin.RevitTooltip.Intface
             return sql;
         }
         //表KeyTable的InsertSql
-        private String GetInsertIntoKeyTableSql(int idExcel, String keyName)
+        private String GetInsertIntoKeyTableSql(int idExcel,int idGroup, string keyName)
         {
-            String sql = String.Format("insert into KeyTable ( Excel_ID, KeyName ) values ('{0}','{1}')", idExcel, keyName);
+            String sql = String.Format("insert into KeyTable ( Excel_ID, Group_ID, KeyName ) values ('{0}','{1}','{2}')", idExcel, idGroup, keyName);
             return sql;
         }
         //表EntityTable的InsertSql
-        private String GetInsertIntoEntityTableSql(int idExcel, String entityName, String entityColumn = "测点编号", String entityRemark = "")
+        private String GetInsertIntoEntityTableSql(int idExcel, String entityName, String entityRemark = "")
         {
             String sql = String.Format("insert into EntityTable ( Excel_ID, EntityName, Remark ) values ('{0}','{1}','{2}')", idExcel, entityName, entityRemark);
             return sql;
@@ -646,7 +743,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         }
 
         //表GroupTable的InsertSql
-        private String GetInsertIntoGroupTableSql(int idExcel, string groupName, String remark= "")
+        private String GetInsertIntoGroupTableSql(int idExcel, string groupName = "未分组", string remark= "")
         {
             String sql = String.Format("insert into GroupTable ( Excel_ID, GroupName, Remark ) values ('{0}','{1}','{2}')", idExcel, groupName, remark);
             return sql;
@@ -657,9 +754,26 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// </summary>
         /// <param name="signal"></param>
         /// <returns></returns>
-        private int getIdExcel(String signal)
+        private int getIdExcel(string signal)
         {
             string sql = String.Format("select ID from ExcelTable where ExcelSignal = '{0}'", signal);
+            int id = getID(sql);
+            return id;
+        }
+        /// <summary>
+        /// 获取“未分组”Group的ID
+        /// </summary>
+        /// <param name="idExcel"></param>
+        /// <returns></returns>
+        private int getIdGroup(int idExcel)
+        {
+            string sql = String.Format("select ID from GroupTable where Excel_ID = '{0}' and GroupName = '未分组' ", idExcel);
+            int id = getID(sql);
+            return id;
+        }
+        private int getDefaultGroupId(int idGroup)
+        {
+            string sql = String.Format("select b.ID from GroupTable a, GroupTable b where a.Excel_ID = b.Excel_ID and a.ID = '{0}' and b.GroupName = '未分组' ", idGroup);
             int id = getID(sql);
             return id;
         }
@@ -702,25 +816,6 @@ namespace Revit.Addin.RevitTooltip.Intface
         //*****注意，sql语句多行写的话，开始要注意留空格*******
 
         /// <summary>
-        /// 后期可能会删除*********************************************
-        /// </summary>
-        public MySqlDataReader GetCXTable()
-        {
-            String sql = "Select e.Entity,c.Date,c.Value from CXView c, EntityTable e where c.ID_Entity = e.ID "
-                       + " group by c.ID_Entity,c.Date order by c.ID_Entity,c.Date ";
-
-            //判断数据库是否打开
-            if (!this.isOpen)
-            {
-                OpenConnect();
-            }
-            MySqlCommand mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
-            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
-
-            return reader;
-        }
-
-        /// <summary>
         /// 新建一个Group
         ///在选定的某种Excel的基础上新建一个Group
         ///传入Signal标志
@@ -736,9 +831,9 @@ namespace Revit.Addin.RevitTooltip.Intface
                 OpenConnect();
             }
             MySqlCommand mycom;
-            if (isBegin)
-                mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-            else
+            //if (isBegin)
+            //    mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
+            //else
                 mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
 
             try
@@ -759,18 +854,15 @@ namespace Revit.Addin.RevitTooltip.Intface
         public bool DeleteKeyGroup(int Group_ID)
         {
             bool flag = false;
-            string sql = String.Format("delete from GroupTable where ID = '{0}'; update KeyTable set Group_ID = null where Group_ID = '{1}'", Group_ID , Group_ID);
-
+            int defaultGroup = getDefaultGroupId(Group_ID);
+            string sql = String.Format("delete from GroupTable where ID = '{0}'; update KeyTable set Group_ID = '{1}' where Group_ID = '{2}'", Group_ID , defaultGroup, Group_ID);
             //判断数据库是否打开
             if (!this.isOpen)
             {
                 OpenConnect();
             }
             MySqlCommand mycom;
-            if (isBegin)
-                mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-            else
-                mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
 
             try
             {
@@ -797,10 +889,7 @@ namespace Revit.Addin.RevitTooltip.Intface
                 OpenConnect();
             }
             MySqlCommand mycom;
-            if (isBegin)
-                mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-            else
-                mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
 
             try
             {
@@ -840,10 +929,7 @@ namespace Revit.Addin.RevitTooltip.Intface
                 OpenConnect();
             }
             MySqlCommand mycom;
-            if (isBegin)
-                mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-            else
-                mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
 
             try
             {
@@ -858,15 +944,15 @@ namespace Revit.Addin.RevitTooltip.Intface
         }
 
         /// <summary>
-        /// 列举所有的Info Excel等待分组，这里不包括测量数据的excel
+        /// 列举所有的Info Excel等待分组，所有基础数据excel表
         ///返回的Dictionary中
-        ///string2:signal简写（全局唯一）
-        ///string1:desc描述
+        ///key:desc描述
+        ///string:signal简写（全局唯一）
         /// </summary>
         public Dictionary<string, string> ListExcelToGroup()
         {
             Dictionary<string, string> list = new Dictionary<string, string>();
-            string sql = String.Format("select ExcelSignal, TableDesc from ExcelTable where ID NOT IN( select distinct Excel_ID from GroupTable )" );
+            string sql = String.Format("select distinct TableDesc, ExcelSignal from ExcelTable where isInfo = true ");
             //判断数据库是否打开
             if (!isOpen)
             {
@@ -893,27 +979,62 @@ namespace Revit.Addin.RevitTooltip.Intface
             {
                 reader.Close();
             }
-
         }
 
         /// <summary>
-        /// 修改Entity的Remark
+        /// 修改Entity的Remark********************************************
         /// </summary>
         public bool ModifyEntityRemark(string entityName, string remark)
         {
             bool flag = false;
-            string sql = String.Format("Update EntityTable set Remark = '{0}' where EntityName = '{1}'", remark, entityName);
+            //根据entityName获取idExcel,idEntity
+            int idExcel = 0;
+            int idEntity = 0;
+            string presql = String.Format("select ID, Excel_ID from EntityTable where EntityName = '{0}' ", entityName);
             //判断数据库是否打开
             if (!this.isOpen)
             {
                 OpenConnect();
             }
-            MySqlCommand mycom;
-            if (isBegin)
-                mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-            else
-                mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            MySqlCommand mycom = new MySqlCommand();
+            mycom.Connection = this.conn;
+            mycom.CommandText = presql;
+            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
+            try
+            {
+                while (reader.Read())
+                {
+                    if (reader.HasRows)
+                    {
+                        idEntity = reader.IsDBNull(0) ? 0 : Convert.ToInt32(reader.GetValue(0));
+                        idExcel = reader.IsDBNull(1) ? 0 : Convert.ToInt32(reader.GetValue(1));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                reader.Close();
+            }
+            if(idEntity == 0)
+            {
+                MessageBox.Show("实体名不存在，建议核查！");
+                return flag;
+            }
 
+            //获取idKey       
+            int idKey = getIdKey(idExcel,"备注");
+            if(idKey == 0)
+            {
+                MessageBox.Show("实体名不属于基础数据，建议核查！");
+                return flag;
+            }
+            //modify Entity remark
+            string sql = String.Format("Replace into InfoTable (Key_ID,Entity_ID,Value) values ('{0}','{1}','{2}') ", idKey, idEntity, remark);
+            mycom.CommandText = sql;
             try
             {
                 if (mycom.ExecuteNonQuery() > 0)
@@ -933,17 +1054,14 @@ namespace Revit.Addin.RevitTooltip.Intface
         public bool ModifyThreshold(string signal, double Total_hold, double Diff_hold)
         {
             bool flag = false;
-            string sql = String.Format("Update ExcelTabel set Total_hold = '{0}', Diff_hold = '{1}' where ExcelSignal = '{2}'", Total_hold, Diff_hold, signal);
+            string sql = String.Format("Update ExcelTable set Total_hold = '{0}', Diff_hold = '{1}' where ExcelSignal = '{2}'", Total_hold, Diff_hold, signal);
             //判断数据库是否打开
             if (!this.isOpen)
             {
                 OpenConnect();
             }
             MySqlCommand mycom;
-            if (isBegin)
-                mycom = new MySqlCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-            else
-                mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
 
             try
             {
@@ -972,6 +1090,169 @@ namespace Revit.Addin.RevitTooltip.Intface
             MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
 
             return reader;
+        }
+
+        /// <summary>
+        /// 查询当前Excel表信息
+        /// 可用于查询当前阈值和分组时使用
+        /// </summary>
+        /// <returns>返回一个ExcelTable</returns>
+        public List<ExcelTable> ListExcelsMessage()
+        {
+            List<ExcelTable> excelTable = new List<ExcelTable>();
+            string sql = String.Format("select distinct ExcelSignal,TableDesc,Total_hold,Diff_hold from ExcelTable order by ExcelSignal ");
+            //判断数据库是否打开
+            if (!isOpen)
+            {
+                OpenConnect();
+            }
+            MySqlCommand mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
+            try
+            {
+                while (reader.Read())
+                {
+                    ExcelTable excel = new ExcelTable();
+                    if (reader.HasRows)
+                    {
+                        excel.Signal = reader.GetString(0);
+                        excel.TableDesc = reader.GetString(1);
+                        excel.Total_hold = reader.IsDBNull(2) ? 0 : Convert.ToSingle(reader.GetValue(2));
+                        excel.Diff_hold = reader.IsDBNull(3) ? 0 : Convert.ToSingle(reader.GetValue(3));
+                        excelTable.Add(excel);
+                    }
+                }
+                return excelTable;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                reader.Close();
+            }
+        }
+
+        /// <summary>
+        /// 查询一种表的分组信息
+        /// </summary>
+        /// <param name="signal">表的简称</param>
+        /// <returns></returns>
+        public List<Group> loadGroupForAExcel(string signal)
+        {
+            List<Group> groupList = new List<Group>();
+            string sql = String.Format("select gt.ID, GroupName from GroupTable gt, ExcelTable et where gt.Excel_ID = et.ID and et.ExcelSignal = '{0}' order by gt.ID ", signal);
+            //判断数据库是否打开
+            if (!isOpen)
+            {
+                OpenConnect();
+            }
+            MySqlCommand mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
+            try
+            {
+                while (reader.Read())
+                {
+                    Group g = new Group();
+                    if (reader.HasRows)
+                    {
+                        g.Id = reader.GetInt32(0);
+                        g.GroupName = reader.GetString(1);
+                        groupList.Add(g);
+                    }
+                }
+                return groupList;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                reader.Close();
+            }
+        }
+
+        /// <summary>
+        /// 通过Group_Id查询所有与之相关的KeyName
+        /// </summary>
+        /// <param name="group_id"></param>
+        /// <returns></returns>
+        public List<KeyTableRow> loadKeyNameForAGroup(int group_id)
+        {
+            List<KeyTableRow> keyGroup = new List<KeyTableRow>();
+            string sql = String.Format("select ID, KeyName from KeyTable where Group_ID = '{0}' ", group_id);
+            //判断数据库是否打开
+            if (!isOpen)
+            {
+                OpenConnect();
+            }
+            MySqlCommand mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
+            try
+            {
+                while (reader.Read())
+                {
+                    KeyTableRow keyRow = new KeyTableRow();
+                    if (reader.HasRows)
+                    {
+                        keyRow.Id =  reader.GetInt32(0);
+                        keyRow.KeyName = reader.GetString(1);
+                        keyGroup.Add(keyRow);
+                    }
+                }
+                return keyGroup;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                reader.Close();
+            }
+        }
+
+        /// <summary>
+        /// 通过Signal来查询与之相关的所有的KeyName
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <returns></returns>
+        public List<KeyTableRow> loadKeyNameForAExcel(string signal)
+        {
+            List<KeyTableRow> keyGroup = new List<KeyTableRow>();
+            int idExcel = getIdExcel(signal);
+            string sql = String.Format("select ID, KeyName from KeyTable where Excel_ID = '{0}' ", idExcel);
+            //判断数据库是否打开
+            if (!isOpen)
+            {
+                OpenConnect();
+            }
+            MySqlCommand mycom = new MySqlCommand(sql, this.conn);  //建立执行命令语句对象
+            MySqlDataReader reader = mycom.ExecuteReader();    //需要关闭
+            try
+            {
+                while (reader.Read())
+                {
+                    KeyTableRow keyRow = new KeyTableRow();
+                    if (reader.HasRows)
+                    {
+                        keyRow.Id = reader.GetInt32(0);
+                        keyRow.KeyName = reader.GetString(1);
+                        keyGroup.Add(keyRow);
+                    }
+                }
+                return keyGroup;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                reader.Close();
+            }
         }
     }
 }

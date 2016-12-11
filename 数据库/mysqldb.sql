@@ -28,7 +28,7 @@ CREATE TABLE GroupTable(ID INT PRIMARY KEY AUTO_INCREMENT,
                         CONSTRAINT gt_ExcelId FOREIGN KEY (Excel_ID) REFERENCES ExcelTable(ID)                        
                         ) DEFAULT CHARSET = utf8;
 CREATE TABLE InfoTable(ID INT PRIMARY KEY AUTO_INCREMENT,
-                       Key_ID INT NOT NULL,
+                       Key_ID INT NOT NULL,                                             
                        Entity_ID INT NOT NULL,
                        Value VARCHAR(20),
                        CONSTRAINT it_keyId FOREIGN KEY (Key_ID) REFERENCES KeyTable(ID) on delete cascade,

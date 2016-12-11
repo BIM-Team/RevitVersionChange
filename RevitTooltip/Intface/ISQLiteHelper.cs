@@ -22,7 +22,7 @@ namespace Revit.Addin.RevitTooltip.Intface
 		///查询Entity时间序列数据
 		///根据传入的起始时间查询
         /// </summary>
-		DrawEntityData SelectDrawEntityData(string EntityName, DateTime StartTime, DateTime EndDate);
+		DrawEntityData SelectDrawEntityData(string EntityName, DateTime StartDate, DateTime EndDate);
 		
 		
 		/// <summary>
@@ -36,13 +36,13 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// 查询Total_hold异常点
 		///返回该类型的所有异常点
         /// </summary>
-		List<string> SelectTotalThresholdEntity(string ExcelSignal, string TotalThreshold);
+		List<string> SelectTotalThresholdEntity(string ExcelSignal, double TotalThreshold);
 		
 		/// <summary>
         /// 查询Diff_hold异常点
 		///返回该类型的所有异常点
         /// </summary>
-		List<string> SelectDiffThresholdEntity(string ExcelSignal, string DiffThreshold);
+		List<string> SelectDiffThresholdEntity(string ExcelSignal, double DiffThreshold);
 		
 		/// <summary>
         /// 通过传入的Signal，查询与之对应的所有的测点

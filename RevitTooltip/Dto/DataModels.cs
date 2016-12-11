@@ -29,6 +29,16 @@ namespace Revit.Addin.RevitTooltip.Dto
             get { return this.tableDesc; }
             set { this.tableDesc = value; }
         }
+        /// <summary>
+        /// 用于查询返回
+        /// 累计阈值
+        /// </summary>
+        public float Total_hold { get; set; }
+        /// <summary>
+        /// 用于查询返回
+        /// 相邻阈值
+        /// </summary>
+        public float Diff_hold { get; set; }
     }
     /// <summary>
     /// 对应于InfoTable某个entity和其相关的所有Info数据
@@ -61,7 +71,7 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// key:GroupName
         /// value:在GroupName中的所有KeyName
         ///该类型在插入到数据库时不使用，只用于查询某Entity相关数据时使用
-        ///该分组信息作为查询返回时，总是有一个未定义组，用于存放未进行分组的所以KeyName
+        ///该分组信息作为查询返回时，总是有一个未定义组，用于存放未进行分组的所有KeyName
         ///这样分组信息中的KeyName应该和Data中的KeyName总量是一样的。
         /// </summary>
         public Dictionary<string, List<string>> GroupMsg
@@ -207,6 +217,65 @@ namespace Revit.Addin.RevitTooltip.Dto
         {
             get { return this.drawRows; }
             set { this.drawRows = value; }
+        }
+    }
+    public class ParameterData
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+
+        public ParameterData(string name, string value)
+        {
+            Name = name;
+            Value = value;
+        }
+        public override bool Equals(object obj)
+        {
+            ParameterData o = (ParameterData)obj;
+            return this.Value.Equals(o.Value) && this.Name.Equals(o.Name);
+        }
+        public override int GetHashCode()
+        {
+            return (this.Name + this.Value).GetHashCode();
+        }
+    }
+    public class Group
+    {
+        /// <summary>
+        /// Group表的Id数据项，仅用于查询返回数据
+        /// </summary>
+        public int Id { get; set; }
+        /// <summary>
+        /// 用于查询返回GroupName
+        /// </summary>
+        public string GroupName { get; set; }
+
+    }
+    /// <summary>
+    /// 对应于Keytable
+    /// 仅用于查询时使用
+    /// </summary>
+    public class KeyTableRow
+    {
+        /// <summary>
+        /// Id
+        /// </summary>
+        public int Id { get; set; }
+        /// <summary>
+        /// 和KeyTable中的keyName对应
+        /// </summary>
+        public string KeyName { get; set; }
+        public override bool Equals(object obj)
+        {
+            if (((KeyTableRow)obj).Equals(this.Id))
+            {
+                return true;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode();
         }
     }
 }

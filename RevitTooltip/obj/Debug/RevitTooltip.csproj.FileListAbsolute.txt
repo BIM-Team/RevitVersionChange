@@ -1,0 +1,9 @@
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\RevitTooltip.csprojResolveAssemblyReference.cache
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\Styles\MetroStyle.baml
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\UI\ElementInfoHost.baml
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\UI\ElementInfoHost.g.cs
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\UI\ElementInfoPanel.g.cs
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\UI\ImageInfo.g.cs
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\RevitTooltip_MarkupCompile.cache
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\RevitTooltip_MarkupCompile.lref

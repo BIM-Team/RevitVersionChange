@@ -90,4 +90,3 @@ C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\
 C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\x64\Debug\RevitTooltip.pdb
 C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\bin\x64\Debug\MySql.Data.dll
 C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\bin\x64\Debug\System.Data.SQLite.dll
-C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\x64\Debug\RevitTooltip.csprojResolveAssemblyReference.cache

@@ -4,7 +4,7 @@
 library
 C#
 .cs
-C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\Debug\
+C:\workspace\慧之建项目\project\RevitVersionChange-master\RevitTooltip\obj\Debug\
 Revit.Addin.RevitTooltip
 none
 false
@@ -12,8 +12,8 @@ TRACE;DEBUG
 
 41330342311
 
-25310635652
-27357644097
+33690030508
+161055883708
 Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageInfo.xaml;
 
 True
