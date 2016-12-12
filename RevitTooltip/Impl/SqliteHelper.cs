@@ -80,7 +80,8 @@ namespace Revit.Addin.RevitTooltip.Impl
         public bool LoadDataToSqlite()
         {
             bool result = false;
-            if (conn.State != ConnectionState.Closed) {
+            if (conn.State != ConnectionState.Closed)
+            {
                 conn.Close();
             }
             string file_path = Path.Combine(this.dbPath, this.dbName);
@@ -1704,7 +1705,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (reader.Read())
                     {
-                        if (!reader.IsDBNull(0)) {
+                        if (!reader.IsDBNull(0))
+                        {
                             remark = reader.GetString(0);
                         }
                     }
@@ -1763,7 +1765,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         public DrawEntityData SelectDrawEntityData(string EntityName, DateTime? StartDate, DateTime? EndDate)
         {
             //判断是否创建该查询的表（一定要先打开数据库）
-            if (!isExist("DrawDataTable", "table"))
+            if (!isExist("DrawTable", "table"))
             {
                 MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
                 return null;
@@ -1776,39 +1778,39 @@ namespace Revit.Addin.RevitTooltip.Impl
             string end = null;
             if (StartDate == null && EndDate == null)
             {
-                sql = string.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawDataTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}'order by Date", EntityName);
+                sql = string.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' order by Date", EntityName);
             }
             else if (StartDate == null)
             {
                 end = ((DateTime)EndDate).ToString("yyyy-MM-dd");
-                if (((DateTime)EndDate).Hour >= 12)
-                {
-                    end += "pm";
-                }
-                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawDataTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date <= '{1}' order by Date", EntityName, end);
+                //if (((DateTime)EndDate).Hour >= 12)
+                //{
+                //    end += "pm";
+                //}
+                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date <= '{1}' order by Date", EntityName, end);
             }
             else if (EndDate == null)
             {
                 start = ((DateTime)StartDate).ToString("yyyy-MM-dd");
-                if (((DateTime)StartDate).Hour >= 12)
-                {
-                    start += "pm";
-                }
-                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawDataTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date >= '{1}' order by Date", EntityName, start);
+                //if (((DateTime)StartDate).Hour >= 12)
+                //{
+                //    start += "pm";
+                //}
+                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date >= '{1}' order by Date", EntityName, start);
             }
             else
             {
                 end = ((DateTime)EndDate).ToString("yyyy-MM-dd");
-                if (((DateTime)EndDate).Hour >= 12)
-                {
-                    end += "pm";
-                }
+                //if (((DateTime)EndDate).Hour >= 12)
+                //{
+                //    end += "pm";
+                //}
                 start = ((DateTime)StartDate).ToString("yyyy-MM-dd");
-                if (((DateTime)StartDate).Hour >= 12)
-                {
-                    start += "pm";
-                }
-                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawDataTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date between '{1}' and '{2}' order by Date", EntityName, start, end);
+                //if (((DateTime)StartDate).Hour >= 12)
+                //{
+                //    start += "pm";
+                //}
+                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date between '{1}' and '{2}' order by Date", EntityName, start, end);
             }
             if (conn.State != ConnectionState.Open)
             {
@@ -1840,6 +1842,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 finally
                 {
                     reader.Close();
+                    conn.Close();
                 }
             }
             return drawEntityData;
@@ -1860,13 +1863,7 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             DrawData drawData = new DrawData();
             drawData.Date = Date;
-
             string datestr = Date.ToString("yyyy-MM-dd");
-            if (Date.Hour >= 12)
-            {
-                datestr += "pm";
-            }
-
             string sql = String.Format("select EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawDataTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date = '{1}'", EntityName, datestr);
 
             if (conn.State != ConnectionState.Open)
@@ -1880,13 +1877,12 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (reader.Read())
                     {
-                        if (reader.HasRows)
-                        {
-                            drawData.MaxValue = reader.GetFloat(0);
-                            drawData.MidValue = reader.GetFloat(1);
-                            drawData.MinValue = reader.GetFloat(2);
-                            drawData.Detail = reader.GetString(3);
-                        }
+
+                        drawData.MaxValue = reader.GetFloat(0);
+                        drawData.MidValue = reader.GetFloat(1);
+                        drawData.MinValue = reader.GetFloat(2);
+                        drawData.Detail = reader.GetString(3);
+
                     }
 
                     return drawData;
@@ -1901,120 +1897,12 @@ namespace Revit.Addin.RevitTooltip.Impl
                 }
             }
         }
-
-
         /// <summary>
-        /// 查询Total_hold异常点
-        ///返回该类型的所有异常点
-        /// </summary>
-        public List<string> SelectTotalThresholdEntity(string ExcelSignal, float TotalThreshold)
-        {
-            ////判断是否创建该查询的表（一定要先打开数据库）
-            //if (!isExist("DrawDataTable", "table"))
-            //{
-            //    MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
-            //    return null;
-            //}
-            //List<string> totalThresholdEntity = new List<string>();
-
-            ////判断数据库是否打开
-            //if (conn.State != ConnectionState.Open)
-            //{
-            //    conn.Open();
-            //}
-            //string sql = String.Format("select distinct EntityName from  DrawDataTable dt, EntityTable et where dt.Entity_ID = et.ID and dt.Excel_ID = '{0}' and dt.EntityMaxValue > {1} ", idExcel, TotalThreshold);
-
-            //using (SQLiteCommand command = new SQLiteCommand(sql, conn)) //建立执行命令语句对象
-            //{
-            //    SQLiteDataReader reader = command.ExecuteReader();
-            //    try
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            if (reader.HasRows)
-            //            {
-            //                totalThresholdEntity.Add(reader.GetString(0));
-            //            }
-            //        }
-            //        return totalThresholdEntity;
-
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        throw e;
-            //    }
-            //    finally
-            //    {
-            //        reader.Close();  //关闭
-            //    }
-            //}
-
-            ///
-
-
-
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 查询Diff_hold异常点
-        ///返回该类型的所有异常点
-        /// </summary>
-        public List<string> SelectDiffThresholdEntity(string ExcelSignal, float DiffThreshold)
-        {
-            ////判断是否创建该查询的表（一定要先打开数据库）
-            //if (!isExist("DrawDataTable", "table"))
-            //{
-            //    MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
-            //    return null;
-            //}
-            //List<string> diffThresholdEntity = new List<string>();
-            ////判断数据库是否打开
-            //if (conn.State != ConnectionState.Open)
-            //{
-            //    conn.Open();
-            //}
-
-            //string sql = String.Format("select EntityName from EntityTable where ID IN (select distinct a.Entity_ID from  DrawDataTable a, DrawDataTable b where a.Entity_ID = b.Entity_ID and a.Excel_ID = '{0}' and b.Excel_ID = '{1}' and b.ID - a.ID = 1 and b.EntityMaxValue - a.EntityMaxValue > {2} )", idExcel, idExcel, DiffThreshold);
-
-            //using (SQLiteCommand command = new SQLiteCommand(sql, conn)) //建立执行命令语句对象
-            //{
-            //    SQLiteDataReader reader = command.ExecuteReader();
-            //    try
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            if (reader.HasRows)
-            //            {
-            //                diffThresholdEntity.Add(reader.GetString(0));
-            //            }
-            //        }
-            //        return diffThresholdEntity;
-
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        throw e;
-            //    }
-            //    finally
-            //    {
-            //        reader.Close();  //关闭
-            //    }
-            //}
-
-
-            //
-
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 通过传入的Signal，查询与之对应的所有的测点
+        ///通过传入的Signal，查询与之对应的所有的测点
         ///传入的Signal应该是测量数据的signal
+        ///ErrMsg:Total,TotalDiff,No,NoDiff
         /// </summary>
-        public List<CEntityName> SelectAllEntities(string ExcelSignal)
+        public List<CEntityName> SelectAllEntitiesAndErr(string ExcelSignal)
         {
             //判断是否创建该查询的表（一定要先打开数据库）
             if (!isExist("EntityTable", "table"))
@@ -2022,26 +1910,90 @@ namespace Revit.Addin.RevitTooltip.Impl
                 MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
                 return null;
             }
-            List<CEntityName> Entities = new List<CEntityName>();
-            string sql = String.Format("select ID,EntityName from  EntityTable where ExcelSignal = '{0}'", ExcelSignal);
-
             if (conn.State != ConnectionState.Open)
             {
                 conn.Open();
             }
-            using (SQLiteCommand command = new SQLiteCommand(sql, conn))  //建立执行命令语句对象
+            string select_Threshold = string.Format("Select Total_hold,Diff_hold From ExcelTable Where ExcelSignal='{0}'", ExcelSignal);
+            List<CEntityName> Entities = new List<CEntityName>();
+            Dictionary<string, CEntityName> maps = new Dictionary<string, CEntityName>();
+
+            using (SQLiteCommand command = new SQLiteCommand(select_Threshold, conn))  //建立执行命令语句对象
             {
-                SQLiteDataReader reader = command.ExecuteReader();
+                SQLiteDataReader reader = null;
                 try
                 {
+                    reader = command.ExecuteReader();
+                    float? Total_hold = null;
+                    float? Diff_hold = null;
+                    if (reader.Read())
+                    {
+                        Total_hold = reader.GetFloat(0);
+                        Diff_hold = reader.GetFloat(1);
+                    }
+                    reader.Close();
+                    if (Total_hold == null || Diff_hold == null)
+                    {
+                        throw new Exception("无效的阈值");
+                    }
+                    string sql_Total = null;
+                    if (Total_hold >= 0)
+                    {
+                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Max(DrawTable.EntityMaxValue)>={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID", Total_hold, ExcelSignal);
+                    }
+                    else
+                    {
+                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Min(DrawTable.EntityMaxValue)<={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID", Total_hold, ExcelSignal);
+                    }
+                    command.CommandText = sql_Total;
+                    reader = command.ExecuteReader();
                     while (reader.Read())
                     {
                         CEntityName one = new CEntityName();
                         one.Id = reader.GetInt32(0);
                         one.EntityName = reader.GetString(1);
+                        one.ErrMsg = reader.GetBoolean(2) ? "Total" : "No";
                         Entities.Add(one);
+                        maps.Add(one.EntityName, one);
                     }
-                    return Entities;
+                    reader.Close();
+                    string sql_Diff = string.Format("SELECT DrawTable.EntityMaxValue,EntityTable.EntityName From DrawTable ,EntityTable WHERE DrawTable.Entity_ID = EntityTable.ID and EntityTable.ExcelSignal='{0}' Order BY EntityTable.ID,DrawTable.Date", ExcelSignal);
+                    command.CommandText = sql_Diff;
+                    reader = command.ExecuteReader();
+                    Diff_hold = Math.Abs((float)Diff_hold);
+                    float first = 0;
+                    float next = 0;
+                    float diff = 0;
+                    bool isErr = false;
+                    string entityName = null;
+                    if (reader.Read())
+                    {
+                        first = reader.GetFloat(0);
+                        entityName = reader.GetString(1);
+                    }
+                    while (reader.Read())
+                    {
+                        next = reader.GetFloat(0);
+                        diff = Math.Abs((float)(next - first));
+                        if (entityName.Equals(reader.GetString(1)))
+                        {
+                            if (diff >= Diff_hold)
+                            {
+                                isErr = true;
+                            }
+                        }
+                        else if (isErr)
+                        {
+                            maps[entityName].ErrMsg += "Diff";
+                            isErr = false;
+                            entityName = reader.GetString(1);
+                        }
+                        else
+                        {
+                            entityName = reader.GetString(1);
+                        }
+                        first = next;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -2049,18 +2001,25 @@ namespace Revit.Addin.RevitTooltip.Impl
                 }
                 finally
                 {
-                    reader.Close();
+                    if (!reader.IsClosed)
+                    {
+                        reader.Close();
+                    }
+                    conn.Close();
                 }
             }
+            return Entities;
         }
         public List<ExcelTable> SelectDrawTypes()
         {
             List<ExcelTable> result = null;
-            if (conn.State != ConnectionState.Open) {
+            if (conn.State != ConnectionState.Open)
+            {
                 conn.Open();
             }
-            string sql= "Select ID,CurrentFile,ExcelSignal,Total_hold,Diff_hold,History From ExcelTable Where IsInfo=0";
-            using (SQLiteCommand command=new SQLiteCommand(sql,conn)) {
+            string sql = "Select ID,CurrentFile,ExcelSignal,Total_hold,Diff_hold,History From ExcelTable Where IsInfo=0";
+            using (SQLiteCommand command = new SQLiteCommand(sql, conn))
+            {
                 SQLiteDataReader reader = null;
                 try
                 {
@@ -2085,7 +2044,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     throw e;
                 }
-                finally {
+                finally
+                {
                     reader.Close();
                     conn.Close();
                 }
@@ -2103,12 +2063,14 @@ namespace Revit.Addin.RevitTooltip.Impl
             string sql = string.Format("Update EntityTable Set Remark='{0}' Where EntityName='{1}'", Remark, EntityName);
             try
             {
-                if (conn.State != ConnectionState.Open) {
-                conn.Open();
+                if (conn.State != ConnectionState.Open)
+                {
+                    conn.Open();
                 }
                 SQLiteCommand command = new SQLiteCommand(sql, conn);
-                if (command.ExecuteNonQuery() > 0) {
-                result = true;
+                if (command.ExecuteNonQuery() > 0)
+                {
+                    result = true;
                 }
             }
             catch (Exception e)
@@ -2121,5 +2083,7 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             return result;
         }
+
+
     }
 }

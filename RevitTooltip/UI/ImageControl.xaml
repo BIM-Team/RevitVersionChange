@@ -38,9 +38,43 @@
         
         <DataGrid x:Name="dataGrid" HorizontalAlignment="Left" Margin="0,0,0,0"  VerticalAlignment="Top"   SelectionChanged="dataGrid_SelectionChanged" IsReadOnly="True" Grid.Row="5" Grid.ColumnSpan="2" AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Id}"  Header="Id" CanUserSort="False"/>
-                <DataGridTextColumn Binding="{Binding EntityName}" Header="实体名" />
-                <DataGridTextColumn Binding="{Binding ErrMsg}"  Header="错误"/>
+                <DataGridTextColumn Binding="{Binding Id}"  Header="Id" CanUserSort="False" Visibility="Hidden"/>
+                <DataGridTextColumn Binding="{Binding EntityName}" Header="实体名" Width="5*">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="Total">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="TotalDiff">
+                                    <Setter Property="Background" Value="Gray"/>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="NoDiff">
+                                    <Setter Property="Foreground" Value="Blue"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding ErrMsg}"  Header="错误" Width="5*">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="Total">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="TotalDiff">
+                                    <Setter Property="Background" Value="Gray"/>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="NoDiff">
+                                    <Setter Property="Foreground" Value="Blue"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
 

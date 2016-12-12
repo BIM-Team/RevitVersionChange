@@ -48,6 +48,9 @@
             this.Controls.Add(this.panel1);
             this.Name = "NewImageForm";
             this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.TopMost = true;
+            this.Resize += new System.EventHandler(this.NewImageForm_Resize);
             this.ResumeLayout(false);
 
         }

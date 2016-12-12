@@ -10,8 +10,10 @@ namespace Revit.Addin.RevitTooltip.UI
     public partial class NewImageForm : Form
     {
         private static NewImageForm _form;
-        public static NewImageForm Instance() {
-            if (_form != null) {
+        public static NewImageForm Instance()
+        {
+            if (_form == null || _form.IsDisposed)
+            {
                 _form = new NewImageForm();
             }
             return _form;
@@ -25,12 +27,14 @@ namespace Revit.Addin.RevitTooltip.UI
         /// <summary>
         /// 保存某一个实体的数据
         /// </summary>
-        public DrawEntityData EntityData{
-            set {
+        public DrawEntityData EntityData
+        {
+            set
+            {
                 if (!value.Equals(this._entityData))
                 {
-                this._entityData = value;
-                this.panel1.Invalidate(this.panel1.ClientRectangle);
+                    this._entityData = value;
+                    this.panel1.Invalidate(this.panel1.ClientRectangle);
                 }
             }
         }
@@ -38,7 +42,7 @@ namespace Revit.Addin.RevitTooltip.UI
         {
 
             Graphics g = e.Graphics;
-
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             float height = this.panel1.ClientRectangle.Height;
             float width = this.panel1.ClientRectangle.Width;
             float startX = 40, endX = width - 10;
@@ -53,13 +57,23 @@ namespace Revit.Addin.RevitTooltip.UI
             float diff_hold = _entityData.Diff_hold;
             float total_hold = _entityData.Total_hold;
             int length = data.Count;
-            int div = length / 5;
+            int div = 2;
 
-            float  Max = data[0].MaxValue;
-            foreach (DrawData row in data) {
-                if (Max < row.MaxValue) {
+            float Max = data[0].MaxValue;
+            float Min = Max;
+            foreach (DrawData row in data)
+            {
+                if (Max < row.MaxValue)
+                {
                     Max = row.MaxValue;
                 }
+                if (Min > row.MaxValue) {
+                    Min = row.MaxValue;
+                }
+            }
+            if (total_hold < 0)
+            {
+                Max = Math.Abs(Min);
             }
             float divX = (endX - startX) / length;
             float divY = (startY - endY) / Max;
@@ -109,15 +123,15 @@ namespace Revit.Addin.RevitTooltip.UI
 
                         g.DrawString(str, font, Brushes.Black, x - g.MeasureString(str, font).Width / 2, startY + g.MeasureString(str, font).Height / 2);
                         g.DrawString(value.ToString(), font, Brushes.Black, startX - g.MeasureString(value.ToString(), font).Width, y - g.MeasureString(value.ToString(), font).Height / 2);
-                        g.DrawLine(dotPen, startX, y, x, y);
-                        g.DrawLine(dotPen, x, y, x, startY);
+                        //g.DrawLine(dotPen, startX, y, x, y);
+                        //g.DrawLine(dotPen, x, y, x, startY);
                     }
                     if (num == length - 1)
                     {
                         g.DrawString(str, font, Brushes.Black, endX - g.MeasureString(str, font).Width, startY + g.MeasureString(str, font).Height / 2);
                         g.DrawString(value.ToString(), font, Brushes.Black, startX - g.MeasureString(value.ToString(), font).Width, y - g.MeasureString(value.ToString(), font).Height / 2);
-                        g.DrawLine(dotPen, startX, y, x, y);
-                        g.DrawLine(dotPen, x, y, x, startY);
+                        //g.DrawLine(dotPen, startX, y, x, y);
+                        //g.DrawLine(dotPen, x, y, x, startY);
                     }
                     num++;
 
@@ -176,6 +190,11 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 throw exception;
             }
+        }
+
+        private void NewImageForm_Resize(object sender, EventArgs e)
+        {
+            this.panel1.Invalidate(this.panel1.ClientRectangle);
         }
     }
 }

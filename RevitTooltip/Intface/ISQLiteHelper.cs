@@ -30,26 +30,11 @@ namespace Revit.Addin.RevitTooltip.Intface
         ///查询Entity某日期的数据
         /// </summary>
         DrawData SelectDrawData(string EntityName, DateTime Date);
-
-
-        /// <summary>
-        /// 查询Total_hold异常点
-        ///返回该类型的所有异常点
-        /// </summary>
-        List<string> SelectTotalThresholdEntity(string ExcelSignal, float TotalThreshold);
-
-        /// <summary>
-        /// 查询Diff_hold异常点
-        ///返回该类型的所有异常点
-        /// </summary>
-        List<string> SelectDiffThresholdEntity(string ExcelSignal, float DiffThreshold);
-
         /// <summary>
         /// 通过传入的Signal，查询与之对应的所有的测点
         ///传入的Signal应该是测量数据的signal
         /// </summary>
-        List<CEntityName> SelectAllEntities(string ExcelSignal);
-
+        List<CEntityName> SelectAllEntitiesAndErr(string ExcelSignal);
         /// <summary>
         /// 复制MySQL中的数据到Sqlite中
         /// </summary>
@@ -66,5 +51,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="Remark">备注</param>
         /// <returns>是否成功</returns>
         bool ModifyEntityRemark(string EntityName, string Remark);
+
+        
     }
 }
