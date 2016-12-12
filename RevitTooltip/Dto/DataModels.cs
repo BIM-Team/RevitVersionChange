@@ -201,15 +201,15 @@ namespace Revit.Addin.RevitTooltip.Dto
             Name = name;
             Value = value;
         }
-        public override bool Equals(object obj)
-        {
-            ParameterData o = (ParameterData)obj;
-            return this.Value.Equals(o.Value) && this.Name.Equals(o.Name);
-        }
-        public override int GetHashCode()
-        {
-            return (this.Name + this.Value).GetHashCode();
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    ParameterData o = (ParameterData)obj;
+        //    return this.Value.Equals(o.Value) && this.Name.Equals(o.Name);
+        //}
+        //public override int GetHashCode()
+        //{
+        //    return (this.Name + this.Value).GetHashCode();
+        //}
     }
     public class Group {
         /// <summary>
@@ -284,14 +284,14 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// </summary>
         public string ErrMsg { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            CEntityName o = (CEntityName)obj;
-            return this.EntityName.Equals(o.EntityName);
-        }
-        public override int GetHashCode()
-        {
-            return this.EntityName.GetHashCode();
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    CEntityName o = (CEntityName)obj;
+        //    return this.EntityName.Equals(o.EntityName);
+        //}
+        //public override int GetHashCode()
+        //{
+        //    return this.EntityName.GetHashCode();
+        //}
     }
 }

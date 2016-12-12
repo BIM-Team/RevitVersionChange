@@ -206,7 +206,7 @@ namespace Revit.Addin.RevitTooltip
             helpButtonData.SetContextualHelp(cHelp);
             ribbonPanel.AddStackedItems(aboutButtonData, helpButtonData);
             //…Ë÷√≥…“˛≤ÿ
-            this.SetPanelEnabled(false);
+            // this.SetPanelEnabled(false);
 
             return Result.Succeeded;
 
@@ -259,7 +259,7 @@ namespace Revit.Addin.RevitTooltip
                 {
                     imageControl.Hide();
                 }
-                App.Instance.SetPanelEnabled(true);
+                //App.Instance.SetPanelEnabled(true);
 
             }
             catch (System.Exception ex)

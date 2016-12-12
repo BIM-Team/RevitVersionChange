@@ -19,9 +19,9 @@
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DataGrid x:Name="dg" Margin="0" AutoGenerateColumns="False" SelectionChanged="OnDGSelectionChanged" IsReadOnly="True">
+        <DataGrid x:Name="dg" Margin="0" AutoGenerateColumns="False" SelectionChanged="OnDGSelectionChanged" CanUserAddRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Name}" Header="属性名称" Width="5*" >
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Name}" Header="属性名称" Width="5*" CanUserSort="False">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Style.Triggers>
@@ -32,7 +32,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Value}" Header="属性数据" Width="5*">
+                <DataGridTextColumn Binding="{Binding Value}" Header="属性数据" Width="5*" CanUserSort="False">
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>

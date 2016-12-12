@@ -80,6 +80,9 @@ namespace Revit.Addin.RevitTooltip.Impl
         public bool LoadDataToSqlite()
         {
             bool result = false;
+            if (conn.State != ConnectionState.Closed) {
+                conn.Close();
+            }
             string file_path = Path.Combine(this.dbPath, this.dbName);
             if (File.Exists(file_path))
             {
@@ -2052,7 +2055,71 @@ namespace Revit.Addin.RevitTooltip.Impl
         }
         public List<ExcelTable> SelectDrawTypes()
         {
-            throw new NotImplementedException();
+            List<ExcelTable> result = null;
+            if (conn.State != ConnectionState.Open) {
+                conn.Open();
+            }
+            string sql= "Select ID,CurrentFile,ExcelSignal,Total_hold,Diff_hold,History From ExcelTable Where IsInfo=0";
+            using (SQLiteCommand command=new SQLiteCommand(sql,conn)) {
+                SQLiteDataReader reader = null;
+                try
+                {
+                    reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        result = new List<ExcelTable>();
+                    }
+                    while (reader.Read())
+                    {
+                        ExcelTable one = new ExcelTable();
+                        one.Id = reader.GetInt32(0);
+                        one.CurrentFile = reader.GetString(1);
+                        one.Signal = reader.GetString(2);
+                        one.Total_hold = reader.GetFloat(3);
+                        one.Diff_hold = reader.GetFloat(4);
+                        one.History = reader.GetString(5);
+                        result.Add(one);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                finally {
+                    reader.Close();
+                    conn.Close();
+                }
+            }
+            return result;
+        }
+
+        public bool ModifyEntityRemark(string EntityName, string Remark)
+        {
+            bool result = false;
+            if (string.IsNullOrWhiteSpace(EntityName) || string.IsNullOrWhiteSpace(Remark))
+            {
+                return false;
+            }
+            string sql = string.Format("Update EntityTable Set Remark='{0}' Where EntityName='{1}'", Remark, EntityName);
+            try
+            {
+                if (conn.State != ConnectionState.Open) {
+                conn.Open();
+                }
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                if (command.ExecuteNonQuery() > 0) {
+                result = true;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                conn.Close();
+            }
+            return result;
         }
     }
 }

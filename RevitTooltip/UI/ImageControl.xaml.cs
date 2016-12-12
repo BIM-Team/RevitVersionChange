@@ -31,8 +31,6 @@ namespace Revit.Addin.RevitTooltip.UI
         private ImageControl()
         {
             InitializeComponent();
-           // List<ExcelTable> allTypes = App.Instance.Sqlite.SelectDrawTypes();
-            //this.comboBox.ItemsSource = allTypes;
         }
         private static ImageControl _image;
         public static ImageControl Instance(){
@@ -89,7 +87,11 @@ namespace Revit.Addin.RevitTooltip.UI
             ExcelTable excel = this.comboBox.SelectedItem as ExcelTable;
             List<CEntityName> all_entity = App.Instance.Sqlite.SelectAllEntities(excel.Signal);
             this.dataGrid.ItemsSource = all_entity;
-            
+        }
+        public void setExcelType(System.Collections.IEnumerable itemsSource)
+        {
+            this.comboBox.ItemsSource = itemsSource;
+
         }
     }
     

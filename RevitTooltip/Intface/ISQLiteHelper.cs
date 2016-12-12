@@ -59,5 +59,12 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// </summary>
         /// <returns></returns>
         List<ExcelTable> SelectDrawTypes();
+        /// <summary>
+        ///修改备注
+        /// </summary>
+        /// <param name="EntityName">实体名</param>
+        /// <param name="Remark">备注</param>
+        /// <returns>是否成功</returns>
+        bool ModifyEntityRemark(string EntityName, string Remark);
     }
 }

@@ -19,8 +19,8 @@ namespace Revit.Addin.RevitTooltip
 
         public void Update( System.Collections.IEnumerable itemsSource)
         {
-            dg.ItemsSource = null;
             dg.ItemsSource = itemsSource;
+            
         }
 
         private void OnSaveClick(object sender, RoutedEventArgs e)
@@ -30,13 +30,22 @@ namespace Revit.Addin.RevitTooltip
                 var parameters = (List<ParameterData>)dg.ItemsSource;
                 //确保第一例是测点编号列
                 //存放实体编号，用于更新该实体的备注
-                string entity = parameters[0].Value;
-                var comment = parameters.FirstOrDefault(p => p.Name == "备注").Value;
+                string entity = parameters.FirstOrDefault(p=>p.Name.Equals("构件名称")).Value;
+                string comment = parameters.FirstOrDefault(p => p.Name == "备注").Value;
                 if (comment != null)
                 {
-                    if (!App.Instance.MySql.ModifyEntityRemark(entity,comment))
+                    bool isOKMysql = App.Instance.MySql.ModifyEntityRemark(entity, comment);
+                    bool isOKSqlite= App.Instance.Sqlite.ModifyEntityRemark(entity, comment);
+                    if (isOKMysql && isOKSqlite)
                     {
-                        MessageBox.Show("更新注释失败：");
+                        MessageBox.Show("更新成功");
+                    }
+                    else if (isOKMysql)
+                    {
+                        MessageBox.Show("更新成功,请重新刷新本地文件");
+                    }
+                    else {
+                        MessageBox.Show("更新失败");
                     }
                 }
             }
@@ -54,7 +63,7 @@ namespace Revit.Addin.RevitTooltip
                 var content = dg.Columns[0].GetCellContent(pd);
                 dg.Columns[1].SetValue(DataGridColumn.IsReadOnlyProperty, false);
             }
-            else if ((bool)dg.Columns[1].GetValue(DataGridColumn.IsReadOnlyProperty) == false)
+            else if ((bool)dg.Columns[1].GetValue(DataGridColumn.IsReadOnlyProperty)== false)
             {
                 dg.Columns[1].SetValue(DataGridColumn.IsReadOnlyProperty, true);
             }

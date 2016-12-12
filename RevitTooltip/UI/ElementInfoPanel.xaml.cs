@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Autodesk.Revit.UI;
 using Revit.Addin.RevitTooltip.Dto;
+using System.Collections.ObjectModel;
 
 namespace Revit.Addin.RevitTooltip
 {
@@ -34,6 +35,7 @@ namespace Revit.Addin.RevitTooltip
         public void Update(InfoEntityData infoEntityData)
         {
             List<ParameterData> list = new List<ParameterData>();
+            list.Add(new ParameterData("构件名称",infoEntityData.EntityName));
             if (infoEntityData != null&& infoEntityData.Data!=null) {
             Dictionary<string,string> data = infoEntityData.Data;
                 foreach (string key in data.Keys) {

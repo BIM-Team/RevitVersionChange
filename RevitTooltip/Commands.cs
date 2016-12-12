@@ -172,6 +172,7 @@ namespace Revit.Addin.RevitTooltip
                 MessageBox.Show("本地数据文件不存在，请先更新");
                 return Result.Succeeded;
             }
+            ImageControl.Instance().setExcelType(App.Instance.Sqlite.SelectDrawTypes());
             DockablePane imagePanel = commandData.Application.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
             imagePanel.Show();
             commandData.Application.Idling += App.Instance.IdlingHandler;

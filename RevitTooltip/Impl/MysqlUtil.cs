@@ -758,7 +758,29 @@ namespace Revit.Addin.RevitTooltip.Impl
 
         public bool ModifyEntityRemark(string EntityName, string Remark)
         {
-            throw new NotImplementedException();
+            bool result = false;
+            if (string.IsNullOrWhiteSpace(EntityName)||string.IsNullOrWhiteSpace(Remark)) {
+                return false;
+            }
+            string sql = string.Format("Update EntityTable Set Remark='{0}' Where EntityName='{1}'", Remark, EntityName);
+            MySqlConnection conn = new MySqlConnection(this.connectMessage);
+            try
+            {
+                conn.Open();
+                MySqlCommand command = new MySqlCommand(sql, conn);
+                if (command.ExecuteNonQuery() > 0) {
+                result = true;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally {
+                conn.Close();
+                conn.Dispose();
+            }
+            return result;
         }
 
         public void updateKeyGroup(int? Group_id, int Key_id)
