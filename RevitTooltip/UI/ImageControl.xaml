@@ -36,7 +36,7 @@
         <TextBox x:Name="endBox" Grid.Column="1" Grid.Row="3"  HorizontalAlignment="Left" Height="23" Margin="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" GotFocus="endBox_GotFocus" IsReadOnly="True"/>
         <Calendar x:Name="endTime" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Top" Grid.ColumnSpan="2"  Panel.ZIndex="10" Visibility="Hidden" SelectedDatesChanged="endTime_SelectedDatesChanged" Grid.RowSpan="4" Grid.Row="4"/>
         
-        <DataGrid x:Name="dataGrid" HorizontalAlignment="Left" Margin="0,0,0,0"  VerticalAlignment="Top"   SelectionChanged="dataGrid_SelectionChanged" IsReadOnly="True" Grid.Row="5" Grid.ColumnSpan="2" AutoGenerateColumns="False">
+        <DataGrid x:Name="dataGrid" HorizontalAlignment="Left" Margin="0,0,0,0"  VerticalAlignment="Top"   SelectionChanged="dataGrid_SelectionChanged" IsReadOnly="True" Grid.Row="5" Grid.ColumnSpan="2" AutoGenerateColumns="False" SelectionUnit="FullRow">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Id}"  Header="Id" CanUserSort="False" Visibility="Hidden"/>
                 <DataGridTextColumn Binding="{Binding EntityName}" Header="实体名" Width="5*">
@@ -47,7 +47,7 @@
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ErrMsg}" Value="TotalDiff">
-                                    <Setter Property="Background" Value="Gray"/>
+                                    <Setter Property="Background" Value="#4C11111C"/>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ErrMsg}" Value="NoDiff">
@@ -65,7 +65,7 @@
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ErrMsg}" Value="TotalDiff">
-                                    <Setter Property="Background" Value="Gray"/>
+                                    <Setter Property="Background" Value="#4C11111C"/>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ErrMsg}" Value="NoDiff">

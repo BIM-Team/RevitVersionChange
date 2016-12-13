@@ -31,7 +31,7 @@ namespace Revit.Addin.RevitTooltip.UI
         {
             set
             {
-                if (!value.Equals(this._entityData))
+                if (null == value || !value.Equals(this._entityData))
                 {
                     this._entityData = value;
                     this.panel1.Invalidate(this.panel1.ClientRectangle);
@@ -45,7 +45,7 @@ namespace Revit.Addin.RevitTooltip.UI
             g.SmoothingMode = SmoothingMode.AntiAlias;
             float height = this.panel1.ClientRectangle.Height;
             float width = this.panel1.ClientRectangle.Width;
-            float startX = 40, endX = width - 10;
+            float startX = width/10, endX = width - 10;
             float startY = height - 30, endY = 10;
             Font font = new Font("Arial", 9, System.Drawing.FontStyle.Regular);
             if (null == _entityData || _entityData.Data.Count == 0)
@@ -53,30 +53,47 @@ namespace Revit.Addin.RevitTooltip.UI
                 g.DrawString("没有数据", font, Brushes.Black, (startX + endX - g.MeasureString("没有数据", font).Width) / 2, (startY + endY) / 2);
                 return;
             }
-            List<DrawData> data = _entityData.Data;
-            float diff_hold = _entityData.Diff_hold;
-            float total_hold = _entityData.Total_hold;
-            int length = data.Count;
-            int div = 2;
+            List<DrawData> data1 = _entityData.Data;
+            List<DrawData> data2 = null;
+            if (_entityData.Total_hold < 0)
+            {
+                data2 = new List<DrawData>();
+                foreach (DrawData one in data1)
+                {
+                    DrawData newOne = new DrawData();
+                    newOne.Date = one.Date;
+                    newOne.Detail = one.Detail;
+                    newOne.MaxValue = -one.MaxValue;
+                    newOne.MidValue = -one.MidValue;
+                    newOne.MinValue = -one.MinValue;
+                    data2.Add(newOne);
+                }
+            }
+            else
+            {
+                data2 = data1;
+            }
 
-            float Max = data[0].MaxValue;
+            float diff_hold = Math.Abs(_entityData.Diff_hold);
+            float total_hold = Math.Abs(_entityData.Total_hold);
+            int length = data2.Count;
+            int div = length / 5;
+
+            float Max = data2[0].MaxValue;
             float Min = Max;
-            foreach (DrawData row in data)
+            foreach (DrawData row in data2)
             {
                 if (Max < row.MaxValue)
                 {
                     Max = row.MaxValue;
                 }
-                if (Min > row.MaxValue) {
+                if (Min > row.MaxValue)
+                {
                     Min = row.MaxValue;
                 }
             }
-            if (total_hold < 0)
-            {
-                Max = Math.Abs(Min);
-            }
             float divX = (endX - startX) / length;
-            float divY = (startY - endY) / Max;
+            float divY = (startY - endY) / (Max - Min);
             try
             {
                 //清除屏幕
@@ -95,7 +112,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 Pen pen_error1 = new Pen(System.Drawing.Color.Green, 2);
                 pen_error1.DashStyle = DashStyle.Dash;
                 //用于连接xy轴
-                Pen dotPen = new Pen(System.Drawing.Color.Black, 0.5f);
+                Pen dotPen = new Pen(Color.FromArgb(128, Color.Black), 0.3f);
                 dotPen.DashStyle = DashStyle.Dot;
                 Pen dotPen1 = new Pen(System.Drawing.Color.Red, 0.5f);
                 dotPen1.DashStyle = DashStyle.Dot;
@@ -103,37 +120,45 @@ namespace Revit.Addin.RevitTooltip.UI
                 g.DrawLine(mypen1, startX, startY, endX, startY);
                 //画Y轴
                 g.DrawLine(mypen1, startX, endY, startX, startY);
+
+                float div_height = (startY - endY) / 10;
+                float div_width = (endX - startX) / 10;
+                float div_value = (Max - Min) / 10;
+                //画10*10网格
+                for (int i = 0; i <= 10; i++)
+                {
+                    float y10 = startY - i * div_height;
+                    float x10 = startX + i * div_width;
+                    string str_va = Math.Round(div_value * i + Min, 2, MidpointRounding.AwayFromZero).ToString();
+                    g.DrawLine(dotPen, startX, y10, endX, y10);
+                    g.DrawLine(dotPen, x10, startY, x10, endY);
+                    g.DrawString(str_va, font, Brushes.Black, startX - g.MeasureString(str_va, font).Width, y10);
+                }
                 float y_b = startY;
                 float x_b = startX;
                 float x = startX - divX;
                 float y = startY;
                 float value_b = 0;
-                int num = 0;
-                foreach (DrawData row in data)
+                //int num = 0;
+                for (int i = 0; i < data2.Count; i++)
                 {
                     ////x轴的字
-                    float value = row.MaxValue;
-                    string str = row.Date.ToShortDateString();
+                    float value = data2[i].MaxValue;
+                    string str = data1[i].Date.ToShortDateString();
+                    string str_value = data1[i].MaxValue.ToString();
+
                     x += divX;
-                    y = startY - value * divY;
+                    y = startY - (value - Min) * divY;
                     //
                     ////y轴的字
-                    if (num % div == 0 && (length - num) >= div)
+                    if (i == 0)
                     {
-
-                        g.DrawString(str, font, Brushes.Black, x - g.MeasureString(str, font).Width / 2, startY + g.MeasureString(str, font).Height / 2);
-                        g.DrawString(value.ToString(), font, Brushes.Black, startX - g.MeasureString(value.ToString(), font).Width, y - g.MeasureString(value.ToString(), font).Height / 2);
-                        //g.DrawLine(dotPen, startX, y, x, y);
-                        //g.DrawLine(dotPen, x, y, x, startY);
+                        g.DrawString(str, font, Brushes.Black, x, startY + g.MeasureString(str, font).Height / 2);
                     }
-                    if (num == length - 1)
+                    if (i == length - 1)
                     {
                         g.DrawString(str, font, Brushes.Black, endX - g.MeasureString(str, font).Width, startY + g.MeasureString(str, font).Height / 2);
-                        g.DrawString(value.ToString(), font, Brushes.Black, startX - g.MeasureString(value.ToString(), font).Width, y - g.MeasureString(value.ToString(), font).Height / 2);
-                        //g.DrawLine(dotPen, startX, y, x, y);
-                        //g.DrawLine(dotPen, x, y, x, startY);
                     }
-                    num++;
 
                     if (value_b != 0)
                     {
@@ -151,7 +176,6 @@ namespace Revit.Addin.RevitTooltip.UI
                         }
                         else if (Math.Abs(value - value_b) > diff_hold)
                         {
-
                             if (Math.Abs(x - x_b) < 1 || Math.Abs(y - y_b) < 1)
                             {
                                 g.DrawLine(pen_error1, x_b, y_b, x + 1, y + 1);
@@ -166,17 +190,20 @@ namespace Revit.Addin.RevitTooltip.UI
                             g.DrawLine(mypen, x_b, y_b, x, y);
                         }
                     }
-
-
                     y_b = y;
                     x_b = x;
                     value_b = value;
 
                 }
-                float alert = (float)(startY - total_hold * divY);
-                g.DrawString(total_hold.ToString(), font, Brushes.Red, startX -
-                    g.MeasureString(total_hold.ToString(), font).Width, alert - g.MeasureString(total_hold.ToString(), font).Height / 2);
-                g.DrawLine(dotPen1, startX, alert, endX, alert);
+                if (total_hold - Min > 0&&total_hold<Max)
+                {
+                    float alert = (float)(startY - (total_hold - Min) * divY);
+                    string str_alert = _entityData.Total_hold.ToString();
+                    g.DrawString(str_alert, font, Brushes.Red, (startX + endX) / 2 -
+                        g.MeasureString(str_alert, font).Width, alert - g.MeasureString(str_alert, font).Height / 2);
+                    g.DrawLine(dotPen1, startX, alert, endX, alert);
+                }
+
                 mypen.Dispose();
                 mypen1.Dispose();
                 dotPen.Dispose();

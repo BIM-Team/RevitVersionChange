@@ -44,7 +44,9 @@ namespace Revit.Addin.RevitTooltip
                     {
                         MessageBox.Show("更新成功,请重新刷新本地文件");
                     }
-                    else {
+                    else if (isOKSqlite) {
+                        MessageBox.Show("本地更新成功,刷新本地文件数据将丢失");
+                    }else{
                         MessageBox.Show("更新失败");
                     }
                 }

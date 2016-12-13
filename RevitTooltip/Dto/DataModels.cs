@@ -284,14 +284,5 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// </summary>
         public string ErrMsg { get; set; }
 
-        //public override bool Equals(object obj)
-        //{
-        //    CEntityName o = (CEntityName)obj;
-        //    return this.EntityName.Equals(o.EntityName);
-        //}
-        //public override int GetHashCode()
-        //{
-        //    return this.EntityName.GetHashCode();
-        //}
     }
 }

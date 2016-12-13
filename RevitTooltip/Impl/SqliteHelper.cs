@@ -125,41 +125,35 @@ namespace Revit.Addin.RevitTooltip.Impl
             {
                 if (!isExist("ExcelTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE ExcelTable(ID integer NOT NULL PRIMARY KEY AUTOINCREMENT,CurrentFile VARCHAR(30) NOT NULL,ExcelSignal VARCHAR(20) UNIQUE, IsInfo BOOLEAN, Total_hold float, Diff_hold float, History VARCHAR(100) )";
+                    command.CommandText = "CREATE TABLE ExcelTable(ID integer NOT NULL PRIMARY KEY AUTOINCREMENT,CurrentFile VARCHAR(30) NOT NULL,ExcelSignal VARCHAR(20) UNIQUE, IsInfo BOOLEAN NOT NULL, Total_hold float NOT NULL default 0, Diff_hold float NOT NULL default 0, History VARCHAR(100) NOT NULL )";
                     command.ExecuteNonQuery();
                 }
-
                 if (!isExist("KeyTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE KeyTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, Group_ID integer, KeyName VARCHAR(20) NOT NULL,Odr integer )";
+                    command.CommandText = "CREATE TABLE KeyTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, Group_ID integer , KeyName VARCHAR(20) NOT NULL,Odr integer NOT NULL default 0)";
                     command.ExecuteNonQuery();
                 }
-
                 if (!isExist("EntityTable", "table"))
                 {
                     command.CommandText = "CREATE TABLE EntityTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, EntityName VARCHAR(20) NOT NULL, Remark VARCHAR(100))";
                     command.ExecuteNonQuery();
                 }
-
                 if (!isExist("GroupTable", "table"))
                 {
                     command.CommandText = "CREATE TABLE GroupTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, GroupName VARCHAR(20) NOT NULL)";
                     command.ExecuteNonQuery();
                 }
-
                 if (!isExist("InfoTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE InfoTable(ID integer PRIMARY KEY AUTOINCREMENT, Key_ID integer NOT NULL REFERENCES KeyTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Value VARCHAR(20))";
+                    command.CommandText = "CREATE TABLE InfoTable(ID integer PRIMARY KEY AUTOINCREMENT, Key_ID integer NOT NULL REFERENCES KeyTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Value VARCHAR(20) NOT NULL)";
                     command.ExecuteNonQuery();
                 }
-
                 if (!isExist("DrawTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE DrawTable(ID integer PRIMARY KEY AUTOINCREMENT,  Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Date VARCHAR(20), EntityMaxValue float, EntityMidValue float, EntityMinValue float, Detail TEXT )";
+                    command.CommandText = "CREATE TABLE DrawTable(ID integer PRIMARY KEY AUTOINCREMENT,  Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Date VARCHAR(20) NOT NULL, EntityMaxValue float NOT NULL, EntityMidValue float NOT NULL, EntityMinValue float NOT NULL, Detail TEXT NOT NULL )";
                     command.ExecuteNonQuery();
                 }
             }
-
         }
 
         //插入数据
@@ -256,7 +250,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                     while (mysql_reader.Read())
                     {
                         sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO DrawTable(ID,Entity_ID,Date ,EntityMaxValue,EntityMidValue,EntityMinValue,Detail) Values({0},{1},'{2}',{3},{4},{5},'{6}')",
-                            mysql_reader.GetInt32(0), mysql_reader.GetInt32(1), mysql_reader.GetDateTime(2), mysql_reader.GetFloat(3), mysql_reader.GetFloat(4), mysql_reader.GetFloat(5), mysql_reader.GetString(6));
+                            mysql_reader.GetInt32(0), mysql_reader.GetInt32(1), mysql_reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"), mysql_reader.GetFloat(3), mysql_reader.GetFloat(4), mysql_reader.GetFloat(5), mysql_reader.GetString(6));
                         sqlite_command.ExecuteNonQuery();
                     }
                 }
@@ -311,25 +305,9 @@ namespace Revit.Addin.RevitTooltip.Impl
             {
                 throw new Exception("无效的传入参数");
             }
-            if (conn.State != ConnectionState.Open)
+            if (!File.Exists(Path.Combine(dbPath, dbName)))
             {
-                conn.Open();
-            }
-            using (SQLiteTransaction tran = conn.BeginTransaction())
-            {
-                try
-                {
-                    if (!File.Exists(Path.Combine(dbName, dbPath)))
-                    {
-                        CreateDB();
-                    }
-                    tran.Commit();
-                }
-                catch (Exception)
-                {
-                    tran.Rollback();
-                    throw;
-                }
+                CreateDB();
             }
             if (sheetInfo.Tag)
             {
@@ -340,36 +318,6 @@ namespace Revit.Addin.RevitTooltip.Impl
                 InsertDrawData(sheetInfo);
             }
         }
-        ///// <summary>
-        ///// 当插入一个sheet数据回滚时，删除当前sheet表的entity
-        ///// </summary>
-        ///// <param name="sheetInfo"></param>
-        ///// <param name="IdExcel"></param>
-        //private void DeleteCurrentEntity(SheetInfo sheetInfo, int IdExcel)
-        //{
-        //    Dictionary<string, int> PeriousEntities = SelectEntities(IdExcel);
-        //    string sql = "delete from entitytable where EntityName in (";
-        //    int n = 0;
-        //    foreach (string entityName in sheetInfo.EntityNames)
-        //    {
-        //        if (PeriousEntities.Keys.Contains(entityName))
-        //        {
-        //            if (n != 0)
-        //                sql += ",";
-
-        //            sql += "'" + entityName + "'";
-        //            n++;
-        //        }
-        //    }
-
-        //    if (n == 0)
-        //        sql += "'')";
-        //    else
-        //        sql += ")";
-
-        //    ExecuteOneSql(sql);
-        //}
-
         /// <summary>
         /// 插入基础数据表
         /// </summary>
@@ -379,12 +327,7 @@ namespace Revit.Addin.RevitTooltip.Impl
             //是否已经处理过
             bool hasDone = false;
             string signal = sheetInfo.ExcelTableData.Signal;
-            string reset_auto_increment = "alter table ExcelTable auto_increment =1;"
-                         + "alter table KeyTable auto_increment =1;"
-                         + "alter table EntityTable auto_increment =1;"
-                         + "alter table GroupTable auto_increment =1;"
-                         + "alter table InfoTable auto_increment =1;"
-                         + "alter table DrawTable auto_increment =1";
+            string reset_auto_increment = "DELETE FROM sqlite_sequence";
             SQLiteTransaction tran = null;
             try
             {
@@ -402,13 +345,13 @@ namespace Revit.Addin.RevitTooltip.Impl
                     throw new Exception("无效的插入数据");
                 }
                 //判断是否该Signal已存在
-                ExcelTable exist = SelectExcelTable(signal, conn);
+                ExcelTable exist = SelectExcelTable(signal);
                 if (exist == null)
                 {
                     //插入ExcelTable
                     new SQLiteCommand(string.Format("insert into ExcelTable (CurrentFile,ExcelSignal,IsInfo,History) values ('{0}', '{1}', {2},'{3}')",
-                         sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag, sheetInfo.ExcelTableData.CurrentFile), tran.Connection, tran).ExecuteNonQuery();
-                    exist = SelectExcelTable(signal, conn);
+                         sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag?1:0, sheetInfo.ExcelTableData.CurrentFile), tran.Connection, tran).ExecuteNonQuery();
+                    exist = SelectExcelTable(signal);
                     //插入表结构KeyNames
                     new SQLiteCommand(InsertIntoKeyTable(sheetInfo.KeyNames, sheetInfo.ExcelTableData.Signal), tran.Connection, tran).ExecuteNonQuery();
                 }
@@ -483,7 +426,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 string sql = string.Format("insert into EntityTable(ExcelSignal,EntityName) values ('{0}','{1}')", signal, one.EntityName);
                 //插入Entity
                 new SQLiteCommand(sql, tran.Connection, tran).ExecuteNonQuery();
-                CEntityName entity = selectEntity(one.EntityName, tran.Connection);
+                CEntityName entity = selectEntity(one.EntityName);
                 Dictionary<string, string> data = one.Data;
                 StringBuilder buider = null;
                 if (data != null && data.Count != 0)
@@ -506,18 +449,15 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// <param name="command"></param>
         /// <param name="err"></param>
         /// <returns></returns>
-        private CEntityName selectEntity(string entityName, SQLiteConnection OpenedConn, bool err = false)
+        private CEntityName selectEntity(string entityName)
         {
             CEntityName result = null;
-            //不需要Err信息
-            if (!err)
-            {
                 string sql = string.Format("select ID,EntityName from EntityTable where EntityName='{0}'", entityName);
-                if (OpenedConn.State != ConnectionState.Open)
+                if (conn.State != ConnectionState.Open)
                 {
-                    OpenedConn.Open();
+                conn.Open();
                 }
-                SQLiteCommand command = new SQLiteCommand(sql, OpenedConn);
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
                 SQLiteDataReader reader = command.ExecuteReader();
                 try
                 {
@@ -537,7 +477,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     reader.Close();
                 }
-            }
+            
             return result;
         }
         /// <summary>
@@ -601,10 +541,14 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// <param name="signal"></param>
         /// <param name="OpenedConn"></param>
         /// <returns></returns>
-        private ExcelTable SelectExcelTable(String signal, SQLiteConnection OpenedConn)
+        private ExcelTable SelectExcelTable(String signal)
         {
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.Open();
+            }
             string sql = String.Format("select ID,CurrentFile,ExcelSignal,Total_hold,Diff_hold,History from ExcelTable where ExcelSignal = '{0}'", signal);
-            SQLiteDataReader reader = new SQLiteCommand(sql, OpenedConn).ExecuteReader();
+            SQLiteDataReader reader = new SQLiteCommand(sql, conn).ExecuteReader();
             ExcelTable result = null;
             try
             {
@@ -644,17 +588,11 @@ namespace Revit.Addin.RevitTooltip.Impl
             {
                 if (conn.State != ConnectionState.Open)
                 {
-
                     conn.Open();
                 }
                 //事务开始
                 tran = conn.BeginTransaction();
-                string reset_auto_increment = "alter table ExcelTable auto_increment =1;"
-                             + "alter table KeyTable auto_increment =1;"
-                             + "alter table EntityTable auto_increment =1;"
-                             + "alter table GroupTable auto_increment =1;"
-                             + "alter table InfoTable auto_increment =1;"
-                             + "alter table DrawTable auto_increment =1";
+                string reset_auto_increment = "DELETE FROM sqlite_sequence";
                 //主命令
                 SQLiteCommand command = new SQLiteCommand(reset_auto_increment, conn, tran);
                 //重置自增
@@ -665,11 +603,11 @@ namespace Revit.Addin.RevitTooltip.Impl
                     throw new Exception("无效的插入数据");
                 }
                 //判断是否该Signal已存在
-                ExcelTable exist = SelectExcelTable(signal, tran.Connection);
+                ExcelTable exist = SelectExcelTable(signal);
                 if (exist == null)
                 {
                     command.CommandText = string.Format("insert into ExcelTable (CurrentFile,ExcelSignal,IsInfo,History) values ('{0}', '{1}', {2},'{3}')",
-                          sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag, sheetInfo.ExcelTableData.CurrentFile);
+                          sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag?1:0, sheetInfo.ExcelTableData.CurrentFile);
                     //插入新的数据表
                     command.ExecuteNonQuery();
                 }
@@ -721,14 +659,14 @@ namespace Revit.Addin.RevitTooltip.Impl
             string signal = sheetInfo.ExcelTableData.Signal;
             foreach (DrawEntityData one in rows)
             {
-                CEntityName entity = selectEntity(one.EntityName, tran.Connection);
+                CEntityName entity = selectEntity(one.EntityName);
                 DateTime? maxDate = null;
                 if (entity == null)
                 {
                     string sql = string.Format("insert into EntityTable(ExcelSignal,EntityName) values ('{0}','{1}')", signal, one.EntityName);
                     //插入Entity
                     new SQLiteCommand(sql, tran.Connection, tran).ExecuteNonQuery();
-                    entity = selectEntity(one.EntityName, tran.Connection);
+                    entity = selectEntity(one.EntityName);
                 }
                 else
                 {
@@ -741,730 +679,22 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     buider = new StringBuilder("insert into DrawTable(Entity_ID,Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail) values");
                 }
+                bool hasValue = false;
                 foreach (DrawData p in data)
                 {
                     if (maxDate == null || p.Date > maxDate)
                     {
-                        buider.AppendFormat(" ({0},'{1}','{2}','{3}','{4}','{5}'),", entity.Id, p.Date, p.MaxValue, p.MidValue, p.MinValue, p.Detail);
+                        hasValue = true;
+                        buider.AppendFormat(" ({0},'{1}','{2}','{3}','{4}','{5}'),", entity.Id, p.Date.ToString("yyyy-MM-dd HH:mm:ss"), p.MaxValue, p.MidValue, p.MinValue, p.Detail);
                     }
                 }
+                if (hasValue) {
                 buider.Remove(buider.Length - 1, 1);
                 new SQLiteCommand(buider.ToString(), tran.Connection, tran).ExecuteNonQuery();
+                }
             }
 
         }
-        ///// <summary>
-        ///// 插入到ExcelTable表
-        ///// 并返回IdExcel和IdGroup
-        ///// </summary>
-        ///// <param name="sheetInfo"></param>
-        ///// <returns></returns>
-        //private Dictionary<string, int> InsertIntoExcelTable(SheetInfo sheetInfo)
-        //{
-        //    Dictionary<string, int> id = new Dictionary<string, int>();
-        //    bool isInfo = sheetInfo.Tag;
-        //    string signal = sheetInfo.ExcelTableData.Signal;
-        //    string tableDesc = sheetInfo.ExcelTableData.TableDesc;
-
-        //    int IdExcel = getIdExcel(signal);
-        //    int IdGroup = getIdGroup(IdExcel);
-        //    string currentTableDesc = GetTableDesc(signal);
-        //    bool hasTableDesc = false;
-
-        //    if (IdExcel == 0)
-        //    {
-        //        string sql = GetInsertIntoExcelTableSql(isInfo, signal, tableDesc);
-        //        ExecuteOneSql(sql);
-        //        IdExcel = getIdExcel(signal);
-
-        //        //插入到GroupTable
-        //        IdGroup = InsertIntoGroupTable(IdExcel);
-        //    }
-        //    else
-        //    {
-        //        string[] tableDesclist = currentTableDesc.Split(';');
-        //        foreach (string t in tableDesclist)
-        //        {
-        //            if (t.Equals(tableDesc))
-        //            {
-        //                hasTableDesc = true;
-        //            }
-        //        }
-        //        if (!hasTableDesc)
-        //        {
-        //            string updateTableDesc = currentTableDesc + tableDesc;
-        //            UpdateTableDesc(signal, updateTableDesc);
-        //        }
-        //    }
-        //    id.Add("IdExcel", IdExcel);
-        //    id.Add("IdGroup", IdGroup);
-
-        //    return id;
-        //}
-        ///// <summary>
-        ///// 插入“未分组”Group
-        ///// </summary>
-        ///// <param name="idExcel"></param>
-        ///// <returns></returns>
-        //private int InsertIntoGroupTable(int idExcel)
-        //{
-        //    int idGroup = 0;
-        //    string sql = GetInsertIntoGroupTableSql(idExcel) + ";select @@IDENTITY ";
-
-        //    SQLiteCommand mycom = new SQLiteCommand();
-        //    mycom.Connection = this.conn;
-        //    mycom.CommandText = sql;
-        //    if (isBegin)
-        //        mycom.Transaction = myTran;
-
-        //    using (mycom)
-        //    {
-        //        try
-        //        {
-        //            idGroup = Convert.ToInt32(mycom.ExecuteScalar());
-        //            return idGroup;
-        //        }
-        //        catch { throw; }
-        //    }
-
-        //}
-        ///// <summary>
-        ///// 插入属性到KeyTable表
-        ///// 返回当前表的属性及对应ID，<KeyName,ID>
-        ///// </summary>
-        ///// <param name="KeyNames"></param>
-        ///// <param name="IdExcel"></param>
-        ///// <returns></returns>
-        //private Dictionary<string, int> InsertIntoKeyTable(List<string> KeyNames, Dictionary<string, int> id)
-        //{
-        //    int IdExcel = id["IdExcel"];
-        //    int IdGroup = id["IdGroup"];
-        //    Dictionary<string, int> PeriousKeys = SelectKeyNames(IdExcel);
-        //    String sql = "";
-        //    int n = 0;
-        //    foreach (string name in KeyNames)
-        //    {
-        //        if (name.Equals("备注") || PeriousKeys.Keys.Contains("备注"))
-        //        {
-        //            hasEntityRemark = true;
-        //            continue;
-        //        }
-
-        //        //如果没有在原表中匹配到，则添加到插入语句当中
-        //        if (!PeriousKeys.Keys.Contains(name))
-        //        {
-        //            if (n == 0)
-        //                sql = GetInsertIntoKeyTableSql(IdExcel, IdGroup, name);
-        //            else
-        //                sql = sql + ",('" + IdExcel + "','" + IdGroup + "','" + name + "')";
-        //            n++;
-        //        }
-        //    }
-        //    if (!hasEntityRemark)
-        //    {
-        //        sql = sql + ",('" + IdExcel + "','" + IdGroup + "','备注')";
-        //    }
-        //    ExecuteOneSql(sql);
-        //    //获取更新后的<属性，ID>
-        //    Dictionary<string, int> CurrentKeys = SelectKeyNames(IdExcel);
-        //    return CurrentKeys;
-        //}
-
-        ///// <summary>
-        ///// 插入实体到EntityTable表
-        ///// 返回当前插入的EntityNames,<EntityName,ID> 
-        ///// </summary>
-        ///// <param name="EntityNames"></param>
-        ///// <param name="IdExcel"></param>
-        ///// <returns></returns>
-        //private Dictionary<string, int> InsertIntoEntityTable(List<string> EntityNames, int IdExcel)
-        //{
-        //    Dictionary<string, int> UpdateEntities = new Dictionary<string, int>();
-        //    List<string> UpdateEntityNames = new List<string>();
-        //    Dictionary<string, int> PeriousEntities = SelectEntities(IdExcel);
-        //    String sql = "";
-        //    int n = 0;
-        //    foreach (string entityName in EntityNames)
-        //    {
-        //        //如果没有在原表中匹配到，则添加到插入语句当中
-        //        if (!PeriousEntities.Keys.Contains(entityName))
-        //        {
-        //            if (n == 0)
-        //                sql = GetInsertIntoEntityTableSql(IdExcel, entityName);
-        //            else
-        //                sql = sql + ",('" + IdExcel + "','" + entityName + "','" + "')";
-
-        //            UpdateEntityNames.Add(entityName);
-        //            n++;
-        //        }
-        //    }
-        //    ExecuteOneSql(sql);
-
-        //    //获取当前表所有的Entities
-        //    foreach (string s in UpdateEntityNames)
-        //    {
-        //        int id = getIdEntity(IdExcel, s);
-        //        UpdateEntities.Add(s, id);
-        //    }
-
-        //    return UpdateEntities;
-        //}
-        ///// <summary>
-        ///// 插入到InfoTable
-        ///// </summary>
-        ///// <param name="sheetInfo"></param>
-        ///// <param name="CurrentKeys"></param>
-        ///// <param name="UpdateEntities"></param>
-        //private void InsertIntoInfoTable(SheetInfo sheetInfo, Dictionary<string, int> CurrentKeys, Dictionary<string, int> UpdateEntities)
-        //{
-        //    int IdKey;
-        //    int IdEntity;
-        //    List<string> SqlStringList = new List<string>();  // 用来存放多条SQL语句
-        //    string sql = "";
-        //    int n = 0;
-        //    foreach (InfoEntityData infoRow in sheetInfo.InfoRows)
-        //    {
-        //        if (UpdateEntities.Keys.Contains(infoRow.EntityName))
-        //        {
-        //            IdEntity = UpdateEntities[infoRow.EntityName];
-        //            foreach (string key in infoRow.Data.Keys)
-        //            {
-        //                IdKey = CurrentKeys[key];
-        //                if (n % 500 == 0)
-        //                {
-        //                    if (n > 0)
-        //                        SqlStringList.Add(sql);
-        //                    sql = GetInsertIntoInfoTableSql(IdKey, IdEntity, infoRow.Data[key]);
-        //                }
-        //                else
-        //                    sql = sql + ",('" + IdKey + "','" + IdEntity + "','" + infoRow.Data[key] + "')";
-
-        //                n++;
-        //            }
-        //        }
-        //    }
-        //    if (n % 500 != 0)
-        //        SqlStringList.Add(sql);  //不够500values的SQL语言也要添加进去
-        //    InsertSqlStringList(SqlStringList);
-
-        //}
-        ///// <summary>
-        ///// 插入到DrawDataTabel
-        ///// </summary>
-        ///// <param name="sheetInfo"></param>
-        ///// <param name="UpdateEntities"></param>
-        ///// <param name="IdExcel"></param>
-        //private void InsertIntoDrawDataTable(SheetInfo sheetInfo, Dictionary<string, int> UpdateEntities, int IdExcel)
-        //{
-        //    int IdEntity;
-        //    List<string> SqlStringList = new List<string>();  // 用来存放多条SQL语句
-        //    String sql = "";
-        //    int n = 0;
-
-        //    foreach (DrawEntityData drawRow in sheetInfo.DrawRows)
-        //    {
-        //        if (UpdateEntities.Keys.Contains(drawRow.EntityName))
-        //        {
-        //            IdEntity = UpdateEntities[drawRow.EntityName];
-        //            foreach (DrawData data in drawRow.Data)
-        //            {
-        //                string datestr = data.Date.ToString("yyyy-MM-dd HH:mm:ss");
-        //                if (n % 500 == 0)
-        //                {
-        //                    if (n > 0)
-        //                        SqlStringList.Add(sql);
-        //                    sql = GetInsertIntoDrawDataTableSql(IdExcel, IdEntity, datestr, data.MaxValue, data.MidValue, data.MinValue, data.Detail);
-        //                }
-        //                else
-        //                    sql = sql + ",('" + IdExcel + "','" + IdEntity + "','" + datestr + "','" + data.MaxValue + "','" + data.MidValue + "','" + data.MinValue + "','" + data.Detail + "')";
-
-        //                n++;
-        //            }
-        //        }
-        //        else  //实体表如果没有更新，要检查每个实体表中，时间是否增加
-        //        {
-        //            IdEntity = getIdEntity(IdExcel, drawRow.EntityName);
-        //            List<string> PeriousDateTimes = GetDrawDataTableDateTimes(IdEntity);
-        //            foreach (DrawData data in drawRow.Data)
-        //            {
-        //                string datestr = data.Date.ToString("yyyy-MM-dd HH:mm:ss");
-        //                if (!PeriousDateTimes.Contains(datestr))
-        //                {
-        //                    if (n % 500 == 0)
-        //                    {
-        //                        if (n > 0)
-        //                            SqlStringList.Add(sql);
-        //                        sql = GetInsertIntoDrawDataTableSql(IdExcel, IdEntity, datestr, data.MaxValue, data.MidValue, data.MinValue, data.Detail);
-        //                    }
-        //                    else
-        //                        sql = sql + ",('" + IdExcel + "','" + IdEntity + "','" + datestr + "','" + data.MaxValue + "','" + data.MidValue + "','" + data.MinValue + "','" + data.Detail + "')";
-
-        //                    n++;
-        //                }
-        //            }
-        //        }
-        //    }
-        //    if (n % 500 != 0)
-        //        SqlStringList.Add(sql);  //不够500values的SQL语言也要添加进去            
-        //    InsertSqlStringList(SqlStringList);
-        //}
-
-
-        ///// <summary>
-        ///// 获取KeyTable表的Key和ID
-        ///// </summary>
-        ///// <param name="IdExcel"></param>
-        ///// <returns></returns>
-        //private Dictionary<string, int> SelectKeyNames(int IdExcel)
-        //{
-        //    Dictionary<string, int> KeyNames = new Dictionary<string, int>();
-        //    String sql = "select KeyName, ID from KeyTable where Excel_ID = " + IdExcel;
-
-        //    SQLiteCommand mycom = new SQLiteCommand(sql, this.conn, myTran);  //建立执行命令语句对象
-        //    SQLiteDataReader reader = mycom.ExecuteReader();    //需要关闭
-        //    try
-        //    {
-        //        while (reader.Read())
-        //        {
-        //            if (reader.HasRows)
-        //            {
-        //                KeyNames.Add(reader.GetString(0), reader.GetInt32(1));
-        //            }
-        //        }
-        //        return KeyNames;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-        //}
-        ///// <summary>
-        ///// 获取EntityTable表的EntityName和ID
-        ///// </summary>
-        ///// <param name="IdExcel"></param>
-        ///// <returns></returns>
-        //private Dictionary<string, int> SelectEntities(int IdExcel)
-        //{
-        //    Dictionary<string, int> Entities = new Dictionary<string, int>();
-        //    string sql = "select distinct EntityName, ID from EntityTable where Excel_ID = " + IdExcel;
-        //    SQLiteCommand mycom = new SQLiteCommand();
-        //    mycom.Connection = this.conn;
-        //    mycom.CommandText = sql;
-        //    if (isBegin)
-        //        mycom.Transaction = myTran;
-        //    SQLiteDataReader reader = mycom.ExecuteReader();    //需要关闭
-        //    try
-        //    {
-        //        while (reader.Read())
-        //        {
-        //            if (reader.HasRows)
-        //            {
-        //                //这里如果添加了相同的项会出错，所以entity一定要唯一
-        //                Entities.Add(reader.GetString(0), reader.GetInt32(1));
-        //            }
-        //        }
-        //        return Entities;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-        //}
-        ///// <summary>
-        ///// 从DrawDataTable表中，获取该实体数据中，当前存储的DATETIME项
-        ///// </summary>
-        ///// <param name="IdEntity"></param>
-        ///// <returns></returns>
-        //private List<string> GetDrawDataTableDateTimes(int IdEntity)
-        //{
-        //    List<string> PeriousDateTimes = new List<string>();
-        //    String sql = "select Date from DrawDataTable where Entity_ID = " + IdEntity;
-
-        //    SQLiteCommand mycom = new SQLiteCommand(sql, this.conn, myTran);  //建立执行命令语句对象
-        //    SQLiteDataReader reader = mycom.ExecuteReader();    //需要关闭
-        //    try
-        //    {
-        //        while (reader.Read())
-        //        {
-        //            if (reader.HasRows)
-        //            {
-        //                PeriousDateTimes.Add(reader.GetString(0));
-        //            }
-        //        }
-        //        return PeriousDateTimes;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 获取当前Excel的TableDesc
-        ///// </summary>
-        ///// <param name="signal"></param>
-        ///// <returns></returns>
-        //private string GetTableDesc(string signal)
-        //{
-        //    string currentTableDesc = "";
-        //    string sql = String.Format("select tableDesc from ExcelTable where ExcelSignal = '{0}' ", signal);
-
-        //    SQLiteCommand mycom = new SQLiteCommand();
-        //    mycom.Connection = this.conn;
-        //    mycom.CommandText = sql;
-        //    if (isBegin)
-        //        mycom.Transaction = myTran;
-
-        //    SQLiteDataReader reader = mycom.ExecuteReader();    //需要关闭
-        //    try
-        //    {
-        //        while (reader.Read())
-        //        {
-        //            if (reader.HasRows)
-        //            {
-        //                currentTableDesc = reader.GetString(0);
-        //            }
-        //        }
-        //        return currentTableDesc;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-        //}
-        ///// <summary>
-        ///// 更新TableDesc
-        ///// </summary>
-        ///// <param name="signal"></param>
-        ///// <param name="updateTableDesc"></param>
-        //private void UpdateTableDesc(string signal, string updateTableDesc)
-        //{
-        //    string sql = String.Format("update ExcelTable set tableDesc = '{0}' where ExcelSignal = '{1}' ", updateTableDesc, signal);
-        //    ExecuteOneSql(sql);
-        //}
-        //private Boolean HasCX(string CX)
-        //{
-        //    string sql = String.Format("select * from CXTable where ENTITY = '{0}'", CX);
-        //    SQLiteCommand mycom = new SQLiteCommand(sql, this.conn, myTran);  //建立执行命令语句对象
-        //    SQLiteDataReader reader = mycom.ExecuteReader();
-        //    try
-        //    {
-        //        reader.Read();
-        //        if (reader.HasRows)
-        //            return true;
-        //        else
-        //            return false;
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-
-        //}
-        ////Test############################################################################
-        //public List<string> SelectCXTable()
-        //{
-        //    Dictionary<string, string> cxTable = new Dictionary<string, string>();
-        //    List<string> list = new List<string>();
-        //    //String sql = "Select e.Entity,c.Date,c.Value from CXView c, EntityTable e where c.ID_Entity = e.ID "
-        //    //           + " group by c.ID_Entity,c.Date order by c.ID_Entity,c.Date ";
-
-        //    // String sql = " Select ENTITY,DATE,VALUE from CXTable group by ENTITY,DATE order by ENTITY,DATE";
-        //    String sql = " Select ENTITY,DATE,VALUE from CXTable order by ENTITY,DATE";
-
-        //    //判断数据库是否打开
-        //    if (conn.State != ConnectionState.Open)
-        //    {
-        //        OpenConnect();
-        //    }
-        //    SQLiteCommand mycom = new SQLiteCommand(sql, this.conn);  //建立执行命令语句对象
-        //    SQLiteDataReader reader = mycom.ExecuteReader();
-        //    try
-        //    {
-        //        while (reader.Read())
-        //        {
-        //            if (reader.HasRows)
-        //            {
-
-        //                //cxTable.Add(reader.GetString(1), reader.GetFloat(2));
-        //                //DateTime dateTime = Convert.ToDateTime(reader.GetString(1));
-        //                //string datestr = dateTime.ToString("yyyy-MM-dd");
-        //                //if (dateTime.Hour >= 12)
-        //                //{
-        //                //    datestr += "pm";
-        //                //}
-        //                list.Add(reader.GetString(1));
-        //            }
-        //        }
-        //        return list;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        reader.Close();
-        //    }
-        //}
-
-
-
-        ///// <summary>
-        ///// 执行批量插入
-        ///// </summary>
-        //private void InsertSqlStringList(List<string> SqlStringList)
-        //{
-
-        //    SQLiteCommand command = new SQLiteCommand();
-        //    command.Connection = this.conn;
-        //    command.Transaction = myTran;
-        //    try
-        //    {
-        //        for (int i = 0; i < SqlStringList.Count; i++)
-        //        {
-        //            string sql = SqlStringList[i].ToString();
-        //            if (sql.Equals(""))
-        //                return;
-        //            command.CommandText = sql;
-        //            command.ExecuteNonQuery();
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //}
-        ///// <summary>
-        ///// 执行单个sql语句，返回插入结果
-        ///// </summary>
-        ///// <param name="sql"></param>
-        //private void ExecuteOneSql(string sql)
-        //{
-        //    if (sql.Equals(""))
-        //        return;
-        //    SQLiteCommand mycom = new SQLiteCommand();
-        //    mycom.Connection = this.conn;
-        //    mycom.CommandText = sql;
-        //    if (isBegin)
-        //        mycom.Transaction = myTran;
-
-        //    try
-        //    {
-        //        mycom.ExecuteNonQuery();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //}
-        ////执行单个插入语句，返回插入结果
-        //private void InsertOne(String sql)
-        //{
-        //    if (sql.Equals(""))
-        //        return;
-        //    SQLiteCommand mycom = new SQLiteCommand(sql, this.conn, myTran);  //建立执行命令语句对象，其中myTran为事务
-
-        //    try
-        //    {
-        //        mycom.ExecuteNonQuery();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //}
-        ////根据entity,修改备注
-        //public bool ModifyEntityRemark(string entity, string entityremark)
-        //{
-        //    bool flag = false;
-        //    string sql = String.Format("Update EntityTable set ENTITYREMARK = '{0}' where ENTITY = '{1}'", entityremark, entity);
-        //    //判断数据库是否打开
-        //    if (conn.State != ConnectionState.Open)
-        //    {
-        //        OpenConnect();
-        //    }
-        //    SQLiteCommand mycom;
-        //    if (isBegin)
-        //        mycom = new SQLiteCommand(sql, this.conn, this.myTran);  //建立执行命令语句对象
-        //    else
-        //        mycom = new SQLiteCommand(sql, this.conn);  //建立执行命令语句对象
-
-        //    try
-        //    {
-        //        if (mycom.ExecuteNonQuery() > 0)
-        //            flag = true;
-        //        return flag;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //}
-
-        //表ExcelTable的LoadSql
-        private String GetLoadIntoExcelTableSql(string tableDesc, string signal, bool isInfo, int id = 0, double total_hold = 0, double diff_hold = 0, string remark = null)
-        {
-            String sql = String.Format("INSERT OR IGNORE INTO ExcelTable(ID,TableDesc,ExcelSignal,IsInfo,Total_hold,Diff_hold,Remark) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", id, tableDesc, signal, isInfo, total_hold, diff_hold, remark);
-            return sql;
-        }
-        //表KeyTable的LoadSql
-        private String GetLoadIntoKeyTableSql(int idExcel, string keyName, int id = 0, int idGroup = 0)
-        {
-            String sql = String.Format("INSERT OR IGNORE INTO KeyTable (ID,Excel_ID,Group_ID,KeyName) VALUES ({0} ,{1}, {2}, '{3}') ", id, idExcel, idGroup, keyName);
-            return sql;
-        }
-        //表EntityTable的LoadSql
-        private String GetLoadIntoEntityTableSql(int idExcel, string entityName, int id = 0, string remark = "")
-        {
-            String sql = String.Format("INSERT OR IGNORE INTO EntityTable(ID,Excel_ID,EntityName,Remark) VALUES ('{0}','{1}','{2}','{3}')", id, idExcel, entityName, remark);
-            return sql;
-        }
-        //表InfoTable的LoadSql
-        private String GetLoadIntoInfoTableSql(int idKey, int idEntity, string value, int id = 0)
-        {
-            String sql = String.Format("INSERT OR IGNORE into InfoTable ( ID, Key_ID, Entity_ID, Value ) VALUES ('{0}','{1}','{2}','{3}')", id, idKey, idEntity, value);
-            return sql;
-        }
-
-        //表DrawDataTable的LoadSql
-        private String GetLoadIntoDrawDataTableSql(int idExcel, int idEntity, string date, double maxValue, double midValue, double minValue, string detail, int id = 0)
-        {
-            String sql = String.Format("INSERT OR IGNORE into DrawDataTable (ID, Excel_ID, Entity_ID, Date, EntityMaxValue, EntityMidValue, EntityMinValue, Detail) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}')", id, idExcel, idEntity, date, maxValue, midValue, minValue, detail);
-            return sql;
-        }
-
-        ////表GroupTable的LoadSql
-        //private String GetLoadIntoGroupTableSql(int idExcel, string groupName, int id = 0, string remark = "")
-        //{
-        //    String sql = String.Format("INSERT OR IGNORE into GroupTable ( ID, Excel_ID, GroupName, Remark ) VALUES ('{0}','{1}','{2}','{3}')", id, idExcel, groupName, remark);
-        //    return sql;
-        //}
-
-        ////表ExcelTable的InsertSql
-        //private String GetInsertIntoExcelTableSql(bool isInfo, string signal, string tableDesc)
-        //{
-        //    String sql = String.Format("INSERT INTO ExcelTable(TableDesc,ExcelSignal,IsInfo) VALUES ('{0}', '{1}', '{2}' ) ", tableDesc, signal, isInfo);
-        //    return sql;
-        //}
-        ////表KeyTable的InsertSql
-        //private String GetInsertIntoKeyTableSql(int idExcel, int idGroup, string keyName)
-        //{
-        //    String sql = String.Format("INSERT INTO KeyTable ( Excel_ID, Group_ID, KeyName ) values ('{0}','{1}','{2}')", idExcel, idGroup, keyName);
-        //    return sql;
-        //}
-        ////表EntityTable的InsertSql
-        //private String GetInsertIntoEntityTableSql(int idExcel, string entityName, string entityRemark = "")
-        //{
-        //    String sql = String.Format("INSERT INTO EntityTable ( Excel_ID, EntityName, Remark ) VALUES ('{0}','{1}','{2}')", idExcel, entityName, entityRemark);
-        //    return sql;
-        //}
-        //表InfoTable的InsertSql
-        //private String GetInsertIntoInfoTableSql(int idKey, int idEntity, string value)
-        //{
-        //    String sql = String.Format("INSERT INTO InfoTable ( Key_ID, Entity_ID, Value ) VALUES ('{0}','{1}','{2}')", idKey, idEntity, value);
-        //    return sql;
-        //}
-
-        ////表DrawDataTable的InsertSql
-        //private String GetInsertIntoDrawDataTableSql(int idExcel, int idEntity, string date, double maxValue, double midValue, double minValue, string detail)
-        //{
-        //    String sql = String.Format("INSERT INTO DrawDataTable ( Excel_ID, Entity_ID, Date, EntityMaxValue, EntityMidValue, EntityMinValue, Detail ) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", idExcel, idEntity, date, maxValue, midValue, minValue, detail);
-        //    return sql;
-        //}
-
-        ////表GroupTable的InsertSql
-        //private String GetInsertIntoGroupTableSql(int idExcel, string groupName = "未分组", string remark = "")
-        //{
-        //    String sql = String.Format("INSERT INTO GroupTable ( Excel_ID, GroupName, Remark ) VALUES ('{0}','{1}','{2}')", idExcel, groupName, remark);
-        //    return sql;
-        //}
-
-        ///// <summary>
-        ///// 根据signal获取Excel_ID
-        ///// </summary>
-        ///// <param name="signal"></param>
-        ///// <returns></returns>
-        //private int getIdExcel(String signal)
-        //{
-        //    string sql = String.Format("select ID from ExcelTable where ExcelSignal = '{0}'", signal);
-        //    int id = getID(sql);
-        //    return id;
-        //}
-        ///// <summary>
-        ///// 获取“未分组”Group的ID
-        ///// </summary>
-        ///// <param name="idExcel"></param>
-        ///// <returns></returns>
-        //private int getIdGroup(int idExcel)
-        //{
-        //    string sql = String.Format("select ID from GroupTable where Excel_ID = '{0}' and GroupName = '未分组' ", idExcel);
-        //    int id = getID(sql);
-        //    return id;
-        //}
-        ///// <summary>
-        ///// 
-        ///// 获取Key_ID
-        ///// </summary>
-        ///// <param name="idExcel"></param>
-        ///// <param name="keyName"></param>
-        ///// <returns></returns>
-        //private int getIdKey(int idExcel, String keyName)
-        //{
-        //    string sql = String.Format("select ID from KeyTable where Excel_ID = {0} and KeyName = '{1}'", idExcel, keyName);
-        //    int id = getID(sql);
-        //    return id;
-        //}
-        ///// <summary>
-        ///// 获取Entity_ID
-        ///// </summary>
-        ///// <param name="idExcel"></param>
-        ///// <param name="entityName"></param>
-        ///// <returns></returns>
-        //private int getIdEntity(int idExcel, string entityName)
-        //{
-        //    string sql = String.Format("select ID from EntityTable where Excel_ID = {0} and EntityName = '{1}'", idExcel, entityName);
-        //    int id = getID(sql);
-        //    return id;
-        //}
-        //private int getID(string sql)
-        //{
-        //    int id = 0;
-
-        //    SQLiteCommand mycom = new SQLiteCommand();
-        //    mycom.Connection = this.conn;
-        //    mycom.CommandText = sql;
-        //    if (isBegin)
-        //        mycom.Transaction = myTran;
-
-        //    using (mycom)
-        //    {
-        //        try
-        //        {
-        //            id = Convert.ToInt32(mycom.ExecuteScalar());   //查询返回一个值的时候，用ExecuteScalar()更节约资源，快捷                    
-        //        }
-        //        catch { throw; }
-        //    }
-        //    return id;
-        //}
-
-
 
         //*****************************查询功能*******************************
 
@@ -1554,107 +784,6 @@ namespace Revit.Addin.RevitTooltip.Impl
                 }
             }
         }
-
-        ///// <summary>
-        ///// 
-        /////查询CX中的异常点，返回异常的entity值
-        ///// </summary>
-        ///// <param name="threshold">累计预警值threshold</param>
-        ///// <returns>返回list<string></returns>
-        //public List<ParameterData> SelectExceptionalCX1(double threshold)
-        //{
-        //    List<ParameterData> ExceptionalCX = new List<ParameterData>();
-        //    string sql = String.Format("select distinct b.ENTITY from  CXTable b where   b.VALUE > {0} ", threshold);
-
-        //    //判断数据库是否打开
-        //    if (conn.State != ConnectionState.Open)
-        //    {
-        //        OpenConnect();
-        //    }
-        //    //判断是否创建该查询的表（一定要先打开数据库）
-        //    if (!isExist("CXTable", "table"))
-        //    {
-        //        MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
-        //        return ExceptionalCX;
-        //    }
-
-        //    using (SQLiteCommand command = new SQLiteCommand(sql, conn)) //建立执行命令语句对象
-        //    {
-        //        SQLiteDataReader reader = command.ExecuteReader();
-        //        try
-        //        {
-        //            while (reader.Read())
-        //            {
-        //                if (reader.HasRows)
-        //                {
-        //                    ExceptionalCX.Add(new ParameterData(reader.GetString(0), reader.GetString(0)));
-        //                }
-        //            }
-        //            return ExceptionalCX;
-
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            throw e;
-        //        }
-        //        finally
-        //        {
-        //            reader.Close();  //关闭
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 
-        /////查询CX中的异常点，返回异常的entity值
-        ///// </summary>
-        ///// <param name="D_value">相邻差值预警D_value</param>
-        ///// <returns>返回list<string></returns>
-        //public List<ParameterData> SelectExceptionalCX2(double D_value)
-        //{
-        //    List<ParameterData> ExceptionalCX = new List<ParameterData>();
-        //    string sql = String.Format("select distinct b.ENTITY from CXTable a, CXTable b where a.ENTITY = b.ENTITY and b.ID - a.ID = 1 and b.VALUE - a.VALUE > {0} ", D_value);
-
-        //    //判断数据库是否打开
-        //    if (conn.State != ConnectionState.Open)
-        //    {
-        //        OpenConnect();
-        //    }
-        //    //判断是否创建该查询的表（一定要先打开数据库）
-        //    if (!isExist("CXTable", "table"))
-        //    {
-        //        MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
-        //        return ExceptionalCX;
-        //    }
-
-        //    using (SQLiteCommand command = new SQLiteCommand(sql, conn)) //建立执行命令语句对象
-        //    {
-        //        SQLiteDataReader reader = command.ExecuteReader();
-        //        try
-        //        {
-        //            while (reader.Read())
-        //            {
-        //                if (reader.HasRows)
-        //                {
-        //                    ExceptionalCX.Add(new ParameterData(reader.GetString(0), reader.GetString(0)));
-        //                }
-        //            }
-        //            return ExceptionalCX;
-
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            throw e;
-        //        }
-        //        finally
-        //        {
-        //            reader.Close();  //关闭
-        //        }
-        //    }
-        //}
-
-
-
 
         /// <summary>
         /// 查询InfoTable
@@ -1782,35 +911,19 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             else if (StartDate == null)
             {
-                end = ((DateTime)EndDate).ToString("yyyy-MM-dd");
-                //if (((DateTime)EndDate).Hour >= 12)
-                //{
-                //    end += "pm";
-                //}
-                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date <= '{1}' order by Date", EntityName, end);
+                end = ((DateTime)EndDate).ToString("yyyy-MM-dd HH:mm:ss");
+                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and Date <= '{1}' order by Date", EntityName, end);
             }
             else if (EndDate == null)
             {
-                start = ((DateTime)StartDate).ToString("yyyy-MM-dd");
-                //if (((DateTime)StartDate).Hour >= 12)
-                //{
-                //    start += "pm";
-                //}
-                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date >= '{1}' order by Date", EntityName, start);
+                start = ((DateTime)StartDate).ToString("yyyy-MM-dd HH:mm:ss");
+                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and Date >= '{1}' order by Date", EntityName, start);
             }
             else
             {
-                end = ((DateTime)EndDate).ToString("yyyy-MM-dd");
-                //if (((DateTime)EndDate).Hour >= 12)
-                //{
-                //    end += "pm";
-                //}
-                start = ((DateTime)StartDate).ToString("yyyy-MM-dd");
-                //if (((DateTime)StartDate).Hour >= 12)
-                //{
-                //    start += "pm";
-                //}
-                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and dt.date between '{1}' and '{2}' order by Date", EntityName, start, end);
+                end = ((DateTime)EndDate).ToString("yyyy-MM-dd HH:mm:ss");
+                start = ((DateTime)StartDate).ToString("yyyy-MM-dd HH:mm:ss");
+                sql = String.Format("select Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail from DrawTable dt, EntityTable et where dt.Entity_ID = et.ID and et.EntityName = '{0}' and Date between '{1}' and '{2}' order by Date", EntityName, start, end);
             }
             if (conn.State != ConnectionState.Open)
             {
@@ -1824,15 +937,21 @@ namespace Revit.Addin.RevitTooltip.Impl
                     while (reader.Read())
                     {
                         DrawData drawData = new DrawData();
-                        if (reader.HasRows)
-                        {
-                            drawData.Date = Convert.ToDateTime(reader.GetString(0));
-                            drawData.MaxValue = reader.GetFloat(1);
-                            drawData.MidValue = reader.GetFloat(2);
-                            drawData.MinValue = reader.GetFloat(3);
-                            drawData.Detail = reader.GetString(4);
-                            drawEntityData.Data.Add(drawData);
-                        }
+
+                        drawData.Date = Convert.ToDateTime(reader.GetString(0));
+                        drawData.MaxValue = reader.GetFloat(1);
+                        drawData.MidValue = reader.GetFloat(2);
+                        drawData.MinValue = reader.GetFloat(3);
+                        drawData.Detail = reader.GetString(4);
+                        drawEntityData.Data.Add(drawData);
+                    }
+                    reader.Close();
+                    command.CommandText = string.Format("Select Total_hold,Diff_hold From ExcelTable,EntityTable Where EntityTable.EntityName='{0}' and EntityTable.ExcelSignal=ExcelTable.ExcelSignal", EntityName);
+                    reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        drawEntityData.Total_hold = reader.GetFloat(0);
+                        drawEntityData.Diff_hold = reader.GetFloat(1);
                     }
                 }
                 catch (Exception e)
@@ -1841,7 +960,10 @@ namespace Revit.Addin.RevitTooltip.Impl
                 }
                 finally
                 {
-                    reader.Close();
+                    if (!reader.IsClosed)
+                    {
+                        reader.Close();
+                    }
                     conn.Close();
                 }
             }
@@ -1993,6 +1115,10 @@ namespace Revit.Addin.RevitTooltip.Impl
                             entityName = reader.GetString(1);
                         }
                         first = next;
+                    }
+                    //最后一个
+                    if (isErr) {
+                        maps[entityName].ErrMsg += "Diff";
                     }
                 }
                 catch (Exception e)

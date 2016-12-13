@@ -5,6 +5,7 @@ using Revit.Addin.RevitTooltip.Dto;
 using BIMCoder.OfficeHelper.ExcelCommon;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Revit.Addin.RevitTooltip.Impl
 {
@@ -108,7 +109,14 @@ namespace Revit.Addin.RevitTooltip.Impl
                                         string value = eHelper.GetCellValue(r, c);
                                         if (!string.IsNullOrWhiteSpace(value))
                                         {
-                                            float dValue =  float.Parse(value);
+                                            float dValue = 0;
+                                            try
+                                            {
+                                                dValue = float.Parse(value);
+                                            }
+                                            catch (Exception) {
+                                                continue;
+                                            }
                                             dValue = (float)Math.Round(dValue, 2, MidpointRounding.AwayFromZero);
                                             double date = Convert.ToDouble(eHelper.GetCellValue(0, c));
                                             DateTime dateTime;
@@ -161,7 +169,15 @@ namespace Revit.Addin.RevitTooltip.Impl
                                     continue;
                                 }
 
-                                float min = float.Parse(_min);
+                                float min = 0;
+                                try
+                                {
+                                    min = float.Parse(_min);
+                                }
+                                catch (Exception)
+                                {
+                                    continue;
+                                }
                                 min = (float)Math.Round(min,2,MidpointRounding.AwayFromZero);
                                 float mid = min;
                                 float max = min;
@@ -173,7 +189,15 @@ namespace Revit.Addin.RevitTooltip.Impl
                                     string value = eHelper.GetCellValue(r, c);
                                     if (!string.IsNullOrWhiteSpace(value))
                                     {
-                                        float dValue = float.Parse( value);
+                                        float dValue = 0;
+                                        try
+                                        {
+                                            dValue = float.Parse(value);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            continue;
+                                        }
                                         dValue = (float)Math.Round(dValue, 2, MidpointRounding.AwayFromZero);
                                         text.Append(eHelper.GetCellValue(r, 0) + ":" + dValue + ";");
                                         //计算最小值

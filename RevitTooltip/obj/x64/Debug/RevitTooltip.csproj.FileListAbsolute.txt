@@ -48,9 +48,8 @@ C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sou
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.g.resources
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.Properties.Resources.resources
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.AboutForm.resources
+C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.UI.NewImageForm.resources
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.UI.NewSettings.resources
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.csproj.GenerateResource.Cache
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.dll
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.pdb
-C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.UI.NewImageForm.resources
-C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.csprojResolveAssemblyReference.cache

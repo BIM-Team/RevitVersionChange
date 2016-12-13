@@ -21,7 +21,7 @@ namespace Revit.Addin.RevitTooltip.UI
     /// <summary>
     /// ImageControl.xaml 的交互逻辑
     /// </summary>
-    public partial class ImageControl : Page,IDockablePaneProvider
+    public partial class ImageControl : Page, IDockablePaneProvider
     {
         private Guid m_guid = new Guid("502805E8-5698-4428-A15B-0E8BADE393E0");
         public Guid Id
@@ -33,26 +33,32 @@ namespace Revit.Addin.RevitTooltip.UI
             InitializeComponent();
         }
         private static ImageControl _image;
-        public static ImageControl Instance(){
-            if (_image == null) {
+        public static ImageControl Instance()
+        {
+            if (_image == null)
+            {
                 _image = new ImageControl();
             }
             return _image;
-            } 
+        }
         private void dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CEntityName selectedItem = this.dataGrid.SelectedItem as CEntityName;
-            if (selectedItem == null) {
+            if (selectedItem == null)
+            {
+                NewImageForm.Instance().EntityData = null;
                 return;
             }
             DateTime? start = this.startTime.SelectedDate as DateTime?;
-            DateTime? end = this.startTime.SelectedDate as DateTime?;
-            NewImageForm.Instance().EntityData= App.Instance.Sqlite.SelectDrawEntityData(selectedItem.EntityName, start, end);
-            if (!NewImageForm.Instance().Visible) {
-            NewImageForm.Instance().Show();
+            DateTime? end = this.endTime.SelectedDate as DateTime?;
+            NewImageForm.Instance().EntityData = App.Instance.Sqlite.SelectDrawEntityData(selectedItem.EntityName, start, end);
+            if (!NewImageForm.Instance().Visible)
+            {
+                NewImageForm.Instance().Show();
             }
         }
-        public void setDataSource(IEnumerable itemsSource) {
+        public void setDataSource(IEnumerable itemsSource)
+        {
             dataGrid.ItemsSource = itemsSource;
         }
 
@@ -88,17 +94,22 @@ namespace Revit.Addin.RevitTooltip.UI
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ExcelTable excel = this.comboBox.SelectedItem as ExcelTable;
-            if (excel == null)
+
+            List<CEntityName> all_entity = null;
+            if (excel != null)
             {
-                return;
+                all_entity = App.Instance.Sqlite.SelectAllEntitiesAndErr(excel.Signal);
             }
-            List<CEntityName> all_entity = App.Instance.Sqlite.SelectAllEntitiesAndErr(excel.Signal);
             this.dataGrid.ItemsSource = all_entity;
+            this.startTime.SelectedDate = null;
+            this.startBox.Text = "";
+            this.endTime.SelectedDate = null;
+            this.endBox.Text = "";
         }
         public void setExcelType(System.Collections.IEnumerable itemsSource)
         {
             this.comboBox.ItemsSource = itemsSource;
         }
     }
-    
+
 }
