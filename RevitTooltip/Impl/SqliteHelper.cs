@@ -1416,10 +1416,10 @@ namespace Revit.Addin.RevitTooltip.Impl
                     {
                         buider1.Append(reader.GetInt32(0)).Append(",");
                     }
+                    reader.Close();
                     buider1.Remove(buider1.Length - 1, 1);
                     string sql_reset = string.Format("update KeyTable set Group_ID=NULL where ID in ({0});", buider1.ToString());
                     command.CommandText = sql_reset;
-                    reader.Close();
                     command.ExecuteNonQuery();
                 }
                 else
@@ -1475,6 +1475,57 @@ namespace Revit.Addin.RevitTooltip.Impl
                 conn.Close();
             }
             return flag;
+        }
+        public bool DeleteGroup(int Group_ID)
+        {
+            bool result = false;
+            try
+            {
+                if (conn.State != ConnectionState.Open) {
+                conn.Open();
+                }
+                string sql = string.Format("Update keyTable Set Group_ID=NULL Where Group_ID={0};Delete From GroupTable Where ID={0}", Group_ID);
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                command.ExecuteNonQuery();
+                result = true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                conn.Close();
+            }
+            return result;
+        }
+        public Group AddNewGroup(string Signal, string GroupName)
+        {
+            Group result = null;
+            string sql = string.Format("DELETE FROM sqlite_sequence;Insert into GroupTable(ExcelSignal,GroupName) values ('{0}','{1}')", Signal, GroupName);
+            string select_sql = string.Format("Select ID from GroupTable where GroupName='{0}' and ExcelSignal='{1}'", GroupName, Signal);
+            try
+            {
+                if (conn.State != ConnectionState.Open) {
+                conn.Open();
+                }
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                command.ExecuteNonQuery();
+                command.CommandText = select_sql;
+                int id = Convert.ToInt32(command.ExecuteScalar());
+                result = new Group();
+                result.Id = id;
+                result.GroupName = GroupName;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                conn.Close();
+            }
+            return result;
         }
     }
 }

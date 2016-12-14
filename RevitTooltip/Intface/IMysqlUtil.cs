@@ -31,12 +31,8 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <summary>
         /// 删除一个Group
         /// </summary>
-        bool DeleteKeyGroup(int Group_ID);
+        bool DeleteGroup(int Group_ID);
 
-        /// <summary>
-        /// 修改某个Group的GroupName
-        /// </summary>
-        bool ModifyKeyGroup(int Group_ID, string GroupName);
 
         /// <summary>
         /// 添加一些属性名到某一Group
@@ -74,24 +70,12 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="signal">表的简称</param>
         /// <returns></returns>
         List<Group> loadGroupForAExcel(string signal);
-        /// <summary>
-        /// 通过Group_Id查询所有与之相关的KeyName
-        /// </summary>
-        /// <param name="group_id"></param>
-        /// <returns></returns>
-        //List<CKeyName> loadKeyNameForAGroup(int group_id);
         ///// <summary>
         ///// 通过Signal来查询与之相关的所有的KeyName
         ///// </summary>
         ///// <param name="signal"></param>
         ///// <returns></returns>
         List<CKeyName> loadKeyNameForExcelAndGroup(string signal,int Group_id=-1);
-        /// <summary>
-        /// 修改Key的分组
-        /// </summary>
-        /// <param name="Group_id">为Null时，表示取消</param>
-        /// <param name="Key_id">KeyName的ID</param>
-        void updateKeyGroup(int? Group_id,int Key_id);
 
         /// <summary>
         /// 插入失败，而事务又自动提交后，事务无法全部回退

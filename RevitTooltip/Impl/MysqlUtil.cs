@@ -663,15 +663,29 @@ namespace Revit.Addin.RevitTooltip.Impl
             return result;
         }
 
-        public bool DeleteKeyGroup(int Group_ID)
+        public bool DeleteGroup(int Group_ID)
         {
-            throw new NotImplementedException();
+            bool result = false;
+            MySqlConnection conn = new MySqlConnection(this.connectMessage);
+            try
+            {
+                conn.Open();
+                string sql = string.Format("Update keyTable Set Group_ID=NULL Where Group_ID={0};Delete From GroupTable Where ID={0}", Group_ID);
+                MySqlCommand command = new MySqlCommand(sql, conn);
+                command.ExecuteNonQuery();
+                result = true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally {
+                conn.Close();
+                conn.Dispose();
+            }
+            return result;
         }
 
-        public bool ModifyKeyGroup(int Group_ID, string GroupName)
-        {
-            throw new NotImplementedException();
-        }
 
         public bool AddKeysToGroup(int Group_ID, List<int> Key_Ids)
         {
@@ -693,10 +707,10 @@ namespace Revit.Addin.RevitTooltip.Impl
                     {
                         buider1.Append(reader.GetInt32(0)).Append(",");
                     }
+                    reader.Close();
                     buider1.Remove(buider1.Length - 1, 1);
                     string sql_reset = string.Format("update KeyTable set Group_ID=NULL where ID in ({0});", buider1.ToString());
                     command.CommandText = sql_reset;
-                    reader.Close();
                     command.ExecuteNonQuery();
                 }
                 else {
@@ -760,10 +774,6 @@ namespace Revit.Addin.RevitTooltip.Impl
             return result;
         }
 
-        public void updateKeyGroup(int? Group_id, int Key_id)
-        {
-            
-        }
 
         public void RollBack(string timeStamp)
         {

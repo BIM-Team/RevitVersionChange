@@ -89,5 +89,12 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="total_hold"></param>
         /// <param name="diff_hold"></param>
         bool ModifyThreshold(string signal, float total_hold, float diff_hold);
+        /// <summary>
+        /// 删除分组
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        bool DeleteGroup(int id);
+        Group AddNewGroup(string signal, string newGroupName);
     }
 }

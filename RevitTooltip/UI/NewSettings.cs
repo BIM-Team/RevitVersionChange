@@ -256,7 +256,8 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     App.Instance.Sqlite.ModifyThreshold(Signal, Total_hold, Diff_hold);
                 }
-                else if(App.Instance.MySql.IsReady){
+                else if (App.Instance.MySql.IsReady)
+                {
                     App.Instance.MySql.ModifyThreshold(Signal, Total_hold, Diff_hold);
                 }
             }
@@ -278,16 +279,17 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 List<Group> groups = null;
                 List<CKeyName> keyNames = null;
-                if (useSqlitePro.Checked) {
+                if (useSqlitePro.Checked)
+                {
                     groups = App.Instance.Sqlite.loadGroupForAExcel(signal);
                     keyNames = App.Instance.Sqlite.loadKeyNameForExcelAndGroup(signal);
-                } else if (App.Instance.MySql.IsReady) {
+                }
+                else if (App.Instance.MySql.IsReady)
+                {
                     groups = App.Instance.MySql.loadGroupForAExcel(signal);
                     keyNames = App.Instance.MySql.loadKeyNameForExcelAndGroup(signal);
                 }
-                //CombGroup
                 this.combGroup.DataSource = groups;
-                ////dataGrid
                 this.dataGridView2.DataSource = keyNames;
             }
             else
@@ -304,7 +306,8 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 this.dataGridView2.DataSource = App.Instance.Sqlite.loadKeyNameForExcelAndGroup(signal, id);
             }
-            else if (App.Instance.MySql.IsReady) {
+            else if (App.Instance.MySql.IsReady)
+            {
                 this.dataGridView2.DataSource = App.Instance.MySql.loadKeyNameForExcelAndGroup(signal, id);
             }
 
@@ -314,6 +317,7 @@ namespace Revit.Addin.RevitTooltip.UI
         private void button5_Click(object sender, EventArgs e)
         {
             int group_id;
+            string signal = this.combExcel.SelectedValue.ToString();
             if (this.combGroup.SelectedValue == null)
             {
                 string newGroupName = combGroup.Text;
@@ -322,12 +326,24 @@ namespace Revit.Addin.RevitTooltip.UI
                     MessageBox.Show("无效的组名");
                     return;
                 }
-                string signal = this.combExcel.SelectedValue.ToString();
-                Group newOne = App.Instance.MySql.AddNewGroup(signal, newGroupName);
+                Group newOne = null;
+                if (useSqlitePro.Checked)
+                {
+                    newOne = App.Instance.Sqlite.AddNewGroup(signal, newGroupName);
+                }
+                else if (App.Instance.MySql.IsReady)
+                {
+                    newOne = App.Instance.MySql.AddNewGroup(signal, newGroupName);
+                }
+                else {
+                    MessageBox.Show("Mysql暂时不可用");
+                    return;
+                }
                 group_id = newOne.Id;
             }
-            else {
-           group_id = Convert.ToInt32(this.combGroup.SelectedValue.ToString());
+            else
+            {
+                group_id = Convert.ToInt32(this.combGroup.SelectedValue.ToString());
 
             }
             List<int> OK_ids = new List<int>();
@@ -342,12 +358,16 @@ namespace Revit.Addin.RevitTooltip.UI
             if (useSqlitePro.Checked)
             {
                 tag = App.Instance.Sqlite.AddKeysToGroup(group_id, OK_ids);
+                this.combGroup.DataSource= App.Instance.Sqlite.loadGroupForAExcel(signal);
             }
-            else if (App.Instance.MySql.IsReady) {
+            else if (App.Instance.MySql.IsReady)
+            {
                 tag = App.Instance.MySql.AddKeysToGroup(group_id, OK_ids);
+                this.combGroup.DataSource = App.Instance.MySql.loadGroupForAExcel(signal);
             }
             if (tag)
             {
+
                 MessageBox.Show("修改成功");
             }
         }
@@ -383,8 +403,57 @@ namespace Revit.Addin.RevitTooltip.UI
                 tables = App.Instance.MySql.ListExcelsMessage(true);
             }
             this.combExcel.DataSource = tables;
-            //combExcel.DisplayMember = "CurrentFile";
-            //combExcel.ValueMember = "Signal";
+            this.combGroup.DataSource = new List<Group>();
+            this.combGroup.Text = "";
+            this.dataGridView2.DataSource = new List<CKeyName>();
+        }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+            Group select_Group = combGroup.SelectedItem as Group;
+            if (select_Group != null)
+            {
+                bool tag = false;
+                try
+                {
+                    if (useSqlitePro.Checked)
+                    {
+                        App.Instance.Sqlite.DeleteGroup(select_Group.Id);
+                        tag = true;
+                    }
+                    else if (App.Instance.MySql.IsReady)
+                    {
+                        App.Instance.MySql.DeleteGroup(select_Group.Id);
+                        tag = true;
+                    }
+                    if (tag)
+                    {
+                        string signal = combExcel.SelectedValue.ToString();
+                        List<Group> groups = new List<Group>();
+                        List<CKeyName> keyNames = new List<CKeyName>();
+                        if (useSqlitePro.Checked)
+                        {
+                            groups = App.Instance.Sqlite.loadGroupForAExcel(signal);
+                            keyNames = App.Instance.Sqlite.loadKeyNameForExcelAndGroup(signal);
+                        }
+                        else if (App.Instance.MySql.IsReady)
+                        {
+                            groups = App.Instance.MySql.loadGroupForAExcel(signal);
+                            keyNames = App.Instance.MySql.loadKeyNameForExcelAndGroup(signal);
+                        }
+                        //CombGroup
+                        this.combGroup.DataSource = groups;
+                        this.combGroup.Text = "";
+                        ////dataGrid
+                        this.dataGridView2.DataSource = keyNames;
+                        MessageBox.Show("删除成功");
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("删除失败");
+                }
+            }
         }
     }
 }

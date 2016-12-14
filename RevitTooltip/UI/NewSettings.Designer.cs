@@ -74,6 +74,7 @@
             this.tabPagePro = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.useSqlitePro = new System.Windows.Forms.CheckBox();
             this.button9 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.combGroup = new System.Windows.Forms.ComboBox();
@@ -81,10 +82,10 @@
             this.label12 = new System.Windows.Forms.Label();
             this.combExcel = new System.Windows.Forms.ComboBox();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
-            this.useSqlitePro = new System.Windows.Forms.CheckBox();
             this.Column5 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label13 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPageDB.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -577,11 +578,12 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dataGridView2);
             this.splitContainer1.Size = new System.Drawing.Size(531, 257);
-            this.splitContainer1.SplitterDistance = 203;
+            this.splitContainer1.SplitterDistance = 231;
             this.splitContainer1.TabIndex = 0;
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.label13);
             this.groupBox4.Controls.Add(this.useSqlitePro);
             this.groupBox4.Controls.Add(this.button9);
             this.groupBox4.Controls.Add(this.button5);
@@ -592,14 +594,25 @@
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox4.Location = new System.Drawing.Point(0, 0);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(203, 257);
+            this.groupBox4.Size = new System.Drawing.Size(231, 257);
             this.groupBox4.TabIndex = 4;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "分组信息";
             // 
+            // useSqlitePro
+            // 
+            this.useSqlitePro.AutoSize = true;
+            this.useSqlitePro.Location = new System.Drawing.Point(67, 20);
+            this.useSqlitePro.Name = "useSqlitePro";
+            this.useSqlitePro.Size = new System.Drawing.Size(96, 16);
+            this.useSqlitePro.TabIndex = 6;
+            this.useSqlitePro.Text = "使用本地文件";
+            this.useSqlitePro.UseVisualStyleBackColor = true;
+            this.useSqlitePro.CheckedChanged += new System.EventHandler(this.useSqlitePro_CheckedChanged);
+            // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(118, 187);
+            this.button9.Location = new System.Drawing.Point(138, 186);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(75, 23);
             this.button9.TabIndex = 5;
@@ -609,7 +622,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(8, 187);
+            this.button5.Location = new System.Drawing.Point(26, 186);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 4;
@@ -623,17 +636,18 @@
             this.combGroup.FormattingEnabled = true;
             this.combGroup.Items.AddRange(new object[] {
             "新建"});
-            this.combGroup.Location = new System.Drawing.Point(67, 121);
+            this.combGroup.Location = new System.Drawing.Point(65, 120);
             this.combGroup.Name = "combGroup";
             this.combGroup.Size = new System.Drawing.Size(121, 20);
             this.combGroup.TabIndex = 3;
-            this.combGroup.ValueMember = "Id";
+            this.combGroup.Text = "选择分组";
+            this.combGroup.ValueMember = "ID";
             this.combGroup.SelectionChangeCommitted += new System.EventHandler(this.combGroup_SelectionChangeCommitted);
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 65);
+            this.label11.Location = new System.Drawing.Point(4, 65);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(59, 12);
             this.label11.TabIndex = 0;
@@ -642,7 +656,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(12, 124);
+            this.label12.Location = new System.Drawing.Point(10, 123);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(41, 12);
             this.label12.TabIndex = 2;
@@ -653,7 +667,7 @@
             this.combExcel.DisplayMember = "CurrentFile";
             this.combExcel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.combExcel.FormattingEnabled = true;
-            this.combExcel.Location = new System.Drawing.Point(67, 62);
+            this.combExcel.Location = new System.Drawing.Point(65, 62);
             this.combExcel.Name = "combExcel";
             this.combExcel.Size = new System.Drawing.Size(121, 20);
             this.combExcel.TabIndex = 1;
@@ -676,19 +690,8 @@
             this.dataGridView2.RowTemplate.Height = 23;
             this.dataGridView2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView2.Size = new System.Drawing.Size(324, 257);
+            this.dataGridView2.Size = new System.Drawing.Size(296, 257);
             this.dataGridView2.TabIndex = 0;
-            // 
-            // useSqlitePro
-            // 
-            this.useSqlitePro.AutoSize = true;
-            this.useSqlitePro.Location = new System.Drawing.Point(67, 20);
-            this.useSqlitePro.Name = "useSqlitePro";
-            this.useSqlitePro.Size = new System.Drawing.Size(96, 16);
-            this.useSqlitePro.TabIndex = 6;
-            this.useSqlitePro.Text = "使用本地文件";
-            this.useSqlitePro.UseVisualStyleBackColor = true;
-            this.useSqlitePro.CheckedChanged += new System.EventHandler(this.useSqlitePro_CheckedChanged);
             // 
             // Column5
             // 
@@ -699,7 +702,6 @@
             this.Column5.HeaderText = "选择";
             this.Column5.IndeterminateValue = "";
             this.Column5.Name = "Column5";
-            this.Column5.ReadOnly = true;
             this.Column5.TrueValue = "True";
             // 
             // Column7
@@ -720,6 +722,18 @@
             this.Column6.Name = "Column6";
             this.Column6.ReadOnly = true;
             this.Column6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label13.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.label13.Location = new System.Drawing.Point(194, 124);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(29, 12);
+            this.label13.TabIndex = 7;
+            this.label13.Text = "删除";
+            this.label13.Click += new System.EventHandler(this.label13_Click);
             // 
             // NewSettings
             // 
@@ -819,5 +833,6 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
+        private System.Windows.Forms.Label label13;
     }
 }
