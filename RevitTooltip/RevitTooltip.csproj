@@ -175,6 +175,9 @@
     <Compile Include="UI\NewSettings.Designer.cs">
       <DependentUpon>NewSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\TabItemControl.xaml.cs">
+      <DependentUpon>TabItemControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -243,6 +246,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\ImageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\TabItemControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

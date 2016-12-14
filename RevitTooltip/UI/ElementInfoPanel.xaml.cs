@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using Autodesk.Revit.UI;
 using Revit.Addin.RevitTooltip.Dto;
 using System.Collections.ObjectModel;
+using Revit.Addin.RevitTooltip.UI;
 
 namespace Revit.Addin.RevitTooltip
 {
@@ -43,6 +44,18 @@ namespace Revit.Addin.RevitTooltip
                 }
             //添加备注列
             list.Add(new ParameterData("备注", infoEntityData.Remark));
+            Dictionary<string,List<string>> groupMsg=infoEntityData.GroupMsg;
+            foreach (string groupName in groupMsg.Keys) {
+                    TabItem item = new TabItem() { Header = groupName};
+                TabItemControl Itemcontent = new TabItemControl();
+                item.Content = Itemcontent;
+                List<ParameterData> content_data = new List<ParameterData>();
+                foreach (string keyName in groupMsg[groupName]) {
+                    content_data.Add(new ParameterData(keyName, data[keyName]));
+                }
+                    Itemcontent.Update(content_data);
+                    this.tabControl.Items.Add(item);
+            }
             }
             elementInfoHost.Update(list);
         }

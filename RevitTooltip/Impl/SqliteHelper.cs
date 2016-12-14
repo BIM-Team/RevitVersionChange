@@ -815,7 +815,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 conn.Open();
             }
             string getDataSql = String.Format("select KeyName, Value from KeyTable kt, EntityTable et,InfoTable it where it.Key_ID = kt.ID and it.Entity_ID = et.ID and et.EntityName = '{0}'", EntityName);
-            string getGroupMsgSql = String.Format("select GroupName, KeyName from GroupTable gt, KeyTable kt, EntityTable et where kt.Group_ID = gt.ID and gt.ExcelSignal = et.ExcelSignal and et.EntityName = '{0}' order by GroupName ", EntityName);
+            string getGroupMsgSql = String.Format("select GroupName, KeyName from GroupTable gt, KeyTable kt, EntityTable et where kt.Group_ID = gt.ID and gt.ExcelSignal = et.ExcelSignal and et.EntityName = '{0}' order by gt.ID ", EntityName);
             using (SQLiteCommand command = new SQLiteCommand(getDataSql, conn))
             {
                 SQLiteDataReader reader = command.ExecuteReader();

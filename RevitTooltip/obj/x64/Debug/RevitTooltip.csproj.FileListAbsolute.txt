@@ -40,11 +40,13 @@ C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sou
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\ElementInfoHost.g.cs
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\ElementInfoPanel.g.cs
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\ImageControl.g.cs
+C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\TabItemControl.g.cs
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\GeneratedInternalTypeHelper.g.cs
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip_MarkupCompile.cache
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip_MarkupCompile.lref
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\ElementInfoPanel.baml
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\ImageControl.baml
+C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\UI\TabItemControl.baml
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.g.resources
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.Properties.Resources.resources
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.AboutForm.resources
