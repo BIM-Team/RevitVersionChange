@@ -62,6 +62,8 @@
             this.textFilePath = new System.Windows.Forms.TextBox();
             this.button4 = new System.Windows.Forms.Button();
             this.tabPageThreshold = new System.Windows.Forms.TabPage();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.useSqliteThreshold = new System.Windows.Forms.CheckBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -79,10 +81,10 @@
             this.label12 = new System.Windows.Forms.Label();
             this.combExcel = new System.Windows.Forms.ComboBox();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.useSqlitePro = new System.Windows.Forms.CheckBox();
             this.Column5 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabPageDB.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -90,6 +92,10 @@
             this.tabPageFile.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabPageThreshold.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tabPagePro.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -439,7 +445,7 @@
             // 
             // tabPageThreshold
             // 
-            this.tabPageThreshold.Controls.Add(this.dataGridView1);
+            this.tabPageThreshold.Controls.Add(this.splitContainer2);
             this.tabPageThreshold.Location = new System.Drawing.Point(4, 22);
             this.tabPageThreshold.Name = "tabPageThreshold";
             this.tabPageThreshold.Padding = new System.Windows.Forms.Padding(3);
@@ -447,6 +453,36 @@
             this.tabPageThreshold.TabIndex = 1;
             this.tabPageThreshold.Text = "阈值设定";
             this.tabPageThreshold.UseVisualStyleBackColor = true;
+            // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer2.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.useSqliteThreshold);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.dataGridView1);
+            this.splitContainer2.Size = new System.Drawing.Size(531, 257);
+            this.splitContainer2.SplitterDistance = 32;
+            this.splitContainer2.TabIndex = 1;
+            // 
+            // useSqliteThreshold
+            // 
+            this.useSqliteThreshold.AutoSize = true;
+            this.useSqliteThreshold.Location = new System.Drawing.Point(29, 7);
+            this.useSqliteThreshold.Name = "useSqliteThreshold";
+            this.useSqliteThreshold.Size = new System.Drawing.Size(96, 16);
+            this.useSqliteThreshold.TabIndex = 1;
+            this.useSqliteThreshold.Text = "使用本地文件";
+            this.useSqliteThreshold.UseVisualStyleBackColor = true;
+            this.useSqliteThreshold.CheckedChanged += new System.EventHandler(this.useSqliteThreshold_CheckedChanged);
             // 
             // dataGridView1
             // 
@@ -463,11 +499,11 @@
             this.Column8});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.dataGridView1.Location = new System.Drawing.Point(3, 3);
+            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 23;
             this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridView1.Size = new System.Drawing.Size(531, 257);
+            this.dataGridView1.Size = new System.Drawing.Size(531, 221);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEndEdit);
             // 
@@ -546,6 +582,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.useSqlitePro);
             this.groupBox4.Controls.Add(this.button9);
             this.groupBox4.Controls.Add(this.button5);
             this.groupBox4.Controls.Add(this.combGroup);
@@ -583,11 +620,10 @@
             // combGroup
             // 
             this.combGroup.DisplayMember = "GroupName";
-            this.combGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.combGroup.FormattingEnabled = true;
             this.combGroup.Items.AddRange(new object[] {
             "新建"});
-            this.combGroup.Location = new System.Drawing.Point(67, 108);
+            this.combGroup.Location = new System.Drawing.Point(67, 121);
             this.combGroup.Name = "combGroup";
             this.combGroup.Size = new System.Drawing.Size(121, 20);
             this.combGroup.TabIndex = 3;
@@ -597,7 +633,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 42);
+            this.label11.Location = new System.Drawing.Point(6, 65);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(59, 12);
             this.label11.TabIndex = 0;
@@ -606,7 +642,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(12, 111);
+            this.label12.Location = new System.Drawing.Point(12, 124);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(41, 12);
             this.label12.TabIndex = 2;
@@ -617,7 +653,7 @@
             this.combExcel.DisplayMember = "CurrentFile";
             this.combExcel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.combExcel.FormattingEnabled = true;
-            this.combExcel.Location = new System.Drawing.Point(67, 39);
+            this.combExcel.Location = new System.Drawing.Point(67, 62);
             this.combExcel.Name = "combExcel";
             this.combExcel.Size = new System.Drawing.Size(121, 20);
             this.combExcel.TabIndex = 1;
@@ -633,17 +669,26 @@
             this.dataGridView2.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column5,
             this.Column7,
-            this.Column6,
-            this.Column10});
+            this.Column6});
             this.dataGridView2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView2.Location = new System.Drawing.Point(0, 0);
             this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.ReadOnly = true;
             this.dataGridView2.RowTemplate.Height = 23;
             this.dataGridView2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dataGridView2.Size = new System.Drawing.Size(324, 257);
             this.dataGridView2.TabIndex = 0;
+            // 
+            // useSqlitePro
+            // 
+            this.useSqlitePro.AutoSize = true;
+            this.useSqlitePro.Location = new System.Drawing.Point(67, 20);
+            this.useSqlitePro.Name = "useSqlitePro";
+            this.useSqlitePro.Size = new System.Drawing.Size(96, 16);
+            this.useSqlitePro.TabIndex = 6;
+            this.useSqlitePro.Text = "使用本地文件";
+            this.useSqlitePro.UseVisualStyleBackColor = true;
+            this.useSqlitePro.CheckedChanged += new System.EventHandler(this.useSqlitePro_CheckedChanged);
             // 
             // Column5
             // 
@@ -676,14 +721,6 @@
             this.Column6.ReadOnly = true;
             this.Column6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
-            // Column10
-            // 
-            this.Column10.DataPropertyName = "Odr";
-            this.Column10.HeaderText = "顺序";
-            this.Column10.Name = "Column10";
-            this.Column10.ReadOnly = true;
-            this.Column10.Visible = false;
-            // 
             // NewSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -705,6 +742,11 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tabPageThreshold.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel1.PerformLayout();
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.tabPagePro.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -771,9 +813,11 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.CheckBox useSqliteThreshold;
+        private System.Windows.Forms.CheckBox useSqlitePro;
         private System.Windows.Forms.DataGridViewCheckBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column10;
     }
 }

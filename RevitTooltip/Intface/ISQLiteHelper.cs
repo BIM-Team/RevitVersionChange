@@ -51,7 +51,43 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="Remark">备注</param>
         /// <returns>是否成功</returns>
         bool ModifyEntityRemark(string EntityName, string Remark);
-
-        
+        /// <summary>
+        /// 用于回退
+        /// </summary>
+        /// <param name="timeStamp"></param>
+        void RollBack(string timeStamp);
+        /// <summary>
+        /// 列举Threshold
+        /// </summary>
+        /// <param name="isInfo"></param>
+        /// <returns></returns>
+        List<ExcelTable> ListExcelsMessage(bool isInfo);
+        /// <summary>
+        /// 列举分组
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <returns></returns>
+        List<Group> loadGroupForAExcel(string signal);
+        /// <summary>
+        /// 列举分组KeyNames的分组信息
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <param name="group_id"></param>
+        /// <returns></returns>
+        List<CKeyName> loadKeyNameForExcelAndGroup(string signal,int group_id=-1);
+        /// <summary>
+        /// 添加KeyNames到分组
+        /// </summary>
+        /// <param name="group_id"></param>
+        /// <param name="oK_ids"></param>
+        /// <returns></returns>
+        bool AddKeysToGroup(int group_id, List<int> oK_ids);
+        /// <summary>
+        /// 修改备注
+        /// </summary>
+        /// <param name="signal"></param>
+        /// <param name="total_hold"></param>
+        /// <param name="diff_hold"></param>
+        bool ModifyThreshold(string signal, float total_hold, float diff_hold);
     }
 }

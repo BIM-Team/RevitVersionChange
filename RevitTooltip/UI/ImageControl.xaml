@@ -14,7 +14,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Page.Resources>
-    <Grid Background="White"  Visibility="Visible">
+    <Grid Background="White"  Visibility="Visible" >
         <Grid.RowDefinitions >
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>

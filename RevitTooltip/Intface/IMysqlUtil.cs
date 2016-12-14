@@ -41,7 +41,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <summary>
         /// 添加一些属性名到某一Group
         /// </summary>
-        bool AddKeysToGroup(int? Group_ID, List<int> Key_Ids);
+        bool AddKeysToGroup(int Group_ID, List<int> Key_Ids);
 
         /// <summary>
         /// 列举所有的Info Excel等待分组，这里不包括测量数据的excel
@@ -85,13 +85,19 @@ namespace Revit.Addin.RevitTooltip.Intface
         ///// </summary>
         ///// <param name="signal"></param>
         ///// <returns></returns>
-        List<CKeyName> loadKeyNameForExcelAndGroup(string signal,int Group_id);
+        List<CKeyName> loadKeyNameForExcelAndGroup(string signal,int Group_id=-1);
         /// <summary>
         /// 修改Key的分组
         /// </summary>
         /// <param name="Group_id">为Null时，表示取消</param>
         /// <param name="Key_id">KeyName的ID</param>
         void updateKeyGroup(int? Group_id,int Key_id);
+
+        /// <summary>
+        /// 插入失败，而事务又自动提交后，事务无法全部回退
+        /// </summary>
+        /// <param name=""></param>
+        void RollBack(string timeStamp);
 
     }
 }

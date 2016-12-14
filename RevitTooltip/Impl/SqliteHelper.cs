@@ -9,6 +9,7 @@ using Revit.Addin.RevitTooltip.Dto;
 using System.Windows;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace Revit.Addin.RevitTooltip.Impl
 {
@@ -125,17 +126,17 @@ namespace Revit.Addin.RevitTooltip.Impl
             {
                 if (!isExist("ExcelTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE ExcelTable(ID integer NOT NULL PRIMARY KEY AUTOINCREMENT,CurrentFile VARCHAR(30) NOT NULL,ExcelSignal VARCHAR(20) UNIQUE, IsInfo BOOLEAN NOT NULL, Total_hold float NOT NULL default 0, Diff_hold float NOT NULL default 0, History VARCHAR(100) NOT NULL )";
+                    command.CommandText = "CREATE TABLE ExcelTable(ID integer NOT NULL PRIMARY KEY AUTOINCREMENT,CurrentFile VARCHAR(30) NOT NULL,ExcelSignal VARCHAR(20) UNIQUE, IsInfo BOOLEAN NOT NULL, Total_hold float NOT NULL default 0, Diff_hold float NOT NULL default 0, History VARCHAR(100) NOT NULL ,Version VARCHAR(20) NOT NULL )";
                     command.ExecuteNonQuery();
                 }
                 if (!isExist("KeyTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE KeyTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, Group_ID integer , KeyName VARCHAR(20) NOT NULL,Odr integer NOT NULL default 0)";
+                    command.CommandText = "CREATE TABLE KeyTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, Group_ID integer , KeyName VARCHAR(20) NOT NULL,Odr integer NOT NULL default 0 ,Version VARCHAR(20) NOT NULL)";
                     command.ExecuteNonQuery();
                 }
                 if (!isExist("EntityTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE EntityTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, EntityName VARCHAR(20) NOT NULL, Remark VARCHAR(100))";
+                    command.CommandText = "CREATE TABLE EntityTable(ID integer PRIMARY KEY AUTOINCREMENT, ExcelSignal VARCHAR(20) NOT NULL, EntityName VARCHAR(20) NOT NULL, Remark VARCHAR(100) ,Version VARCHAR(20) NOT NULL)";
                     command.ExecuteNonQuery();
                 }
                 if (!isExist("GroupTable", "table"))
@@ -145,12 +146,12 @@ namespace Revit.Addin.RevitTooltip.Impl
                 }
                 if (!isExist("InfoTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE InfoTable(ID integer PRIMARY KEY AUTOINCREMENT, Key_ID integer NOT NULL REFERENCES KeyTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Value VARCHAR(20) NOT NULL)";
+                    command.CommandText = "CREATE TABLE InfoTable(ID integer PRIMARY KEY AUTOINCREMENT, Key_ID integer NOT NULL REFERENCES KeyTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Value VARCHAR(20) NOT NULL ,Version VARCHAR(20) NOT NULL)";
                     command.ExecuteNonQuery();
                 }
                 if (!isExist("DrawTable", "table"))
                 {
-                    command.CommandText = "CREATE TABLE DrawTable(ID integer PRIMARY KEY AUTOINCREMENT,  Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Date VARCHAR(20) NOT NULL, EntityMaxValue float NOT NULL, EntityMidValue float NOT NULL, EntityMinValue float NOT NULL, Detail TEXT NOT NULL )";
+                    command.CommandText = "CREATE TABLE DrawTable(ID integer PRIMARY KEY AUTOINCREMENT,  Entity_ID integer NOT NULL REFERENCES EntityTable(ID) ON DELETE CASCADE ON UPDATE NO ACTION, Date VARCHAR(20) NOT NULL, EntityMaxValue float NOT NULL, EntityMidValue float NOT NULL, EntityMinValue float NOT NULL, Detail TEXT NOT NULL ,Version VARCHAR(20) NOT NULL)";
                     command.ExecuteNonQuery();
                 }
             }
@@ -164,6 +165,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 return;
             }
             string conn_string = MysqlUtil.Instance.ConnectionMessage;
+            string newTimeStamp = Convert.ToInt64((DateTime.Now - new DateTime(2016, 12, 14, 0, 0, 0)).TotalMilliseconds).ToString();
             MySqlConnection mysql_conn = new MySqlConnection(conn_string);
             MySqlDataReader mysql_reader = null;
             try
@@ -184,8 +186,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (mysql_reader.Read())
                     {
-                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO ExcelTable(ID, CurrentFile, ExcelSignal, IsInfo, Total_hold, Diff_hold, History)values({0},'{1}','{2}',{3},{4},{5},'{6}')",
-                            mysql_reader.GetInt32(0), mysql_reader.GetString(1), mysql_reader.GetString(2), mysql_reader.GetInt32(3), mysql_reader.GetFloat(4), mysql_reader.GetFloat(5), mysql_reader.GetString(6));
+                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO ExcelTable(ID, CurrentFile, ExcelSignal, IsInfo, Total_hold, Diff_hold, History,Version)values({0},'{1}','{2}',{3},{4},{5},'{6}','{7}')",
+                            mysql_reader.GetInt32(0), mysql_reader.GetString(1), mysql_reader.GetString(2), mysql_reader.GetInt32(3), mysql_reader.GetFloat(4), mysql_reader.GetFloat(5), mysql_reader.GetString(6), newTimeStamp);
                         sqlite_command.ExecuteNonQuery();
                     }
                 }
@@ -197,8 +199,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (mysql_reader.Read())
                     {
-                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO KeyTable(ID,ExcelSignal,Group_ID,KeyName,Odr) Values({0},'{1}',{2},'{3}',{4})",
-                           mysql_reader.GetInt32(0), mysql_reader.GetString(1), mysql_reader.IsDBNull(2) ? "null" : mysql_reader.GetInt32(2).ToString(), mysql_reader.GetString(3), mysql_reader.GetInt32(4));
+                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO KeyTable(ID,ExcelSignal,Group_ID,KeyName,Odr,Version) Values({0},'{1}',{2},'{3}',{4},'{5}')",
+                           mysql_reader.GetInt32(0), mysql_reader.GetString(1), mysql_reader.IsDBNull(2) ? "null" : mysql_reader.GetInt32(2).ToString(), mysql_reader.GetString(3), mysql_reader.GetInt32(4), newTimeStamp);
                         sqlite_command.ExecuteNonQuery();
                     }
                 }
@@ -210,8 +212,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (mysql_reader.Read())
                     {
-                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO EntityTable(ID, ExcelSignal,EntityName,Remark) Values({0},'{1}','{2}','{3}')",
-                           mysql_reader.GetInt32(0), mysql_reader.GetString(1), mysql_reader.GetString(2), mysql_reader.IsDBNull(3) ? "null" : mysql_reader.GetString(3));
+                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO EntityTable(ID, ExcelSignal,EntityName,Remark,Version) Values({0},'{1}','{2}','{3}','{4}')",
+                           mysql_reader.GetInt32(0), mysql_reader.GetString(1), mysql_reader.GetString(2), mysql_reader.IsDBNull(3) ? "null" : mysql_reader.GetString(3), newTimeStamp);
                         sqlite_command.ExecuteNonQuery();
                     }
                 }
@@ -236,8 +238,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (mysql_reader.Read())
                     {
-                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO InfoTable(ID, Key_ID,Entity_ID,Value) Values({0},{1},{2},'{3}')",
-                           mysql_reader.GetInt32(0), mysql_reader.GetInt32(1), mysql_reader.GetInt32(2), mysql_reader.GetString(3));
+                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO InfoTable(ID, Key_ID,Entity_ID,Value,Version) Values({0},{1},{2},'{3}','{4}')",
+                           mysql_reader.GetInt32(0), mysql_reader.GetInt32(1), mysql_reader.GetInt32(2), mysql_reader.GetString(3), newTimeStamp);
                         sqlite_command.ExecuteNonQuery();
                     }
                 }
@@ -249,8 +251,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 {
                     while (mysql_reader.Read())
                     {
-                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO DrawTable(ID,Entity_ID,Date ,EntityMaxValue,EntityMidValue,EntityMinValue,Detail) Values({0},{1},'{2}',{3},{4},{5},'{6}')",
-                            mysql_reader.GetInt32(0), mysql_reader.GetInt32(1), mysql_reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"), mysql_reader.GetFloat(3), mysql_reader.GetFloat(4), mysql_reader.GetFloat(5), mysql_reader.GetString(6));
+                        sqlite_command.CommandText = string.Format("INSERT OR IGNORE INTO DrawTable(ID,Entity_ID,Date ,EntityMaxValue,EntityMidValue,EntityMinValue,Detail,Version) Values({0},{1},'{2}',{3},{4},{5},'{6}','{7}')",
+                            mysql_reader.GetInt32(0), mysql_reader.GetInt32(1), mysql_reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"), mysql_reader.GetFloat(3), mysql_reader.GetFloat(4), mysql_reader.GetFloat(5), mysql_reader.GetString(6), newTimeStamp);
                         sqlite_command.ExecuteNonQuery();
                     }
                 }
@@ -324,6 +326,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// <param name="sheetInfo"></param>
         private void InsertInfoData(SheetInfo sheetInfo)
         {
+            string newTimeStamp = Convert.ToInt64((DateTime.Now - new DateTime(2016, 12, 14, 0, 0, 0)).TotalMilliseconds).ToString();
             //是否已经处理过
             bool hasDone = false;
             string signal = sheetInfo.ExcelTableData.Signal;
@@ -349,11 +352,11 @@ namespace Revit.Addin.RevitTooltip.Impl
                 if (exist == null)
                 {
                     //插入ExcelTable
-                    new SQLiteCommand(string.Format("insert into ExcelTable (CurrentFile,ExcelSignal,IsInfo,History) values ('{0}', '{1}', {2},'{3}')",
-                         sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag?1:0, sheetInfo.ExcelTableData.CurrentFile), tran.Connection, tran).ExecuteNonQuery();
+                    new SQLiteCommand(string.Format("insert into ExcelTable (CurrentFile,ExcelSignal,IsInfo,History,Version) values ('{0}', '{1}', {2},'{3}','{4}')",
+                         sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag ? 1 : 0, sheetInfo.ExcelTableData.CurrentFile, newTimeStamp), tran.Connection, tran).ExecuteNonQuery();
                     exist = SelectExcelTable(signal);
                     //插入表结构KeyNames
-                    new SQLiteCommand(InsertIntoKeyTable(sheetInfo.KeyNames, sheetInfo.ExcelTableData.Signal), tran.Connection, tran).ExecuteNonQuery();
+                    new SQLiteCommand(InsertIntoKeyTable(sheetInfo.KeyNames, sheetInfo.ExcelTableData.Signal, newTimeStamp), tran.Connection, tran).ExecuteNonQuery();
                 }
                 else
                 {
@@ -373,8 +376,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                     {
                         string history = exist.History + ";" + sheetInfo.ExcelTableData.CurrentFile;
                         //更新已有的数据表
-                        new SQLiteCommand(string.Format("update ExcelTable set CurrentFile='{0}',History='{1}' where ExcelSignal='{2}'",
-                           sheetInfo.ExcelTableData.CurrentFile, history, signal), tran.Connection, tran).ExecuteNonQuery();
+                        new SQLiteCommand(string.Format("update ExcelTable set CurrentFile='{0}',History='{1}',Version='{3}' where ExcelSignal='{2}'",
+                           sheetInfo.ExcelTableData.CurrentFile, history, signal, newTimeStamp), tran.Connection, tran).ExecuteNonQuery();
                     }
                 }
                 if (!hasDone)
@@ -390,14 +393,16 @@ namespace Revit.Addin.RevitTooltip.Impl
                     {
                         KeyMap.Add(one.KeyName, one.Id);
                     }
-                    InsertInfoTable(sheetInfo, KeyMap, tran);
+                    InsertInfoTable(sheetInfo, KeyMap, tran, newTimeStamp);
+
                 }
                 tran.Commit();    //事务提交
             }
             catch (Exception e)
             {
                 tran.Rollback();    // 事务回滚
-                throw new Exception("事务操作出错，系统信息：" + e.Message);
+                this.RollBack(newTimeStamp);
+                throw e;
             }
             finally
             {
@@ -411,7 +416,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// <param name="sheetInfo"></param>
         /// <param name="KeyMap"></param>
         /// <param name="command"></param>
-        private void InsertInfoTable(SheetInfo sheetInfo, Dictionary<string, int> KeyMap, SQLiteTransaction tran)
+        private void InsertInfoTable(SheetInfo sheetInfo, Dictionary<string, int> KeyMap, SQLiteTransaction tran, string timeStamp)
         {
             if (sheetInfo.InfoRows == null || sheetInfo.InfoRows.Count == 0)
             {
@@ -423,7 +428,7 @@ namespace Revit.Addin.RevitTooltip.Impl
 
             foreach (InfoEntityData one in rows)
             {
-                string sql = string.Format("insert into EntityTable(ExcelSignal,EntityName) values ('{0}','{1}')", signal, one.EntityName);
+                string sql = string.Format("insert into EntityTable(ExcelSignal,EntityName,Version) values ('{0}','{1}','{2}')", signal, one.EntityName, timeStamp);
                 //插入Entity
                 new SQLiteCommand(sql, tran.Connection, tran).ExecuteNonQuery();
                 CEntityName entity = selectEntity(one.EntityName);
@@ -431,11 +436,11 @@ namespace Revit.Addin.RevitTooltip.Impl
                 StringBuilder buider = null;
                 if (data != null && data.Count != 0)
                 {
-                    buider = new StringBuilder("insert into InfoTable(Key_ID,Entity_ID,Value) values");
+                    buider = new StringBuilder("insert into InfoTable(Key_ID,Entity_ID,Value,Version) values");
                 }
                 foreach (string s in data.Keys)
                 {
-                    buider.AppendFormat(" ({0},{1},'{2}'),", KeyMap[s], entity.Id, data[s]);
+                    buider.AppendFormat(" ({0},{1},'{2}','{3}'),", KeyMap[s], entity.Id, data[s], timeStamp);
                 }
                 buider.Remove(buider.Length - 1, 1);
                 new SQLiteCommand(buider.ToString(), tran.Connection, tran).ExecuteNonQuery();
@@ -452,32 +457,32 @@ namespace Revit.Addin.RevitTooltip.Impl
         private CEntityName selectEntity(string entityName)
         {
             CEntityName result = null;
-                string sql = string.Format("select ID,EntityName from EntityTable where EntityName='{0}'", entityName);
-                if (conn.State != ConnectionState.Open)
-                {
+            string sql = string.Format("select ID,EntityName from EntityTable where EntityName='{0}'", entityName);
+            if (conn.State != ConnectionState.Open)
+            {
                 conn.Open();
-                }
-                SQLiteCommand command = new SQLiteCommand(sql, conn);
-                SQLiteDataReader reader = command.ExecuteReader();
-                try
+            }
+            SQLiteCommand command = new SQLiteCommand(sql, conn);
+            SQLiteDataReader reader = command.ExecuteReader();
+            try
+            {
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        result = new CEntityName();
-                        result.Id = reader.GetInt32(0);
-                        result.EntityName = reader.GetString(1);
-                    }
+                    result = new CEntityName();
+                    result.Id = reader.GetInt32(0);
+                    result.EntityName = reader.GetString(1);
+                }
 
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-                finally
-                {
-                    reader.Close();
-                }
-            
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                reader.Close();
+            }
+
             return result;
         }
         /// <summary>
@@ -525,12 +530,12 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// <param name="KeyNames"></param>
         /// <param name="Signal"></param>
         /// <returns></returns>
-        private string InsertIntoKeyTable(List<string> KeyNames, string Signal)
+        private string InsertIntoKeyTable(List<string> KeyNames, string Signal, string timeStamp)
         {
-            StringBuilder sql = new StringBuilder("insert into KeyTable(ExcelSignal,KeyName) values");
+            StringBuilder sql = new StringBuilder("insert into KeyTable(ExcelSignal,KeyName,Version) values");
             foreach (string one in KeyNames)
             {
-                sql.AppendFormat(" ('{0}','{1}'),", Signal, one);
+                sql.AppendFormat(" ('{0}','{1}','{2}'),", Signal, one, timeStamp);
             }
             sql.Remove(sql.Length - 1, 1);
             return sql.ToString();
@@ -579,6 +584,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// <param name="sheetInfo"></param>
         private void InsertDrawData(SheetInfo sheetInfo)
         {
+            string newTimeStamp = Convert.ToInt64((DateTime.Now - new DateTime(2016, 12, 14, 0, 0, 0)).TotalMilliseconds).ToString();
             //是否已经处理过
             bool hasDone = false;
             string signal = sheetInfo.ExcelTableData.Signal;
@@ -606,8 +612,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                 ExcelTable exist = SelectExcelTable(signal);
                 if (exist == null)
                 {
-                    command.CommandText = string.Format("insert into ExcelTable (CurrentFile,ExcelSignal,IsInfo,History) values ('{0}', '{1}', {2},'{3}')",
-                          sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag?1:0, sheetInfo.ExcelTableData.CurrentFile);
+                    command.CommandText = string.Format("insert into ExcelTable (CurrentFile,ExcelSignal,IsInfo,History,Version) values ('{0}', '{1}', {2},'{3}','{4}')",
+                          sheetInfo.ExcelTableData.CurrentFile, signal, sheetInfo.Tag ? 1 : 0, sheetInfo.ExcelTableData.CurrentFile, newTimeStamp);
                     //插入新的数据表
                     command.ExecuteNonQuery();
                 }
@@ -626,22 +632,26 @@ namespace Revit.Addin.RevitTooltip.Impl
                     if (!hasDone)
                     {
                         string history = exist.History + ";" + sheetInfo.ExcelTableData.CurrentFile;
-                        command.CommandText = string.Format("update ExcelTable set CurrentFile='{0}',History='{1}' where ExcelSignal='{3}'",
-                        sheetInfo.ExcelTableData.CurrentFile, history, signal);
+                        command.CommandText = string.Format("update ExcelTable set CurrentFile='{0}',History='{1}',Version='{3}' where ExcelSignal='{2}'",
+                        sheetInfo.ExcelTableData.CurrentFile, history, signal, newTimeStamp);
                         //更新已有的数据表
                         command.ExecuteNonQuery();
                     }
                 }
                 if (!hasDone)
                 {
-                    InsertDrawDataTable(sheetInfo, tran);
+                    InsertDrawDataTable(sheetInfo, tran, newTimeStamp);
                 }
                 tran.Commit();    //事务提交
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                tran.Rollback();    // 事务回滚
-                throw new Exception("事务操作出错，系统信息：" + e.Message);
+                // 事务回滚
+                tran.Rollback();
+
+                this.RollBack(newTimeStamp);
+
+                throw;
             }
             finally
             {
@@ -653,7 +663,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         /// </summary>
         /// <param name="sheetInfo"></param>
         /// <param name="command"></param>
-        private void InsertDrawDataTable(SheetInfo sheetInfo, SQLiteTransaction tran)
+        private void InsertDrawDataTable(SheetInfo sheetInfo, SQLiteTransaction tran, string timeStamp)
         {
             List<DrawEntityData> rows = sheetInfo.DrawRows;
             string signal = sheetInfo.ExcelTableData.Signal;
@@ -663,7 +673,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 DateTime? maxDate = null;
                 if (entity == null)
                 {
-                    string sql = string.Format("insert into EntityTable(ExcelSignal,EntityName) values ('{0}','{1}')", signal, one.EntityName);
+                    string sql = string.Format("insert into EntityTable(ExcelSignal,EntityName,Version) values ('{0}','{1}','{2}')", signal, one.EntityName, timeStamp);
                     //插入Entity
                     new SQLiteCommand(sql, tran.Connection, tran).ExecuteNonQuery();
                     entity = selectEntity(one.EntityName);
@@ -677,7 +687,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                 StringBuilder buider = null;
                 if (data != null && data.Count != 0)
                 {
-                    buider = new StringBuilder("insert into DrawTable(Entity_ID,Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail) values");
+                    buider = new StringBuilder("insert into DrawTable(Entity_ID,Date,EntityMaxValue,EntityMidValue,EntityMinValue,Detail,Version) values");
                 }
                 bool hasValue = false;
                 foreach (DrawData p in data)
@@ -685,12 +695,13 @@ namespace Revit.Addin.RevitTooltip.Impl
                     if (maxDate == null || p.Date > maxDate)
                     {
                         hasValue = true;
-                        buider.AppendFormat(" ({0},'{1}','{2}','{3}','{4}','{5}'),", entity.Id, p.Date.ToString("yyyy-MM-dd HH:mm:ss"), p.MaxValue, p.MidValue, p.MinValue, p.Detail);
+                        buider.AppendFormat(" ({0},'{1}','{2}','{3}','{4}','{5}','{6}'),", entity.Id, p.Date.ToString("yyyy-MM-dd HH:mm:ss"), p.MaxValue, p.MidValue, p.MinValue, p.Detail, timeStamp);
                     }
                 }
-                if (hasValue) {
-                buider.Remove(buider.Length - 1, 1);
-                new SQLiteCommand(buider.ToString(), tran.Connection, tran).ExecuteNonQuery();
+                if (hasValue)
+                {
+                    buider.Remove(buider.Length - 1, 1);
+                    new SQLiteCommand(buider.ToString(), tran.Connection, tran).ExecuteNonQuery();
                 }
             }
 
@@ -1117,7 +1128,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                         first = next;
                     }
                     //最后一个
-                    if (isErr) {
+                    if (isErr)
+                    {
                         maps[entityName].ErrMsg += "Diff";
                     }
                 }
@@ -1210,6 +1222,259 @@ namespace Revit.Addin.RevitTooltip.Impl
             return result;
         }
 
+        public void RollBack(string timeStamp)
+        {
+            if (string.IsNullOrWhiteSpace(timeStamp))
+            {
+                throw new Exception("无效的参数");
+            }
+            StringBuilder buider = new StringBuilder();
+            string sql = string.Format("Select History From ExcelTable Where Version='{0}'", timeStamp);
+            try
+            {
+                if (conn.State != ConnectionState.Open)
+                {
+                    conn.Open();
+                }
+                //回退ExcelTable
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                object result = command.ExecuteScalar();
+                string His = null;
+                if (result != null)
+                {
+                    His = result.ToString();
+                }
+                if (!string.IsNullOrWhiteSpace(His))
+                {
+                    string[] files = His.Split(';');
+                    if (files.Count() > 1)
+                    {
+                        string newTimeStamp = Convert.ToInt64((DateTime.Now - new DateTime(2016, 12, 14, 0, 0, 0)).TotalMilliseconds).ToString();
+                        string newHis = His.Substring(0, His.LastIndexOf(';'));
+                        string newCurrentFile = files[files.Count() - 2];
+                        buider.AppendFormat("Update ExcelTable Set CurrentFile='{0}',Version='{1}' Where Version='{2}';", newCurrentFile, newTimeStamp, timeStamp);
+                    }
+                    else if (files.Count() == 1)
+                    {
+                        buider.AppendFormat("Delete From ExcelTable Where Version='{0}';", timeStamp);
+                    }
+                }
+                //InfoTable
+                buider.AppendFormat("Delete From InfoTable Where Version='{0}';", timeStamp);
+                //DrawTable
+                buider.AppendFormat("Delete From DrawTable Where Version='{0}';", timeStamp);
+                //EntityTable
+                buider.AppendFormat("Delete From EntityTable Where Version='{0}';", timeStamp);
+                //KeyTable
+                buider.AppendFormat("Delete From KeyTable Where Version='{0}'", timeStamp);
+                command.CommandText = buider.ToString();
+                command.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
 
+        public List<ExcelTable> ListExcelsMessage(bool isInfo)
+        {
+            List<ExcelTable> result = null;
+            if (conn.State != ConnectionState.Open) {
+                conn.Open();
+            }
+            string sql = String.Format("select ID,CurrentFile,ExcelSignal,Total_hold,Diff_hold,History from ExcelTable where IsInfo = {0}", isInfo?1:0);
+            SQLiteDataReader reader = null;
+            try
+            {
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    result = new List<ExcelTable>();
+                }
+                while (reader.Read())
+                {
+                    ExcelTable one = new ExcelTable();
+                    one.Id = reader.GetInt32(0);
+                    one.CurrentFile = reader.GetString(1);
+                    one.Signal = reader.GetString(2);
+                    one.Total_hold = reader.GetFloat(3);
+                    one.Diff_hold = reader.GetFloat(4);
+                    one.History = reader.GetString(5);
+                    result.Add(one);
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                reader.Close();
+                conn.Close();
+            }
+            return result;
+        }
+
+        public List<Group> loadGroupForAExcel(string signal)
+        {
+            List<Group> groups = new List<Group>();
+            Group newOne = new Group();
+            //newOne.Id = -1;
+            //newOne.GroupName = "新建";
+            //groups.Add(newOne);
+            string sql = string.Format("select ID,GroupName from GroupTable where ExcelSignal='{0}'", signal);
+            if (conn.State != ConnectionState.Open) {
+                conn.Open();
+            }
+            SQLiteDataReader reader = null;
+            try
+            {
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    Group one = new Group();
+                    one.Id = reader.GetInt32(0);
+                    one.GroupName = reader.GetString(1);
+                    groups.Add(one);
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                reader.Close();
+                conn.Close();
+            }
+            return groups;
+        }
+
+        public List<CKeyName> loadKeyNameForExcelAndGroup(string signal, int Group_id= -1)
+        {
+            List<CKeyName> result = null;
+            string sql = string.Format("Select ID,KeyName,Group_ID={1} from KeyTable where ExcelSignal='{0}'", signal, Group_id);
+            SQLiteDataReader reader = null;
+            try
+            {
+                if (conn.State != ConnectionState.Open) {
+                conn.Open();
+                }
+                SQLiteCommand command = new SQLiteCommand(sql, conn);
+                reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    result = new List<CKeyName>();
+                }
+                while (reader.Read())
+                {
+                    CKeyName one = new CKeyName();
+                    one.Id = reader.GetInt32(0);
+                    one.KeyName = reader.GetString(1);
+                    if (!reader.IsDBNull(2))
+                    {
+                        one.IsCheck = reader.GetBoolean(2);
+                    }
+                    result.Add(one);
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                reader.Close();
+                conn.Close();
+            }
+            return result;
+        }
+
+        public bool AddKeysToGroup(int Group_ID, List<int> Key_Ids)
+        {
+            bool result = false;
+            SQLiteTransaction tran = null;
+            SQLiteDataReader reader = null;
+            try
+            {
+                if (conn.State != ConnectionState.Open) {
+                conn.Open();
+                }
+                tran = conn.BeginTransaction();
+                string select_sql = string.Format("Select ID from KeyTable where Group_ID={0};", Group_ID);
+                SQLiteCommand command = new SQLiteCommand(select_sql, conn, tran);
+                reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    StringBuilder buider1 = new StringBuilder();
+                    while (reader.Read())
+                    {
+                        buider1.Append(reader.GetInt32(0)).Append(",");
+                    }
+                    buider1.Remove(buider1.Length - 1, 1);
+                    string sql_reset = string.Format("update KeyTable set Group_ID=NULL where ID in ({0});", buider1.ToString());
+                    command.CommandText = sql_reset;
+                    reader.Close();
+                    command.ExecuteNonQuery();
+                }
+                else
+                {
+                    reader.Close();
+                }
+
+                if (Key_Ids != null && Key_Ids.Count != 0)
+                {
+                    StringBuilder buider = new StringBuilder();
+                    foreach (int i in Key_Ids)
+                    {
+                        buider.Append(i).Append(",");
+                    }
+                    buider.Remove(buider.Length - 1, 1);
+                    command.CommandText = string.Format("update KeyTable set Group_ID={0} where ID in ({1});", Group_ID, buider.ToString()); ;
+                    command.ExecuteNonQuery();
+                }
+                tran.Commit();
+                result = true;
+            }
+            catch (Exception)
+            {
+                tran.Rollback();
+                throw;
+            }
+            finally
+            {
+                conn.Close();
+            }
+            return result;
+        }
+
+        public bool ModifyThreshold(string signal, float Total_hold, float Diff_hold)
+        {
+            bool flag = false;
+            string sql = String.Format("Update ExcelTable set Total_hold = '{0}', Diff_hold = '{1}' where ExcelSignal = '{2}'", Total_hold, Diff_hold, signal);
+            try
+            {
+                if (conn.State != ConnectionState.Open) {
+                conn.Open();
+                }
+                SQLiteCommand mycom = new SQLiteCommand(sql, conn);
+                mycom.ExecuteNonQuery();
+                flag = true;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("修改出错");
+            }
+            finally
+            {
+                conn.Close();
+            }
+            return flag;
+        }
     }
 }

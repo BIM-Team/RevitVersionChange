@@ -24,15 +24,7 @@ namespace Revit.Addin.RevitTooltip.UI
         /// <summary>
         /// 记录待处理的文件（excel）列表
         /// </summary>
-        private string[] fileNames=null;
-        /// <summary>
-        /// 记录当前的文件集是否已经导入到Mysql
-        /// </summary>
-        private bool IsInMySql = false;
-        /// <summary>
-        /// 记录当前的文件集是否已经导入到Sqlite
-        /// </summary>
-        private bool IsInSqlite = false;
+        private string[] fileNames = null;
         /// <summary>
         /// Excel的读取工具，该工具只在这里使用，外部使用
         /// </summary>
@@ -40,13 +32,13 @@ namespace Revit.Addin.RevitTooltip.UI
         public NewSettings()
         {
             excelReader = new ExcelReader();
-            
             InitializeComponent();
         }
         internal NewSettings(RevitTooltip settings)
         {
             InitializeComponent();
-            if (settings != null) {
+            if (settings != null)
+            {
                 this.textAddr.Text = settings.DfServer;
                 this.textDB.Text = settings.DfDB;
                 this.textPort.Text = settings.DfPort;
@@ -55,6 +47,8 @@ namespace Revit.Addin.RevitTooltip.UI
                 this.textSqlitePath.Text = settings.SqliteFilePath;
                 this.textSqliteName.Text = settings.SqliteFileName;
             }
+            dataGridView2.AutoGenerateColumns = false;
+            dataGridView1.AutoGenerateColumns = false;
             excelReader = new ExcelReader();
         }
 
@@ -69,21 +63,20 @@ namespace Revit.Addin.RevitTooltip.UI
             ofd.Multiselect = true;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                this.fileNames=ofd.FileNames;
-                this.IsInMySql = false;
-                this.IsInSqlite = false;
+                this.fileNames = ofd.FileNames;
                 StringBuilder buider = new StringBuilder();
-                foreach (string s in this.fileNames) {
+                foreach (string s in this.fileNames)
+                {
                     buider.Append(s).Append(";");
                 }
-                buider.Remove(buider.Length-1,1);
+                buider.Remove(buider.Length - 1, 1);
                 this.textFilePath.Text = buider.ToString();
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string connectUrl = "server = " + this.textAddr.Text.Trim()+
+            string connectUrl = "server = " + this.textAddr.Text.Trim() +
                 "; user =" + this.textUser.Text.Trim() +
                 "; database =" + this.textDB.Text.Trim() +
                 "; port = " + this.textPort.Text.Trim() +
@@ -100,7 +93,8 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 MessageBox.Show("连接失败：" + ex.Message);
             }
-            finally {
+            finally
+            {
                 conn.Close();
                 conn.Dispose();
             }
@@ -132,7 +126,8 @@ namespace Revit.Addin.RevitTooltip.UI
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (this.IsSettingChanged) {
+            if (this.IsSettingChanged)
+            {
                 button2.Enabled = false;
                 RevitTooltip newSetting = RevitTooltip.Default;
                 newSetting.DfServer = this.textAddr.Text.Trim();
@@ -155,15 +150,25 @@ namespace Revit.Addin.RevitTooltip.UI
 
         private void buttonInMysql_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("确定导入到Mysql?", "", MessageBoxButtons.OKCancel) ==DialogResult.OK) {
+            if (MessageBox.Show("确定导入到Mysql?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
                 this.progressBar1.Value = 0;
-                for (int i=0;i< fileNames.Length;i++) {
-                    SheetInfo info = this.excelReader.loadExcelData(fileNames[i]);
-                    App.Instance.MySql.InsertSheetInfo(info);
-                    this.progressBar1.Value =(int) ((i + 1.0) / fileNames.Length) * progressBar1.Maximum;
-                }   
-                    this.IsInMySql = true;
-                    MessageBox.Show("导入数据成功");
+                int i = 0;
+                try
+                {
+                    for (; i < fileNames.Length; i++)
+                    {
+                        SheetInfo info = this.excelReader.loadExcelData(fileNames[i]);
+                        App.Instance.MySql.InsertSheetInfo(info);
+                        this.progressBar1.Value = (int)((i + 1.0) / fileNames.Length) * progressBar1.Maximum;
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("导入异常，成功处理" + i + "个文件");
+                    return;
+                }
+                MessageBox.Show("导入成功");
             }
         }
 
@@ -174,56 +179,69 @@ namespace Revit.Addin.RevitTooltip.UI
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("确定导入到本地？", "", MessageBoxButtons.OKCancel) == DialogResult.OK) {
+            if (MessageBox.Show("确定导入到本地？", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
                 this.progressBar1.Value = 0;
-                for (int i=0;i<fileNames.Length;i++) {
-                   SheetInfo info= this.excelReader.loadExcelData(fileNames[i]);
-                    App.Instance.Sqlite.InsertSheetInfo(info);
-                    this.progressBar1.Value = (int)((i + 1.0) / fileNames.Length) * progressBar1.Maximum;
+                int i = 0;
+                try
+                {
+                    for (; i < fileNames.Length; i++)
+                    {
+                        SheetInfo info = this.excelReader.loadExcelData(fileNames[i]);
+                        App.Instance.Sqlite.InsertSheetInfo(info);
+                        this.progressBar1.Value = (int)((i + 1.0) / fileNames.Length) * progressBar1.Maximum;
+                    }
                 }
-                    this.IsInSqlite = true;
-                    MessageBox.Show("导入成功");
+                catch (Exception)
+                {
+                    MessageBox.Show("导入异常，成功处理" + i + "文件");
+                    return;
+                }
+                MessageBox.Show("导入成功");
             }
         }
 
         private void tabControl1_Selected(object sender, TabControlEventArgs e)
         {
             TabPage p = e.TabPage;
-            if (p == this.tabPageFile) {
+            if (p == this.tabPageFile)
+            {
                 if (App.Instance.MySql.IsReady)
                 {
                     this.buttonInMysql.Enabled = true;
                 }
-                else {
+                else
+                {
                     this.buttonInMysql.Enabled = false;
                 }
             }
-            if (p == this.tabPageThreshold) {
-                if (App.Instance.MySql.IsReady)
+            if (p == this.tabPageThreshold)
+            {
+                List<ExcelTable> tables = new List<ExcelTable>();
+                if (useSqliteThreshold.Checked)
                 {
-                    this.dataGridView1.Enabled = true;
-                    List<ExcelTable> tables = App.Instance.MySql.ListExcelsMessage(false);                  this.dataGridView1.DataSource = tables;    
+                    tables = App.Instance.Sqlite.ListExcelsMessage(false);
                 }
-                else {
-                    this.dataGridView1.Enabled = false;
-                    this.dataGridView1.DataSource = null;
-                }
-            }
-            if (p == this.tabPagePro) {
-                if (App.Instance.MySql.IsReady)
+                else if (App.Instance.MySql.IsReady)
                 {
-                    this.splitContainer1.Enabled = true;
-                    this.combExcel.DataSource = App.Instance.MySql.ListExcelsMessage(true);
+                    tables = App.Instance.MySql.ListExcelsMessage(false);
                 }
-                else {
-                    this.splitContainer1.Enabled = false;
-                }
+                this.dataGridView1.DataSource = tables;
 
             }
-            
-
-
-
+            if (p == this.tabPagePro)
+            {
+                List<ExcelTable> tables = new List<ExcelTable>();
+                if (useSqlitePro.Checked)
+                {
+                    tables = App.Instance.Sqlite.ListExcelsMessage(true);
+                }
+                else if (App.Instance.MySql.IsReady)
+                {
+                    tables = App.Instance.MySql.ListExcelsMessage(true);
+                }
+                this.combExcel.DataSource = tables;
+            }
         }
 
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -234,16 +252,23 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 float Total_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[3].Value.ToString());
                 float Diff_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[4].Value.ToString());
-                App.Instance.MySql.ModifyThreshold(Signal, Total_hold, Diff_hold);
+                if (useSqliteThreshold.Checked)
+                {
+                    App.Instance.Sqlite.ModifyThreshold(Signal, Total_hold, Diff_hold);
+                }
+                else if(App.Instance.MySql.IsReady){
+                    App.Instance.MySql.ModifyThreshold(Signal, Total_hold, Diff_hold);
+                }
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 this.dataGridView1.CancelEdit();
                 MessageBox.Show("无效的编辑");
 
             }
         }
 
-       
+
 
         private void combExcel_SelectionChangeCommitted(object sender, EventArgs e)
         {
@@ -251,68 +276,115 @@ namespace Revit.Addin.RevitTooltip.UI
 
             if (!string.IsNullOrWhiteSpace(signal))
             {
+                List<Group> groups = null;
+                List<CKeyName> keyNames = null;
+                if (useSqlitePro.Checked) {
+                    groups = App.Instance.Sqlite.loadGroupForAExcel(signal);
+                    keyNames = App.Instance.Sqlite.loadKeyNameForExcelAndGroup(signal);
+                } else if (App.Instance.MySql.IsReady) {
+                    groups = App.Instance.MySql.loadGroupForAExcel(signal);
+                    keyNames = App.Instance.MySql.loadKeyNameForExcelAndGroup(signal);
+                }
                 //CombGroup
-                this.combGroup.DataSource = App.Instance.MySql.loadGroupForAExcel(signal); 
+                this.combGroup.DataSource = groups;
                 ////dataGrid
-                //List<CKeyName> data = App.Instance.MySql.loadKeyNameForAExcel(signal);
-                //this.dataGridView2.DataSource = data;
-                //this.dataGridView2.ReadOnly = true;
+                this.dataGridView2.DataSource = keyNames;
             }
-            else {
+            else
+            {
                 throw new Exception("无效的选择");
             }
         }
 
         private void combGroup_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            
+            string signal = this.combExcel.SelectedValue.ToString();
             int id = Convert.ToInt32(this.combGroup.SelectedValue.ToString());
-            if (id == -1)
+            if (useSqlitePro.Checked)
             {
-                string newGroupName = Microsoft.VisualBasic.Interaction.InputBox("请输入新的组名", "新建分组", "newGroupName", 30, 30);
-                if (string.IsNullOrWhiteSpace(newGroupName))
-                {
-                    MessageBox.Show("无效的组名");
-                }
-                else
-                {
-                string signal = this.combExcel.SelectedValue.ToString();
-                Group newOne = App.Instance.MySql.AddNewGroup(signal, newGroupName);
-                id = newOne.Id;
-                List<Group> groups = App.Instance.MySql.loadGroupForAExcel(signal);
-                this.combGroup.DataSource = groups;
-                this.combGroup.SelectedIndex= groups.IndexOf(newOne);
-                }
+                this.dataGridView2.DataSource = App.Instance.Sqlite.loadKeyNameForExcelAndGroup(signal, id);
             }
-            else {
-                this.dataGridView2.ReadOnly = false;
-                string signal = this.combExcel.SelectedValue.ToString();
-                List<CKeyName> data=App.Instance.MySql.loadKeyNameForExcelAndGroup(signal, id);
-                this.dataGridView2.DataSource = data;
+            else if (App.Instance.MySql.IsReady) {
+                this.dataGridView2.DataSource = App.Instance.MySql.loadKeyNameForExcelAndGroup(signal, id);
             }
-            
+
         }
 
 
         private void button5_Click(object sender, EventArgs e)
         {
-            int group_id = Convert.ToInt32(this.combGroup.SelectedValue.ToString());
-            
+            int group_id;
+            if (this.combGroup.SelectedValue == null)
+            {
+                string newGroupName = combGroup.Text;
+                if (string.IsNullOrWhiteSpace(newGroupName))
+                {
+                    MessageBox.Show("无效的组名");
+                    return;
+                }
+                string signal = this.combExcel.SelectedValue.ToString();
+                Group newOne = App.Instance.MySql.AddNewGroup(signal, newGroupName);
+                group_id = newOne.Id;
+            }
+            else {
+           group_id = Convert.ToInt32(this.combGroup.SelectedValue.ToString());
+
+            }
             List<int> OK_ids = new List<int>();
-            foreach (DataGridViewRow row in this.dataGridView2.Rows) {
+            foreach (DataGridViewRow row in this.dataGridView2.Rows)
+            {
                 if (Convert.ToBoolean(row.Cells[0].Value.ToString()))
                 {
                     OK_ids.Add(Convert.ToInt32(row.Cells[1].Value.ToString()));
                 }
             }
-            if (App.Instance.MySql.AddKeysToGroup(group_id, OK_ids)) {
-            MessageBox.Show("修改成功");
+            bool tag = false;
+            if (useSqlitePro.Checked)
+            {
+                tag = App.Instance.Sqlite.AddKeysToGroup(group_id, OK_ids);
+            }
+            else if (App.Instance.MySql.IsReady) {
+                tag = App.Instance.MySql.AddKeysToGroup(group_id, OK_ids);
+            }
+            if (tag)
+            {
+                MessageBox.Show("修改成功");
             }
         }
 
         private void button9_Click(object sender, EventArgs e)
         {
             this.Dispose();
+        }
+
+        private void useSqliteThreshold_CheckedChanged(object sender, EventArgs e)
+        {
+            List<ExcelTable> tables = new List<ExcelTable>();
+            if (useSqliteThreshold.Checked)
+            {
+                tables = App.Instance.Sqlite.ListExcelsMessage(false);
+            }
+            else if (App.Instance.MySql.IsReady)
+            {
+                tables = App.Instance.MySql.ListExcelsMessage(false);
+            }
+            this.dataGridView1.DataSource = tables;
+        }
+
+        private void useSqlitePro_CheckedChanged(object sender, EventArgs e)
+        {
+            List<ExcelTable> tables = new List<ExcelTable>();
+            if (useSqlitePro.Checked)
+            {
+                tables = App.Instance.Sqlite.ListExcelsMessage(true);
+            }
+            else if (App.Instance.MySql.IsReady)
+            {
+                tables = App.Instance.MySql.ListExcelsMessage(true);
+            }
+            this.combExcel.DataSource = tables;
+            //combExcel.DisplayMember = "CurrentFile";
+            //combExcel.ValueMember = "Signal";
         }
     }
 }

@@ -55,8 +55,10 @@ namespace Revit.Addin.RevitTooltip.UI
             }
             List<DrawData> data1 = _entityData.Data;
             List<DrawData> data2 = null;
+            bool isNegative = false;
             if (_entityData.Total_hold < 0)
             {
+                isNegative = true;
                 data2 = new List<DrawData>();
                 foreach (DrawData one in data1)
                 {
@@ -129,7 +131,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     float y10 = startY - i * div_height;
                     float x10 = startX + i * div_width;
-                    string str_va = Math.Round(div_value * i + Min, 2, MidpointRounding.AwayFromZero).ToString();
+                    string str_va = Math.Round((div_value * i + Min)*(isNegative?-1:1), 2, MidpointRounding.AwayFromZero).ToString();
                     g.DrawLine(dotPen, startX, y10, endX, y10);
                     g.DrawLine(dotPen, x10, startY, x10, endY);
                     g.DrawString(str_va, font, Brushes.Black, startX - g.MeasureString(str_va, font).Width, y10);
