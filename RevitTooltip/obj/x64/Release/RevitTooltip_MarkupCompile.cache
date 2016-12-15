@@ -10,11 +10,11 @@ none
 false
 TRACE;Enable_License
 
-41330342311
+5-208631373
 
-242038317389
-271199982901
-Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageInfo.xaml;
+241457321722
+311414445578
+Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageControl.xaml;UI\TabItemControl.xaml;
 
 False
 

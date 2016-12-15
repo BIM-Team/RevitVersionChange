@@ -384,7 +384,7 @@ namespace Revit.Addin.RevitTooltip
                 if (isSettingChange)
                 {
                     ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation, settings);
-                    //App.Instance.CurrentDoc.Save();
+                    App.Instance.CurrentDoc.Save();
                     isSettingChange = false;
                 }
             }
