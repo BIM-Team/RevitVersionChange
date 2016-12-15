@@ -31,6 +31,22 @@ namespace Revit.Addin.RevitTooltip
         private static App _app = null;
 
         private string m_previousDocPathName = null;
+        //模型联动时使用
+        private string _previousselectedNoInfoEntity = null;
+        private string selectedNoInfoEntity = null;
+        /// <summary>
+        /// 模型联动
+        /// </summary>
+        public string SelectedNoInfoEntity
+        {
+            set
+            {
+                this.selectedNoInfoEntity = value;
+            }
+        }
+        //打开文档就构造一份
+        private Dictionary<string, ElementId> keyNameToIdMap = null;
+
         private bool isSettingChange = false;
         /// <summary>
         /// 模型相关的配置
@@ -127,7 +143,7 @@ namespace Revit.Addin.RevitTooltip
             //事件绑定：打开了一个文档的视图
             app.ViewActivated += OnViewActivated;
             //事件绑定：闲置事件
-            app.Idling += IdlingHandler;
+            //app.Idling += IdlingHandler;
 
 
             //加载格式文件
@@ -213,27 +229,6 @@ namespace Revit.Addin.RevitTooltip
 
         }
 
-        public void SetPanelEnabled(bool enabled)
-        {
-            string tabName = Res.String_AppTabName;
-
-            List<RibbonPanel> panels = m_uiApp.GetRibbonPanels(tabName);
-            foreach (var panel in panels)
-            {
-                foreach (RibbonItem item in panel.GetItems())
-                {
-                    if (item.ItemText == Res.CommandName_About ||
-                        item.ItemText == Res.CommandName_Help ||
-                        item.ItemText == Res.CommandName_LicenseInfo)
-                    {
-                        //about ribbon always enabled
-                        item.Enabled = true;
-                        continue;
-                    }
-                    item.Enabled = enabled;
-                }
-            }
-        }
 
         private void OnViewActivated(object sender, ViewActivatedEventArgs e)
         {
@@ -247,11 +242,38 @@ namespace Revit.Addin.RevitTooltip
                     this.sqlite = new SQLiteHelper(settings);
                     m_previousDocPathName = e.Document.PathName;
                     current_doc = e.Document;
+
+                    //过滤测点待使用
+                    //打开文档就过滤一次
+                    keyNameToIdMap = new Dictionary<string, ElementId>();
+                    BuiltInParameter testParam = BuiltInParameter.ALL_MODEL_TYPE_NAME;
+                    ParameterValueProvider pvp = new ParameterValueProvider(new ElementId(testParam));
+                    FilterStringEquals eq = new FilterStringEquals();
+                    FilterRule rule = new FilterStringRule(pvp, eq, Res.String_ParameterSurveyType, false);
+                    ElementParameterFilter paramFilter = new ElementParameterFilter(rule);
+                    Document document = current_doc;
+                    FilteredElementCollector elementCollector = new FilteredElementCollector(document).OfClass(typeof(FamilyInstance));
+                    IList<Element> elems = elementCollector.WherePasses(paramFilter).ToElements();
+                    foreach (var elem in elems)
+                    {
+                        string param_value = string.Empty;
+                        Parameter param = elem.get_Parameter(Res.String_ParameterName);
+                        if (null != param && param.StorageType == StorageType.String)
+                        {
+                            param_value = param.AsString();
+                            if (!string.IsNullOrWhiteSpace(param_value))
+                            {
+                                keyNameToIdMap.Add(param_value, elem.Id);
+                            }
+                        }
+                    }
+
                 }
                 //重新打开视图则隐藏Panel
                 DockablePane panel = m_uiApp.GetDockablePane(new DockablePaneId(ElementInfoPanel.GetInstance().Id));
                 if (panel != null)
                 {
+                    ElementInfoPanel.GetInstance().Update(new InfoEntityData());
                     panel.Hide();
                 }
                 DockablePane imageControl = m_uiApp.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
@@ -295,19 +317,11 @@ namespace Revit.Addin.RevitTooltip
 
             if (null != uidoc)
             {
-                //把settings保存至模型
-                if (isSettingChange)
-                {
-                    ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation, settings);
-                    App.Instance.CurrentDoc.Save();
-                    isSettingChange = false;
-                }
-
                 //存放实体
                 string entity = string.Empty;
                 bool isSurvey = false;
                 // ElementInfoPanel
-#if(Since2016)
+#if (Since2016)
                 Element selectElement = uidoc.Document.GetElement(uidoc.Selection.GetElementIds().FirstOrDefault());
 #else
                 Element selectElement = uidoc.Selection.Elements.Cast<Element>().FirstOrDefault<Element>();
@@ -333,6 +347,7 @@ namespace Revit.Addin.RevitTooltip
                             {//测量数据绘制折线图
                                 DrawEntityData drawEntityData = App.Instance.Sqlite.SelectDrawEntityData(entity, null, null);
                                 NewImageForm.Instance().EntityData = drawEntityData;
+                                NewImageForm.Instance().Show();
                             }
                         }
                     }
@@ -343,12 +358,71 @@ namespace Revit.Addin.RevitTooltip
                     {//清空数据
                         m_selectedElementId = -1;
                         ElementInfoPanel.GetInstance().Update(null);
+                        if (NewImageForm.Instance().Visible)
+                        {
+                            NewImageForm.Instance().EntityData = new DrawEntityData();
+                        }
                     }
                 }
             }
         }
 
-
+        /// <summary>
+        /// SettingForm的闲置事件处理函数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        public void SettingIdlingHandler(
+          object sender,
+          IdlingEventArgs args)
+        {
+            UIApplication uiapp = sender as UIApplication;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            if (null != uidoc)
+            {
+                //把settings保存至模型
+                if (isSettingChange)
+                {
+                    ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation, settings);
+                    //App.Instance.CurrentDoc.Save();
+                    isSettingChange = false;
+                }
+            }
+        }
+        /// <summary>
+        /// imageControl的闲置事件处理函数
+        /// 模型联动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        public void ImageControlIdlingHandler(
+                  object sender,
+                  IdlingEventArgs args)
+        {
+            UIApplication uiapp = sender as UIApplication;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            if (null != uidoc)
+            {
+                //模型联动
+                if (!string.IsNullOrWhiteSpace(selectedNoInfoEntity) && !selectedNoInfoEntity.Equals(_previousselectedNoInfoEntity))
+                {
+                    IList<UIView> uiViews = uidoc.GetOpenUIViews();
+                    if (uiViews != null && uiViews.Count != 0)
+                    {
+                        _previousselectedNoInfoEntity = selectedNoInfoEntity;
+                        UIView currentUIView = uiViews[uiViews.Count - 1];
+                        try
+                        {
+                            uidoc.ShowElements(keyNameToIdMap[selectedNoInfoEntity]);
+                            currentUIView.ZoomSheetSize();
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets help document

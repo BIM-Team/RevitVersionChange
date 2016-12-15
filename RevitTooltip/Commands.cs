@@ -65,6 +65,7 @@ namespace Revit.Addin.RevitTooltip
             {
                 NewSettings settingForm = new NewSettings(App.Instance.settings);
                 settingForm.Show();
+                commandData.Application.Idling += App.Instance.SettingIdlingHandler;
                 return Result.Succeeded;
             }
             catch (Exception ex)
@@ -176,74 +177,39 @@ namespace Revit.Addin.RevitTooltip
             DockablePane imagePanel = commandData.Application.GetDockablePane(new DockablePaneId(ImageControl.Instance().Id));
             imagePanel.Show();
             commandData.Application.Idling += App.Instance.IdlingHandler;
+            commandData.Application.Idling += App.Instance.ImageControlIdlingHandler;
 
             //对模型的处理，后续可能删除
-        //Material color_red = null;
-        //Material color_gray = null;
-        //Material color_blue = null;
-        //FilteredElementCollector elementCollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
-        //IEnumerable<Material> allMaterial = elementCollector.OfClass(typeof(Material)).Cast<Material>();
-        //        foreach (Material elem in allMaterial)
-        //        {
-        //            if (elem.Name.Equals(Res.String_Color_Red))
-        //            {
-        //                color_red = elem;
-        //            }
-        //            if (elem.Name.Equals(Res.String_Color_Gray))
-        //            {
-        //                color_gray = elem;
-        //            }
-        //            if (elem.Name.Equals(Res.String_Color_Blue))
-        //            {
-        //                color_blue = elem;
-        //            }
-        //            if (color_gray != null && color_red != null&& color_blue!=null)
-        //            {
-        //                break;
-        //            }
-        //        }
+            //Material color_red = null;
+            //Material color_gray = null;
+            //Material color_blue = null;
+            //FilteredElementCollector elementCollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
+            //IEnumerable<Material> allMaterial = elementCollector.OfClass(typeof(Material)).Cast<Material>();
+            //        foreach (Material elem in allMaterial)
+            //        {
+            //            if (elem.Name.Equals(Res.String_Color_Red))
+            //            {
+            //                color_red = elem;
+            //            }
+            //            if (elem.Name.Equals(Res.String_Color_Gray))
+            //            {
+            //                color_gray = elem;
+            //            }
+            //            if (elem.Name.Equals(Res.String_Color_Blue))
+            //            {
+            //                color_blue = elem;
+            //            }
+            //            if (color_gray != null && color_red != null&& color_blue!=null)
+            //            {
+            //                break;
+            //            }
+            //        }
 
-           
+
             return Result.Succeeded;
         }
     }
 
-    //[Transaction(TransactionMode.Manual)]
-    //public class CmdLoadExcelToDB : TooltipCommandBase
-    //{
-    //    public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        //消息对话框确认
-    //        if (MessageBox.Show("确认导入Excel表格数据到Mysql数据库？","",MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-    //        {
-    //            return Result.Succeeded;
-    //        }
-    //        ProcessBarForm processBarForm = new ProcessBarForm( MysqlUtil.CreateInstance());
-    //        if (processBarForm.ShowDialog() == DialogResult.OK) {
-    //        processBarForm.Dispose();
-    //        }    
-    //        return Result.Succeeded;
-    //    }
-    //}
-    //[Transaction(TransactionMode.Manual)]
-    //public class CmdLoadExcelToSQLite : TooltipCommandBase
-    //{
-    //    public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-
-    //        //消息对话框确认
-    //        if (MessageBox.Show("确认导入Excel表格数据到本地数据库？", "", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-    //        {
-    //            return Result.Succeeded;
-    //        }
-    //        ProcessBarForm processBarForm = new ProcessBarForm(SQLiteHelper.CreateInstance());
-    //        if (processBarForm.ShowDialog() == DialogResult.OK)
-    //        {
-    //            processBarForm.Dispose();
-    //        }
-    //        return Result.Succeeded;
-    //    }
-    //}
 
 
 }

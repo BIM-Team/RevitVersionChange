@@ -269,15 +269,6 @@ namespace Revit.Addin.RevitTooltip.Properties {
         }
         
         /// <summary>
-        ///   查找类似 600 的本地化字符串。
-        /// </summary>
-        internal static string Double_Df_Radius {
-            get {
-                return ResourceManager.GetString("Double_Df_Radius", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 备注 的本地化字符串。
         /// </summary>
         internal static string ExcelColumnHeader_Comment {
@@ -364,33 +355,6 @@ namespace Revit.Addin.RevitTooltip.Properties {
         }
         
         /// <summary>
-        ///   查找类似 蓝色 的本地化字符串。
-        /// </summary>
-        internal static string String_Color_Blue {
-            get {
-                return ResourceManager.GetString("String_Color_Blue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 灰色 的本地化字符串。
-        /// </summary>
-        internal static string String_Color_Gray {
-            get {
-                return ResourceManager.GetString("String_Color_Gray", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 红线 的本地化字符串。
-        /// </summary>
-        internal static string String_Color_Red {
-            get {
-                return ResourceManager.GetString("String_Color_Red", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 测点编号 的本地化字符串。
         /// </summary>
         internal static string String_ParameterName {
@@ -418,38 +382,11 @@ namespace Revit.Addin.RevitTooltip.Properties {
         }
         
         /// <summary>
-        ///   查找类似 半径 的本地化字符串。
-        /// </summary>
-        internal static string String_Radius {
-            get {
-                return ResourceManager.GetString("String_Radius", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 CX 的本地化字符串。
-        /// </summary>
-        internal static string String_Reg {
-            get {
-                return ResourceManager.GetString("String_Reg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 选择要导入的监测数据 的本地化字符串。
         /// </summary>
         internal static string String_SelectExcelFile {
             get {
                 return ResourceManager.GetString("String_SelectExcelFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 地下连续墙 的本地化字符串。
-        /// </summary>
-        internal static string String_UnderWallName {
-            get {
-                return ResourceManager.GetString("String_UnderWallName", resourceCulture);
             }
         }
         

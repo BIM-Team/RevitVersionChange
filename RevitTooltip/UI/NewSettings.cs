@@ -128,7 +128,6 @@ namespace Revit.Addin.RevitTooltip.UI
         {
             if (this.IsSettingChanged)
             {
-                button2.Enabled = false;
                 RevitTooltip newSetting = RevitTooltip.Default;
                 newSetting.DfServer = this.textAddr.Text.Trim();
                 newSetting.DfDB = this.textDB.Text.Trim();
@@ -139,8 +138,8 @@ namespace Revit.Addin.RevitTooltip.UI
                 newSetting.SqliteFileName = this.textSqliteName.Text.Trim();
                 App.Instance.Settings = newSetting;
                 this.IsSettingChanged = false;
+                MessageBox.Show("成功");
             }
-            button2.Enabled = true;
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -359,11 +358,13 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 tag = App.Instance.Sqlite.AddKeysToGroup(group_id, OK_ids);
                 this.combGroup.DataSource= App.Instance.Sqlite.loadGroupForAExcel(signal);
+                this.dataGridView2.DataSource= App.Instance.Sqlite.loadKeyNameForExcelAndGroup(signal);
             }
             else if (App.Instance.MySql.IsReady)
             {
                 tag = App.Instance.MySql.AddKeysToGroup(group_id, OK_ids);
                 this.combGroup.DataSource = App.Instance.MySql.loadGroupForAExcel(signal);
+                this.dataGridView2.DataSource = App.Instance.MySql.loadKeyNameForExcelAndGroup(signal);
             }
             if (tag)
             {
@@ -453,6 +454,26 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     MessageBox.Show("删除失败");
                 }
+            }
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Title = "打开本地文件";
+            openFile.Filter = "Sqlite文件（*.db）|*.db";
+            openFile.FileName = "SqliteDfFile";
+            openFile.DefaultExt = "db";
+            openFile.AddExtension = false;
+            openFile.RestoreDirectory = true;
+            openFile.Multiselect = false;
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                String fullPath = openFile.FileName;
+                String path = fullPath.Substring(0, fullPath.LastIndexOf("\\"));
+                String fileName = fullPath.Substring(fullPath.LastIndexOf("\\") + 1);
+                this.textSqlitePath.Text = path;
+                this.textSqliteName.Text = fileName;
             }
         }
     }

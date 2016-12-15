@@ -74,6 +74,7 @@
             this.tabPagePro = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label13 = new System.Windows.Forms.Label();
             this.useSqlitePro = new System.Windows.Forms.CheckBox();
             this.button9 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
@@ -85,7 +86,7 @@
             this.Column5 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label13 = new System.Windows.Forms.Label();
+            this.button10 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPageDB.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -139,6 +140,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.button10);
             this.groupBox2.Controls.Add(this.button8);
             this.groupBox2.Controls.Add(this.textSqliteName);
             this.groupBox2.Controls.Add(this.label9);
@@ -153,11 +155,11 @@
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(405, 14);
+            this.button8.Location = new System.Drawing.Point(405, 52);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(75, 23);
             this.button8.TabIndex = 4;
-            this.button8.Text = "...";
+            this.button8.Text = "新建";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
@@ -165,6 +167,7 @@
             // 
             this.textSqliteName.Location = new System.Drawing.Point(80, 54);
             this.textSqliteName.Name = "textSqliteName";
+            this.textSqliteName.ReadOnly = true;
             this.textSqliteName.Size = new System.Drawing.Size(298, 21);
             this.textSqliteName.TabIndex = 3;
             this.textSqliteName.TextChanged += new System.EventHandler(this.textBox_TextChanged);
@@ -182,6 +185,7 @@
             // 
             this.textSqlitePath.Location = new System.Drawing.Point(80, 16);
             this.textSqlitePath.Name = "textSqlitePath";
+            this.textSqlitePath.ReadOnly = true;
             this.textSqlitePath.Size = new System.Drawing.Size(298, 21);
             this.textSqlitePath.TabIndex = 1;
             this.textSqlitePath.TextChanged += new System.EventHandler(this.textBox_TextChanged);
@@ -599,6 +603,18 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "分组信息";
             // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label13.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.label13.Location = new System.Drawing.Point(194, 124);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(29, 12);
+            this.label13.TabIndex = 7;
+            this.label13.Text = "删除";
+            this.label13.Click += new System.EventHandler(this.label13_Click);
+            // 
             // useSqlitePro
             // 
             this.useSqlitePro.AutoSize = true;
@@ -723,17 +739,15 @@
             this.Column6.ReadOnly = true;
             this.Column6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
-            // label13
+            // button10
             // 
-            this.label13.AutoSize = true;
-            this.label13.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label13.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.label13.Location = new System.Drawing.Point(194, 124);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(29, 12);
-            this.label13.TabIndex = 7;
-            this.label13.Text = "删除";
-            this.label13.Click += new System.EventHandler(this.label13_Click);
+            this.button10.Location = new System.Drawing.Point(405, 14);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(75, 23);
+            this.button10.TabIndex = 5;
+            this.button10.Text = "打开";
+            this.button10.UseVisualStyleBackColor = true;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
             // NewSettings
             // 
@@ -834,5 +848,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Button button10;
     }
 }

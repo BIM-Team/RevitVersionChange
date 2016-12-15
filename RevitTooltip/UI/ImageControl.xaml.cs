@@ -56,6 +56,9 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 NewImageForm.Instance().Show();
             }
+            if (!string.IsNullOrWhiteSpace(selectedItem.EntityName)) {
+                App.Instance.SelectedNoInfoEntity = selectedItem.EntityName;
+            }
         }
         public void setDataSource(IEnumerable itemsSource)
         {
