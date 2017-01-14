@@ -240,4 +240,25 @@
   <data name="CommandName_Import_SQLite" xml:space="preserve">
     <value>导入至本地</value>
   </data>
+  <data name="String_Color_Blue" xml:space="preserve">
+    <value>蓝色</value>
+  </data>
+  <data name="String_Color_Gray" xml:space="preserve">
+    <value>灰色</value>
+  </data>
+  <data name="String_Color_Redline" xml:space="preserve">
+    <value>红线</value>
+  </data>
+  <data name="String_Err1" xml:space="preserve">
+    <value>异常一</value>
+  </data>
+  <data name="String_Err1Err2" xml:space="preserve">
+    <value>两种异常</value>
+  </data>
+  <data name="String_Err2" xml:space="preserve">
+    <value>异常二</value>
+  </data>
+  <data name="String_No" xml:space="preserve">
+    <value>没有异常</value>
+  </data>
 </root>

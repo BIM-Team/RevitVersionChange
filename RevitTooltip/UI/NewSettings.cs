@@ -17,6 +17,7 @@ namespace Revit.Addin.RevitTooltip.UI
 {
     public partial class NewSettings : Form
     {
+        private bool IsThresholdChanged = false;
         /// <summary>
         /// 记录当前的设置是否有更改
         /// </summary>
@@ -254,6 +255,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 if (useSqliteThreshold.Checked)
                 {
                     App.Instance.Sqlite.ModifyThreshold(Signal, Total_hold, Diff_hold);
+                    this.IsThresholdChanged = true;
                 }
                 else if (App.Instance.MySql.IsReady)
                 {
@@ -474,6 +476,13 @@ namespace Revit.Addin.RevitTooltip.UI
                 String fileName = fullPath.Substring(fullPath.LastIndexOf("\\") + 1);
                 this.textSqlitePath.Text = path;
                 this.textSqliteName.Text = fileName;
+            }
+        }
+
+        private void NewSettings_Deactivate(object sender, EventArgs e)
+        {
+            if (this.IsThresholdChanged) {
+                App.Instance.ThresholdChanged = true;
             }
         }
     }

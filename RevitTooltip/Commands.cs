@@ -89,7 +89,8 @@ namespace Revit.Addin.RevitTooltip
             try
             {
                 if (App.Instance.Sqlite.LoadDataToSqlite()) {
-                MessageBox.Show("数据更新成功");
+                    App.Instance.ThresholdChanged = true;
+                    MessageBox.Show("数据更新成功");
                 }
                 return Result.Succeeded;
             }

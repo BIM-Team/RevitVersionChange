@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Res = Revit.Addin.RevitTooltip.Properties.Resources;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -1085,7 +1086,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                         CEntityName one = new CEntityName();
                         one.Id = reader.GetInt32(0);
                         one.EntityName = reader.GetString(1);
-                        one.ErrMsg = reader.GetBoolean(2) ? "Total" : "No";
+                        one.ErrMsg = reader.GetBoolean(2) ? Res.String_Err1 : Res.String_No;
                         Entities.Add(one);
                         maps.Add(one.EntityName, one);
                     }
@@ -1117,7 +1118,13 @@ namespace Revit.Addin.RevitTooltip.Impl
                         }
                         else if (isErr)
                         {
-                            maps[entityName].ErrMsg += "Diff";
+                            if (Res.String_Err1.Equals(maps[entityName].ErrMsg))
+                            {
+                                maps[entityName].ErrMsg = Res.String_Err1Err2;
+                            }
+                            else {
+                                maps[entityName].ErrMsg = Res.String_Err2;
+                            }
                             isErr = false;
                             entityName = reader.GetString(1);
                         }
@@ -1130,7 +1137,14 @@ namespace Revit.Addin.RevitTooltip.Impl
                     //最后一个
                     if (isErr)
                     {
-                        maps[entityName].ErrMsg += "Diff";
+                        if (Res.String_Err1.Equals(maps[entityName].ErrMsg))
+                        {
+                            maps[entityName].ErrMsg = Res.String_Err1Err2;
+                        }
+                        else
+                        {
+                            maps[entityName].ErrMsg = Res.String_Err2;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -1527,5 +1541,133 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             return result;
         }
+
+        public List<CEntityName> SelectAllEntitiesAndErrIgnoreSignal()
+        {
+
+            //判断是否创建该查询的表（一定要先打开数据库）
+            if (!isExist("EntityTable", "table"))
+            {
+                MessageBox.Show("本地数据库不存在，建议更新本地数据库！");
+                return null;
+            }
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.Open();
+            }
+            string select_Signal = "Select ExcelSignal From ExcelTable Where IsInfo=0 ";
+            List<CEntityName> Entities = new List<CEntityName>();
+            Dictionary<string, CEntityName> maps = new Dictionary<string, CEntityName>();
+            List<string> Signals = new List<string>();
+
+            using (SQLiteCommand command = new SQLiteCommand(select_Signal, conn))  //建立执行命令语句对象
+            {
+                SQLiteDataReader reader = null;
+                try
+                {
+                    reader=command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Signals.Add(reader.GetString(0));
+                    }
+                    reader.Close();
+                    foreach (string signal in Signals)
+                    {
+                    command.CommandText = string.Format("Select Total_hold,Diff_hold From ExcelTable Where ExcelSignal='{0}'", signal); 
+                    reader = command.ExecuteReader();
+                    float? Total_hold = null;
+                    float? Diff_hold = null;
+                    if (reader.Read())
+                    {
+                        Total_hold = reader.GetFloat(0);
+                        Diff_hold = reader.GetFloat(1);
+                    }
+                    reader.Close();
+                    if (Total_hold == null || Diff_hold == null)
+                    {
+                        throw new Exception("无效的阈值");
+                    }
+                    string sql_Total = null;
+                    if (Total_hold >= 0)
+                    {
+                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Max(DrawTable.EntityMaxValue)>={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID", Total_hold, signal);
+                    }
+                    else
+                    {
+                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Min(DrawTable.EntityMaxValue)<={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID", Total_hold, signal);
+                    }
+                    command.CommandText = sql_Total;
+                    reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        CEntityName one = new CEntityName();
+                        one.Id = reader.GetInt32(0);
+                        one.EntityName = reader.GetString(1);
+                        one.ErrMsg = reader.GetBoolean(2) ? "Total" : "No";
+                        Entities.Add(one);
+                        maps.Add(one.EntityName, one);
+                    }
+                    reader.Close();
+                    string sql_Diff = string.Format("SELECT DrawTable.EntityMaxValue,EntityTable.EntityName From DrawTable ,EntityTable WHERE DrawTable.Entity_ID = EntityTable.ID and EntityTable.ExcelSignal='{0}' Order BY EntityTable.ID,DrawTable.Date", signal);
+                    command.CommandText = sql_Diff;
+                    reader = command.ExecuteReader();
+                    Diff_hold = Math.Abs((float)Diff_hold);
+                    float first = 0;
+                    float next = 0;
+                    float diff = 0;
+                    bool isErr = false;
+                    string entityName = null;
+                    if (reader.Read())
+                    {
+                        first = reader.GetFloat(0);
+                        entityName = reader.GetString(1);
+                    }
+                    while (reader.Read())
+                    {
+                        next = reader.GetFloat(0);
+                        diff = Math.Abs((float)(next - first));
+                        if (entityName.Equals(reader.GetString(1)))
+                        {
+                            if (diff >= Diff_hold)
+                            {
+                                isErr = true;
+                            }
+                        }
+                        else if (isErr)
+                        {
+                            maps[entityName].ErrMsg += "Diff";
+                            isErr = false;
+                            entityName = reader.GetString(1);
+                        }
+                        else
+                        {
+                            entityName = reader.GetString(1);
+                        }
+                        first = next;
+                    }
+                    //最后一个
+                    if (isErr)
+                    {
+                        maps[entityName].ErrMsg += "Diff";
+                    }
+                        reader.Close();
+                        maps.Clear();
+                }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                finally
+                {
+                    if (!reader.IsClosed)
+                    {
+                        reader.Close();
+                    }
+                    conn.Close();
+                }
+            }
+            return Entities;
+    }
     }
 }

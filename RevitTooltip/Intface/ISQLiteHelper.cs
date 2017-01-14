@@ -36,6 +36,12 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// </summary>
         List<CEntityName> SelectAllEntitiesAndErr(string ExcelSignal);
         /// <summary>
+        /// 获取所有的entity和ErrMsg
+        /// </summary>
+        /// <returns></returns>
+        List<CEntityName> SelectAllEntitiesAndErrIgnoreSignal();
+
+        /// <summary>
         /// 复制MySQL中的数据到Sqlite中
         /// </summary>
         bool LoadDataToSqlite();

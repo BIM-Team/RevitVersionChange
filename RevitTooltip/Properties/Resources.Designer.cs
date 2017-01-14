@@ -355,6 +355,69 @@ namespace Revit.Addin.RevitTooltip.Properties {
         }
         
         /// <summary>
+        ///   查找类似 蓝色 的本地化字符串。
+        /// </summary>
+        internal static string String_Color_Blue {
+            get {
+                return ResourceManager.GetString("String_Color_Blue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 灰色 的本地化字符串。
+        /// </summary>
+        internal static string String_Color_Gray {
+            get {
+                return ResourceManager.GetString("String_Color_Gray", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 红线 的本地化字符串。
+        /// </summary>
+        internal static string String_Color_Redline {
+            get {
+                return ResourceManager.GetString("String_Color_Redline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 异常一 的本地化字符串。
+        /// </summary>
+        internal static string String_Err1 {
+            get {
+                return ResourceManager.GetString("String_Err1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 两种异常 的本地化字符串。
+        /// </summary>
+        internal static string String_Err1Err2 {
+            get {
+                return ResourceManager.GetString("String_Err1Err2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 异常二 的本地化字符串。
+        /// </summary>
+        internal static string String_Err2 {
+            get {
+                return ResourceManager.GetString("String_Err2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 没有异常 的本地化字符串。
+        /// </summary>
+        internal static string String_No {
+            get {
+                return ResourceManager.GetString("String_No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 测点编号 的本地化字符串。
         /// </summary>
         internal static string String_ParameterName {

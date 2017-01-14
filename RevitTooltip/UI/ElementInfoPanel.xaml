@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Revit.Addin.RevitTooltip"
              mc:Ignorable="d" 
              SizeChanged="OnPageSizeChanged"
-             d:DesignHeight="600" d:DesignWidth="300">
+             d:DesignHeight="600" d:DesignWidth="300" Width="400">
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition/>

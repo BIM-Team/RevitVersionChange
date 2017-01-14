@@ -43,32 +43,32 @@
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ErrMsg}" Value="Total">
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="异常一">
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ErrMsg}" Value="TotalDiff">
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="两种异常">
                                     <Setter Property="Background" Value="#4C11111C"/>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ErrMsg}" Value="NoDiff">
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="异常二">
                                     <Setter Property="Foreground" Value="Blue"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding ErrMsg}"  Header="错误" Width="5*">
+                <DataGridTextColumn   Header="错误" Width="5*" Binding="{Binding ErrMsg}">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ErrMsg}" Value="Total">
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="异常一">
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ErrMsg}" Value="TotalDiff">
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="两种异常">
                                     <Setter Property="Background" Value="#4C11111C"/>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ErrMsg}" Value="NoDiff">
+                                <DataTrigger Binding="{Binding ErrMsg}" Value="异常二">
                                     <Setter Property="Foreground" Value="Blue"/>
                                 </DataTrigger>
                             </Style.Triggers>

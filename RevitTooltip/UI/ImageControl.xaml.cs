@@ -15,6 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Globalization;
+using Res = Revit.Addin.RevitTooltip.Properties.Resources;
+
 
 namespace Revit.Addin.RevitTooltip.UI
 {
@@ -56,7 +58,8 @@ namespace Revit.Addin.RevitTooltip.UI
             {
                 NewImageForm.Instance().Show();
             }
-            if (!string.IsNullOrWhiteSpace(selectedItem.EntityName)) {
+            if (!string.IsNullOrWhiteSpace(selectedItem.EntityName))
+            {
                 App.Instance.SelectedNoInfoEntity = selectedItem.EntityName;
             }
         }
@@ -113,7 +116,6 @@ namespace Revit.Addin.RevitTooltip.UI
         {
             this.comboBox.ItemsSource = itemsSource;
         }
-
     }
 
 }

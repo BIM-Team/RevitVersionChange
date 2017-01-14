@@ -16,6 +16,7 @@ using System;
 using Revit.Addin.RevitTooltip.Intface;
 using Revit.Addin.RevitTooltip.Impl;
 using Revit.Addin.RevitTooltip.Dto;
+using Autodesk.Revit.DB.Events;
 
 namespace Revit.Addin.RevitTooltip
 {
@@ -25,6 +26,29 @@ namespace Revit.Addin.RevitTooltip
     /// </summary>
     public class App : IExternalApplication
     {
+        private bool ColorMaterialIsReady = false;
+        private bool isThresholdChanged = true;
+        /// <summary>
+        /// 记录阈值是否改变
+        /// </summary>
+        public bool ThresholdChanged
+        {
+            set { this.isThresholdChanged = value; }
+        }
+        //用于记录颜色是否有改变
+
+        /// <summary>
+        /// 红色外观，累计异常
+        /// </summary>
+        private Material color_red = null;
+        /// <summary>
+        /// 灰色外观，正常
+        /// </summary>
+        private Material color_gray = null;
+        /// <summary>
+        /// 蓝色外观，异常
+        /// </summary>
+        private Material color_blue = null;
         /// <summary>
         /// 单列模式
         /// </summary>
@@ -45,7 +69,7 @@ namespace Revit.Addin.RevitTooltip
             }
         }
         //打开文档就构造一份
-        private Dictionary<string, ElementId> keyNameToIdMap = null;
+        private Dictionary<string, Element> keyNameToElementMap = null;
 
         private bool isSettingChange = false;
         /// <summary>
@@ -144,6 +168,8 @@ namespace Revit.Addin.RevitTooltip
             app.ViewActivated += OnViewActivated;
             //事件绑定：闲置事件
             //app.Idling += IdlingHandler;
+            app.ControlledApplication.DocumentClosing += DocumentClosingAction;
+            app.ControlledApplication.DocumentOpened += DocumentOpenedAction;
 
 
             //加载格式文件
@@ -235,40 +261,6 @@ namespace Revit.Addin.RevitTooltip
 
             try
             {
-                if (string.IsNullOrEmpty(m_previousDocPathName) || m_previousDocPathName != e.Document.PathName)
-                {
-                    settings = ExtensibleStorage.GetTooltipInfo(e.Document.ProjectInformation);
-                    this.mysql = new MysqlUtil(settings);
-                    this.sqlite = new SQLiteHelper(settings);
-                    m_previousDocPathName = e.Document.PathName;
-                    current_doc = e.Document;
-
-                    //过滤测点待使用
-                    //打开文档就过滤一次
-                    keyNameToIdMap = new Dictionary<string, ElementId>();
-                    BuiltInParameter testParam = BuiltInParameter.ALL_MODEL_TYPE_NAME;
-                    ParameterValueProvider pvp = new ParameterValueProvider(new ElementId(testParam));
-                    FilterStringEquals eq = new FilterStringEquals();
-                    FilterRule rule = new FilterStringRule(pvp, eq, Res.String_ParameterSurveyType, false);
-                    ElementParameterFilter paramFilter = new ElementParameterFilter(rule);
-                    Document document = current_doc;
-                    FilteredElementCollector elementCollector = new FilteredElementCollector(document).OfClass(typeof(FamilyInstance));
-                    IList<Element> elems = elementCollector.WherePasses(paramFilter).ToElements();
-                    foreach (var elem in elems)
-                    {
-                        string param_value = string.Empty;
-                        Parameter param = elem.get_Parameter(Res.String_ParameterName);
-                        if (null != param && param.StorageType == StorageType.String)
-                        {
-                            param_value = param.AsString();
-                            if (!string.IsNullOrWhiteSpace(param_value))
-                            {
-                                keyNameToIdMap.Add(param_value, elem.Id);
-                            }
-                        }
-                    }
-
-                }
                 //重新打开视图则隐藏Panel
                 DockablePane panel = m_uiApp.GetDockablePane(new DockablePaneId(ElementInfoPanel.GetInstance().Id));
                 if (panel != null)
@@ -281,7 +273,6 @@ namespace Revit.Addin.RevitTooltip
                 {
                     imageControl.Hide();
                 }
-                //App.Instance.SetPanelEnabled(true);
 
             }
             catch (System.Exception ex)
@@ -413,12 +404,69 @@ namespace Revit.Addin.RevitTooltip
                         UIView currentUIView = uiViews[uiViews.Count - 1];
                         try
                         {
-                            uidoc.ShowElements(keyNameToIdMap[selectedNoInfoEntity]);
+                            uidoc.ShowElements(keyNameToElementMap[selectedNoInfoEntity]);
                             currentUIView.ZoomSheetSize();
                         }
                         catch (Exception)
                         {
                         }
+                    }
+                }
+                //对于异常点设置成不同的颜色
+                if (isThresholdChanged && ColorMaterialIsReady)
+                {
+                    
+                    List<CEntityName> all_entity = App.Instance.Sqlite.SelectAllEntitiesAndErrIgnoreSignal();
+                    using (Transaction tran = new Transaction(uidoc.Document))
+                    {
+                        if (tran.Start("ChangeColor") == TransactionStatus.Started)
+                        {
+
+                            foreach (CEntityName one in all_entity)
+                            {
+                                try
+                                {
+                                    if (!keyNameToElementMap.ContainsKey(one.EntityName))
+                                    {
+                                        continue;
+                                    }
+                                    Parameter param_ma = keyNameToElementMap[one.EntityName].get_Parameter(Res.String_Color);
+                                    if (null != param_ma)
+                                    {
+                                        string err = one.ErrMsg;
+                                        if (err.IndexOf("Total") != -1)
+                                        {
+                                            param_ma.Set(color_red.Id);
+                                        }
+                                        else if (err.IndexOf("Diff") != -1)
+                                        {
+                                            param_ma.Set(color_blue.Id);
+                                        }
+                                        else
+                                        {
+                                            param_ma.Set(color_gray.Id);
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+
+                                    throw e;
+                                }
+                            }
+                        }
+                        if (tran.Commit() == TransactionStatus.Committed)
+                        {
+                            isThresholdChanged = false;
+                        }
+                        else
+                        {
+                            tran.RollBack();
+                        }
+                        if (uidoc.Document.IsModified) {
+                            uidoc.Document.Save();
+                        }
+
                     }
                 }
             }
@@ -439,7 +487,77 @@ namespace Revit.Addin.RevitTooltip
         {
             return "BIMRevit2014-2016";
         }
+        private void DocumentClosingAction(object sender, DocumentClosingEventArgs even)
+        {
+            //isColorChanged = false;
+            isThresholdChanged = true;
+            color_blue = null;
+            color_gray = null;
+            color_red = null;
+            settings = null;
+            keyNameToElementMap = null;
+            current_doc = null;
+            m_uiApp.Idling -= SettingIdlingHandler;
+            m_uiApp.Idling -= IdlingHandler;
+            m_uiApp.Idling -= ImageControlIdlingHandler;
+        }
+        private void DocumentOpenedAction(object sender, DocumentOpenedEventArgs even)
+        {
+            settings = ExtensibleStorage.GetTooltipInfo(even.Document.ProjectInformation);
+            this.mysql = new MysqlUtil(settings);
+            this.sqlite = new SQLiteHelper(settings);
+            m_previousDocPathName = even.Document.PathName;
+            current_doc = even.Document;
+
+            //过滤测点待使用
+            //打开文档就过滤一次
+            keyNameToElementMap = new Dictionary<string, Element>();
+            BuiltInParameter testParam = BuiltInParameter.ALL_MODEL_TYPE_NAME;
+            ParameterValueProvider pvp = new ParameterValueProvider(new ElementId(testParam));
+            FilterStringEquals eq = new FilterStringEquals();
+            FilterRule rule = new FilterStringRule(pvp, eq, Res.String_ParameterSurveyType, false);
+            ElementParameterFilter paramFilter = new ElementParameterFilter(rule);
+            Document document = current_doc;
+            FilteredElementCollector elementCollector = new FilteredElementCollector(document).OfClass(typeof(FamilyInstance));
+            IList<Element> elems = elementCollector.WherePasses(paramFilter).ToElements();
+            foreach (var elem in elems)
+            {
+                string param_value = string.Empty;
+                Parameter param = elem.get_Parameter(Res.String_ParameterName);
+                if (null != param && param.StorageType == StorageType.String)
+                {
+                    param_value = param.AsString();
+                    if (!string.IsNullOrWhiteSpace(param_value))
+                    {
+                        keyNameToElementMap.Add(param_value, elem);
+                    }
+                }
+            }
 
 
+            //准备Material
+            IEnumerable<Material> allMaterial = new FilteredElementCollector(even.Document).OfClass(typeof(Material)).Cast<Material>();
+            foreach (Material elem in allMaterial)
+            {
+                if (elem.Name.Equals(Res.String_Color_Redline))
+                {
+                    color_red = elem;
+                }
+                if (elem.Name.Equals(Res.String_Color_Gray))
+                {
+                    color_gray = elem;
+                }
+                if (elem.Name.Equals(Res.String_Color_Blue))
+                {
+                    color_blue = elem;
+                }
+                if (color_gray != null && color_red != null && color_blue != null)
+                {
+                    this.ColorMaterialIsReady = true;
+                    break;
+                }
+            }
+
+        }
     }
 }
