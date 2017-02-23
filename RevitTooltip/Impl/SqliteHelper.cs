@@ -1036,7 +1036,7 @@ namespace Revit.Addin.RevitTooltip.Impl
         ///传入的Signal应该是测量数据的signal
         ///ErrMsg:Total,TotalDiff,No,NoDiff
         /// </summary>
-        public List<CEntityName> SelectAllEntitiesAndErr(string ExcelSignal)
+        public List<CEntityName> SelectAllEntitiesAndErr(string ExcelSignal, DateTime? start = null, DateTime? end = null)
         {
             //判断是否创建该查询的表（一定要先打开数据库）
             if (!isExist("EntityTable", "table"))
@@ -1073,12 +1073,19 @@ namespace Revit.Addin.RevitTooltip.Impl
                     string sql_Total = null;
                     if (Total_hold >= 0)
                     {
-                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Max(DrawTable.EntityMaxValue)>={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID", Total_hold, ExcelSignal);
+                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Max(DrawTable.EntityMaxValue)>={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' ", Total_hold, ExcelSignal);
                     }
                     else
                     {
-                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Min(DrawTable.EntityMaxValue)<={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID", Total_hold, ExcelSignal);
+                        sql_Total = String.Format("select EntityTable.ID,EntityTable.EntityName,Min(DrawTable.EntityMaxValue)<={0} From  EntityTable,DrawTable where DrawTable.Entity_ID=EntityTable.ID and EntityTable.ExcelSignal = '{1}' ", Total_hold, ExcelSignal);
                     }
+                    if (start != null) {
+                        sql_Total += String.Format(" and DrawTable.Date>='{0}' ", ((DateTime)start).ToString("yyyy-MM-dd HH:mm:ss")); 
+                    }
+                    if (end != null) {
+                        sql_Total +=String.Format( " and DrawTable.Date<='{0}' ",((DateTime)end).ToString("yyyy-MM-dd HH:mm:ss"));
+                    }
+                    sql_Total += " GROUP BY EntityTable.EntityName ORDER BY EntityTable.ID";
                     command.CommandText = sql_Total;
                     reader = command.ExecuteReader();
                     while (reader.Read())
@@ -1091,7 +1098,14 @@ namespace Revit.Addin.RevitTooltip.Impl
                         maps.Add(one.EntityName, one);
                     }
                     reader.Close();
-                    string sql_Diff = string.Format("SELECT DrawTable.EntityMaxValue,EntityTable.EntityName From DrawTable ,EntityTable WHERE DrawTable.Entity_ID = EntityTable.ID and EntityTable.ExcelSignal='{0}' Order BY EntityTable.ID,DrawTable.Date", ExcelSignal);
+                    string sql_Diff = string.Format("SELECT DrawTable.EntityMaxValue,EntityTable.EntityName From DrawTable ,EntityTable WHERE DrawTable.Entity_ID = EntityTable.ID and EntityTable.ExcelSignal='{0}' ", ExcelSignal);
+                    if (start != null) {
+                        sql_Diff += String.Format(" and DrawTable.Date>='{0}' ", ((DateTime)start).ToString("yyyy-MM-dd HH:mm:ss"));
+                    }
+                    if (end != null) {
+                        sql_Diff += String.Format(" and DrawTable.Date>='{0}' ", ((DateTime)end).ToString("yyyy-MM-dd HH:mm:ss"));
+                    }
+                    sql_Diff += " Order BY EntityTable.ID,DrawTable.Date";
                     command.CommandText = sql_Diff;
                     reader = command.ExecuteReader();
                     Diff_hold = Math.Abs((float)Diff_hold);

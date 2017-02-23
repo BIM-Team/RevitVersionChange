@@ -16,5 +16,5 @@ TRACE;Enable_License
 311414445578
 Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageControl.xaml;UI\TabItemControl.xaml;
 
-False
+True
 

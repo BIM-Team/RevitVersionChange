@@ -16,5 +16,5 @@ TRACE;DEBUG
 31191429759
 Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageControl.xaml;UI\TabItemControl.xaml;
 
-True
+False
 
