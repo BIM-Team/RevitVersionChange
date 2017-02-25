@@ -55,3 +55,4 @@ C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sou
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Release\RevitTooltip.csproj.GenerateResource.Cache
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Release\RevitTooltip.dll
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Release\RevitTooltip.pdb
+C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Release\RevitTooltip.csprojResolveAssemblyReference.cache

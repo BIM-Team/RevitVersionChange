@@ -555,10 +555,6 @@ namespace Revit.Addin.RevitTooltip.Impl
         public List<Group> loadGroupForAExcel(string signal)
         {
             List<Group> groups = new List<Group>() ;
-            Group newOne = new Group();
-            //newOne.Id = -1;
-            //newOne.GroupName = "新建";
-            //groups.Add(newOne);
             string sql = string.Format("select ID,GroupName from GroupTable where ExcelSignal='{0}'", signal);
             MySqlConnection conn = new MySqlConnection(this.connectMessage);
             MySqlDataReader reader = null;
@@ -585,6 +581,10 @@ namespace Revit.Addin.RevitTooltip.Impl
                 conn.Close();
                 conn.Dispose();
             }
+            Group newOne = new Group();
+            newOne.Id = -1;
+            newOne.GroupName = "新建分组";
+            groups.Add(newOne);
             return groups;
         }
 

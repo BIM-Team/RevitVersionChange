@@ -473,6 +473,7 @@
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer2.IsSplitterFixed = true;
             this.splitContainer2.Location = new System.Drawing.Point(3, 3);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -582,17 +583,20 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer1.MinimumSize = new System.Drawing.Size(531, 257);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.groupBox4);
+            this.splitContainer1.Panel1MinSize = 240;
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dataGridView2);
+            this.splitContainer1.Panel2MinSize = 240;
             this.splitContainer1.Size = new System.Drawing.Size(531, 257);
-            this.splitContainer1.SplitterDistance = 231;
+            this.splitContainer1.SplitterDistance = 240;
             this.splitContainer1.TabIndex = 0;
             // 
             // groupBox4
@@ -608,7 +612,7 @@
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox4.Location = new System.Drawing.Point(0, 0);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(231, 257);
+            this.groupBox4.Size = new System.Drawing.Size(240, 257);
             this.groupBox4.TabIndex = 4;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "分组信息";
@@ -652,7 +656,7 @@
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 4;
-            this.button5.Text = "确认";
+            this.button5.Text = "修改";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
@@ -668,7 +672,7 @@
             this.combGroup.TabIndex = 3;
             this.combGroup.Text = "选择分组";
             this.combGroup.ValueMember = "ID";
-            this.combGroup.SelectionChangeCommitted += new System.EventHandler(this.combGroup_SelectionChangeCommitted);
+            this.combGroup.SelectedIndexChanged += new System.EventHandler(this.combGroup_SelectedIndexChanged);
             // 
             // label11
             // 
@@ -698,7 +702,7 @@
             this.combExcel.Size = new System.Drawing.Size(121, 20);
             this.combExcel.TabIndex = 1;
             this.combExcel.ValueMember = "Signal";
-            this.combExcel.SelectionChangeCommitted += new System.EventHandler(this.combExcel_SelectionChangeCommitted);
+            this.combExcel.SelectedIndexChanged += new System.EventHandler(this.combExcel_SelectedIndexChanged);
             // 
             // dataGridView2
             // 
@@ -716,7 +720,7 @@
             this.dataGridView2.RowTemplate.Height = 23;
             this.dataGridView2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView2.Size = new System.Drawing.Size(296, 257);
+            this.dataGridView2.Size = new System.Drawing.Size(287, 257);
             this.dataGridView2.TabIndex = 0;
             // 
             // Column5
@@ -757,6 +761,7 @@
             this.Controls.Add(this.tabControl1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(260, 328);
             this.Name = "NewSettings";
             this.ShowIcon = false;
             this.Text = "设置";
