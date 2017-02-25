@@ -1103,7 +1103,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                         sql_Diff += String.Format(" and DrawTable.Date>='{0}' ", ((DateTime)start).ToString("yyyy-MM-dd HH:mm:ss"));
                     }
                     if (end != null) {
-                        sql_Diff += String.Format(" and DrawTable.Date>='{0}' ", ((DateTime)end).ToString("yyyy-MM-dd HH:mm:ss"));
+                        sql_Diff += String.Format(" and DrawTable.Date<='{0}' ", ((DateTime)end).ToString("yyyy-MM-dd HH:mm:ss"));
                     }
                     sql_Diff += " Order BY EntityTable.ID,DrawTable.Date";
                     command.CommandText = sql_Diff;
@@ -1683,5 +1683,43 @@ namespace Revit.Addin.RevitTooltip.Impl
             }
             return Entities;
     }
+
+        public ExcelTable SelectADrawType(string EntityName)
+        {
+            ExcelTable result = null;
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.Open();
+            }
+            string sql = String.Format("Select ExcelTable.ID,CurrentFile,ExcelTable.ExcelSignal,Total_hold,Diff_hold,History From ExcelTable,EntityTable Where ExcelTable.IsInfo=0 and EntityTable.ExcelSignal=ExcelTable.ExcelSignal and EntityTable.EntityName='{0}'", EntityName);
+            using (SQLiteCommand command = new SQLiteCommand(sql, conn))
+            {
+                SQLiteDataReader reader = null;
+                try
+                {
+                    reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        result = new ExcelTable();
+                        result.Id = reader.GetInt32(0);
+                        result.CurrentFile = reader.GetString(1);
+                        result.Signal = reader.GetString(2);
+                        result.Total_hold = reader.GetFloat(3);
+                        result.Diff_hold = reader.GetFloat(4);
+                        result.History = reader.GetString(5);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                finally
+                {
+                    reader.Close();
+                    conn.Close();
+                }
+            }
+            return result;
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace Revit.Addin.RevitTooltip.UI
             DateTime? start = this.startTime.SelectedDate as DateTime?;
             DateTime? end = this.endTime.SelectedDate as DateTime?;
             NewImageForm.Instance().EntityData = App.Instance.Sqlite.SelectDrawEntityData(selectedItem.EntityName, start, end);
-            NewImageForm.Instance().Text = (this.comboBox.SelectedItem as ExcelTable)==null?"":(this.comboBox.SelectedItem as ExcelTable).CurrentFile + ": 测点" + selectedItem.EntityName + "的测量数据";
+            NewImageForm.Instance().Text = (this.comboBox.SelectedItem as ExcelTable)==null? "测点" + selectedItem.EntityName + "的测量数据":(this.comboBox.SelectedItem as ExcelTable).CurrentFile + ": 测点" + selectedItem.EntityName + "的测量数据";
             if (!NewImageForm.Instance().Visible)
             {
                 NewImageForm.Instance().Show();

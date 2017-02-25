@@ -35,7 +35,6 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     this._entityData = value;
                     this.panel1.Invalidate(this.panel1.ClientRectangle);
-                    this.Text = value==null?"":value.EntityName+"的测量值";
                 }
             }
         }

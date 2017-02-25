@@ -102,5 +102,6 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <returns></returns>
         bool DeleteGroup(int id);
         Group AddNewGroup(string signal, string newGroupName);
+        ExcelTable SelectADrawType(string EntityName);
     }
 }
