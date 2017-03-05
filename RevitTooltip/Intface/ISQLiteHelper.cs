@@ -94,7 +94,7 @@ namespace Revit.Addin.RevitTooltip.Intface
         /// <param name="signal"></param>
         /// <param name="total_hold"></param>
         /// <param name="diff_hold"></param>
-        bool ModifyThreshold(string signal, float total_hold, float diff_hold);
+        bool ModifyThreshold(string signal, float total_hold, float diff_hold,string totalOpr,string diffOpr);
         /// <summary>
         /// 删除分组
         /// </summary>

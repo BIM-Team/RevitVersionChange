@@ -184,6 +184,8 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Properties\DataSources\Revit.Addin.RevitTooltip.Properties.Resources.datasource" />
+    <None Include="Properties\DataSources\RevitTooltip.datasource" />
     <None Include="RevitTooltip.addin">
       <SubType>Designer</SubType>
     </None>

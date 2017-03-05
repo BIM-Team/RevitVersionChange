@@ -45,7 +45,7 @@ namespace Revit.Addin.RevitTooltip.UI
             g.SmoothingMode = SmoothingMode.AntiAlias;
             float height = this.panel1.ClientRectangle.Height;
             float width = this.panel1.ClientRectangle.Width;
-            float startX = width/10, endX = width - 10;
+            float startX = width / 10, endX = width - 10;
             float startY = height - 30, endY = 10;
             Font font = new Font("Arial", 9, System.Drawing.FontStyle.Regular);
             if (null == _entityData || _entityData.Data.Count == 0)
@@ -53,33 +53,14 @@ namespace Revit.Addin.RevitTooltip.UI
                 g.DrawString("没有数据", font, Brushes.Black, (startX + endX - g.MeasureString("没有数据", font).Width) / 2, (startY + endY) / 2);
                 return;
             }
-            List<DrawData> data1 = _entityData.Data;
-            List<DrawData> data2 = null;
-            bool isNegative = false;
-            if (_entityData.Total_hold < 0)
-            {
-                isNegative = true;
-                data2 = new List<DrawData>();
-                foreach (DrawData one in data1)
-                {
-                    DrawData newOne = new DrawData();
-                    newOne.Date = one.Date;
-                    newOne.Detail = one.Detail;
-                    newOne.MaxValue = -one.MaxValue;
-                    newOne.MidValue = -one.MidValue;
-                    newOne.MinValue = -one.MinValue;
-                    data2.Add(newOne);
-                }
-            }
-            else
-            {
-                data2 = data1;
-            }
+            List<DrawData> data2 = _entityData.Data;
 
-            float diff_hold = Math.Abs(_entityData.Diff_hold);
-            float total_hold = Math.Abs(_entityData.Total_hold);
+
+            float diff_hold = _entityData.Diff_hold;
+            float total_hold = _entityData.Total_hold;
+            string totalOpr = _entityData.TotalOperator;
+            string diffOpr = _entityData.DiffOperator;
             int length = data2.Count;
-            int div = length / 5;
 
             float Max = data2[0].MaxValue;
             float Min = Max;
@@ -131,7 +112,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     float y10 = startY - i * div_height;
                     float x10 = startX + i * div_width;
-                    string str_va = Math.Round((div_value * i + Min)*(isNegative?-1:1), 2, MidpointRounding.AwayFromZero).ToString();
+                    string str_va = Math.Round((div_value * i + Min), 2, MidpointRounding.AwayFromZero).ToString();
                     g.DrawLine(dotPen, startX, y10, endX, y10);
                     g.DrawLine(dotPen, x10, startY, x10, endY);
                     g.DrawString(str_va, font, Brushes.Black, startX - g.MeasureString(str_va, font).Width, y10);
@@ -146,8 +127,8 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     ////x轴的字
                     float value = data2[i].MaxValue;
-                    string str = data1[i].Date.ToShortDateString();
-                    string str_value = data1[i].MaxValue.ToString();
+                    string str = data2[i].Date.ToShortDateString();
+                    string str_value = data2[i].MaxValue.ToString();
 
                     x += divX;
                     y = startY - (value - Min) * divY;
@@ -164,28 +145,51 @@ namespace Revit.Addin.RevitTooltip.UI
 
                     if (value_b != 0)
                     {
-                        if (value > total_hold)
+                        bool totalResult = false;
+                        if (totalOpr.Equals(">"))
                         {
-                            if (Math.Abs(x - x_b) < 1 || Math.Abs(y - y_b) < 1)
-                            {
-                                g.DrawLine(pen_error, x_b, y_b, x + 1, y + 1);
-                            }
-                            else
-                            {
-                                g.DrawLine(pen_error, x_b, y_b, x, y);
-                            }
+                            totalResult = value - total_hold > 0.01f;
+                        }
+                        else if (totalOpr.Equals(">="))
+                        {
+                            totalResult = value - total_hold >= 0.01f;
+                        }
+                        else if (totalOpr.Equals("<"))
+                        {
+                            totalResult = value - total_hold < -0.01f;
+                        }
+                        else if (totalOpr.Equals("<="))
+                        {
+                            totalResult = value - total_hold <= -0.01f;
+                        }
+                        bool diffResult = false;
+                        float diff = Math.Abs(value - value_b);
+                        if (diffOpr.Equals(">"))
+                        {
+                            diffResult = diff - diff_hold > 0.01f;
+                        }
+                        else if (diffOpr.Equals(">="))
+                        {
+                            diffResult = diff - diff_hold >= 0.01f;
+                        }
+                        else if (diffOpr.Equals("<"))
+                        {
+                            diffResult = diff - diff_hold < -0.01f;
+                        }
+                        else if (diffOpr.Equals("<="))
+                        {
+                            diffResult = diff - diff_hold <= -0.01f;
 
                         }
-                        else if (Math.Abs(value - value_b) > diff_hold)
+                        if (totalResult)
                         {
-                            if (Math.Abs(x - x_b) < 1 || Math.Abs(y - y_b) < 1)
-                            {
-                                g.DrawLine(pen_error1, x_b, y_b, x + 1, y + 1);
-                            }
-                            else
-                            {
-                                g.DrawLine(pen_error1, x_b, y_b, x, y);
-                            }
+
+                            g.DrawLine(pen_error, x_b, y_b, x, y);
+
+                        }
+                        else if (diffResult)
+                        {
+                            g.DrawLine(pen_error1, x_b, y_b, x, y);
                         }
                         else
                         {
@@ -197,7 +201,7 @@ namespace Revit.Addin.RevitTooltip.UI
                     value_b = value;
 
                 }
-                if (total_hold - Min > 0&&total_hold<Max)
+                if (total_hold - Min > 0 && total_hold < Max)
                 {
                     float alert = (float)(startY - (total_hold - Min) * divY);
                     string str_alert = _entityData.Total_hold.ToString();

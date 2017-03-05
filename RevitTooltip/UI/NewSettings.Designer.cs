@@ -66,12 +66,6 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.useSqliteThreshold = new System.Windows.Forms.CheckBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPagePro = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -87,6 +81,14 @@
             this.Column5 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.totalOpr = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.diffOpr = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabPageDB.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -510,7 +512,9 @@
             this.Column4,
             this.Column9,
             this.Column1,
+            this.totalOpr,
             this.Column2,
+            this.diffOpr,
             this.Column3,
             this.Column8});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -522,51 +526,6 @@
             this.dataGridView1.Size = new System.Drawing.Size(531, 221);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEndEdit);
-            // 
-            // Column4
-            // 
-            this.Column4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Column4.DataPropertyName = "Id";
-            this.Column4.HeaderText = "Excel_ID";
-            this.Column4.Name = "Column4";
-            this.Column4.ReadOnly = true;
-            this.Column4.Visible = false;
-            // 
-            // Column9
-            // 
-            this.Column9.DataPropertyName = "Signal";
-            this.Column9.HeaderText = "简称";
-            this.Column9.Name = "Column9";
-            this.Column9.ReadOnly = true;
-            // 
-            // Column1
-            // 
-            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Column1.DataPropertyName = "CurrentFile";
-            this.Column1.HeaderText = "最新文档";
-            this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
-            // 
-            // Column2
-            // 
-            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Column2.DataPropertyName = "Total_hold";
-            this.Column2.HeaderText = "累计阈值";
-            this.Column2.Name = "Column2";
-            // 
-            // Column3
-            // 
-            this.Column3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Column3.DataPropertyName = "Diff_hold";
-            this.Column3.HeaderText = "相邻阈值";
-            this.Column3.Name = "Column3";
-            // 
-            // Column8
-            // 
-            this.Column8.DataPropertyName = "History";
-            this.Column8.HeaderText = "历史导入";
-            this.Column8.Name = "Column8";
-            this.Column8.ReadOnly = true;
             // 
             // tabPagePro
             // 
@@ -753,6 +712,78 @@
             this.Column6.ReadOnly = true;
             this.Column6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
+            // Column4
+            // 
+            this.Column4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column4.DataPropertyName = "Id";
+            this.Column4.HeaderText = "Excel_ID";
+            this.Column4.Name = "Column4";
+            this.Column4.ReadOnly = true;
+            this.Column4.Visible = false;
+            // 
+            // Column9
+            // 
+            this.Column9.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column9.DataPropertyName = "Signal";
+            this.Column9.HeaderText = "简称";
+            this.Column9.Name = "Column9";
+            this.Column9.ReadOnly = true;
+            // 
+            // Column1
+            // 
+            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column1.DataPropertyName = "CurrentFile";
+            this.Column1.HeaderText = "最新文档";
+            this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
+            // 
+            // totalOpr
+            // 
+            this.totalOpr.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.totalOpr.DataPropertyName = "TotalOperator";
+            this.totalOpr.HeaderText = "操作";
+            this.totalOpr.Items.AddRange(new object[] {
+            ">",
+            "<",
+            ">=",
+            "<="});
+            this.totalOpr.Name = "totalOpr";
+            // 
+            // Column2
+            // 
+            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column2.DataPropertyName = "Total_hold";
+            this.Column2.HeaderText = "累计阈值";
+            this.Column2.Name = "Column2";
+            // 
+            // diffOpr
+            // 
+            this.diffOpr.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.diffOpr.DataPropertyName = "DIffOperator";
+            this.diffOpr.HeaderText = "操作";
+            this.diffOpr.Items.AddRange(new object[] {
+            ">",
+            "<",
+            ">=",
+            "<="});
+            this.diffOpr.Name = "diffOpr";
+            this.diffOpr.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // Column3
+            // 
+            this.Column3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column3.DataPropertyName = "Diff_hold";
+            this.Column3.HeaderText = "相邻阈值";
+            this.Column3.Name = "Column3";
+            // 
+            // Column8
+            // 
+            this.Column8.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column8.DataPropertyName = "History";
+            this.Column8.HeaderText = "历史导入";
+            this.Column8.Name = "Column8";
+            this.Column8.ReadOnly = true;
+            // 
             // NewSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -841,12 +872,6 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column9;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.CheckBox useSqliteThreshold;
         private System.Windows.Forms.CheckBox useSqlitePro;
@@ -855,5 +880,13 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Button button10;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column9;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewComboBoxColumn totalOpr;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+        private System.Windows.Forms.DataGridViewComboBoxColumn diffOpr;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
     }
 }

@@ -38,6 +38,15 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// 记录所有导入过的文件
         /// </summary>
         public string History { get; set; }
+        /// <summary>
+        /// 记录该Excel的测量数据的比较方式
+        /// TotalThrehold的计算方式
+        /// </summary>
+        public string TotalOperator { get; set; }
+        /// <summary>
+        /// DiffThreshold的计算方式
+        /// </summary>
+        public string DiffOperator { get; set; }
     }
     /// <summary>
     /// 对应于InfoTable某个entity和其相关的所有Info数据
@@ -158,6 +167,15 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// 相邻阈值
         /// </summary>
         public float Diff_hold { get; set; }
+        /// <summary>
+        /// 记录该Excel的测量数据的比较方式
+        /// TotalThrehold的计算方式
+        /// </summary>
+        public string TotalOperator { get; set; }
+        /// <summary>
+        /// DiffThreshold的计算方式
+        /// </summary>
+        public string DiffOperator { get; set; }
 
     }
     /// <summary>

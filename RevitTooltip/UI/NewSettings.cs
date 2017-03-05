@@ -51,6 +51,7 @@ namespace Revit.Addin.RevitTooltip.UI
             dataGridView2.AutoGenerateColumns = false;
             dataGridView1.AutoGenerateColumns = false;
             excelReader = new ExcelReader();
+            //totalOpr.ValueMember = "TotalOperator";
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -165,7 +166,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show("导入异常，成功处理" + i + "个文件");
+                    MessageBox.Show("导入异常，成功处理" + i + "个文件,"+fileNames[i]+"有错误");
                     return;
                 }
                 MessageBox.Show("导入成功");
@@ -250,16 +251,18 @@ namespace Revit.Addin.RevitTooltip.UI
             string Signal = this.dataGridView1.CurrentRow.Cells[1].Value.ToString();
             try
             {
-                float Total_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[3].Value.ToString());
-                float Diff_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[4].Value.ToString());
+                float Total_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[4].Value.ToString());
+                string TotalOpr=this.dataGridView1.CurrentRow.Cells[3].Value.ToString();
+                float Diff_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[6].Value.ToString());
+                string DiffOpr = this.dataGridView1.CurrentRow.Cells[5].Value.ToString();
                 if (useSqliteThreshold.Checked)
                 {
-                    App.Instance.Sqlite.ModifyThreshold(Signal, Total_hold, Diff_hold);
+                    App.Instance.Sqlite.ModifyThreshold(Signal, Total_hold, Diff_hold,TotalOpr,DiffOpr);
                     this.IsThresholdChanged = true;
                 }
                 else if (App.Instance.MySql.IsReady)
                 {
-                    App.Instance.MySql.ModifyThreshold(Signal, Total_hold, Diff_hold);
+                    App.Instance.MySql.ModifyThreshold(Signal, Total_hold, Diff_hold, TotalOpr, DiffOpr);
                 }
             }
             catch (Exception)
@@ -496,7 +499,5 @@ namespace Revit.Addin.RevitTooltip.UI
                 App.Instance.ThresholdChanged = true;
             }
         }
-
-       
     }
 }
