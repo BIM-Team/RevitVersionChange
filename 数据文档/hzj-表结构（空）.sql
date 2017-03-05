@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50713
 File Encoding         : 65001
 
-Date: 2016-12-15 10:52:51
+Date: 2017-03-06 00:43:26
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -30,7 +30,7 @@ CREATE TABLE `drawtable` (
   `Version` varchar(20) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `dt_EntityId` (`Entity_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=14368 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13867 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of drawtable
@@ -48,7 +48,7 @@ CREATE TABLE `entitytable` (
   `Version` varchar(20) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `et_ExcelId` (`ExcelSignal`)
-) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=117 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of entitytable
@@ -64,12 +64,14 @@ CREATE TABLE `exceltable` (
   `ExcelSignal` varchar(20) NOT NULL,
   `IsInfo` tinyint(1) NOT NULL,
   `Total_hold` float NOT NULL DEFAULT '0',
+  `Total_operator` enum('>=','<=','<','>') DEFAULT '>',
   `Diff_hold` float NOT NULL DEFAULT '0',
+  `Diff_operator` enum('>=','<=','>','<') DEFAULT '>',
   `History` varchar(50) NOT NULL,
   `Version` varchar(20) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `ExcelSignal` (`ExcelSignal`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of exceltable
@@ -85,7 +87,7 @@ CREATE TABLE `grouptable` (
   `GroupName` varchar(20) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `gt_ExcelId` (`ExcelSignal`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of grouptable
@@ -104,7 +106,7 @@ CREATE TABLE `infotable` (
   PRIMARY KEY (`ID`),
   KEY `it_keyId` (`Key_ID`),
   KEY `it_EntityId` (`Entity_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=1639 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of infotable
@@ -123,7 +125,7 @@ CREATE TABLE `keytable` (
   `Version` varchar(20) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `kt_ExcelId` (`ExcelSignal`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of keytable
