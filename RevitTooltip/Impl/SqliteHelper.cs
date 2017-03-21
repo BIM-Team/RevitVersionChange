@@ -955,6 +955,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                         drawData.MidValue = reader.GetFloat(2);
                         drawData.MinValue = reader.GetFloat(3);
                         drawData.Detail = reader.GetString(4);
+                        drawData.UniId = EntityName +":"+drawData.Date.ToString("yy/MM/dd-HH时");
                         drawEntityData.Data.Add(drawData);
                     }
                     reader.Close();

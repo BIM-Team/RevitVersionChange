@@ -160,9 +160,9 @@ namespace Revit.Addin.RevitTooltip.Impl
                             drawEntityData.Data = new List<DrawData>();
                             int row = eHelper.GetUsedRowCount(i);
                             int col = eHelper.GetUsedColumnCount(i);
-                            text.Clear();
                             for (int c = 1; c < col; c++)
                             {
+                                text.Clear();
                                 string _min = eHelper.GetCellValue(1, c);
                                 //如果第一个测量值为空，跳过该列
                                 if (string.IsNullOrWhiteSpace(_min)){

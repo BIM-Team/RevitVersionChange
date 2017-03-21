@@ -87,6 +87,11 @@ namespace Revit.Addin.RevitTooltip.Dto
     /// </summary>
     public class DrawData
     {
+        /// <summary>
+        /// 用于唯一标识
+        /// </summary>
+        public String UniId { set; get; }
+
         DateTime date;
         /// <summary>
         /// 对应于DrawTable中的日期

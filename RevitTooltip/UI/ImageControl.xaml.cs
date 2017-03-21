@@ -148,6 +148,11 @@ namespace Revit.Addin.RevitTooltip.UI
         private void startBox_TextChanged(object sender, TextChangedEventArgs e)
         {
         }
+
+        private void detail_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            NewImageForm.Instance().Child.Show();
+        }
     }
 
 }

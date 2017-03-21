@@ -21,8 +21,22 @@ namespace Revit.Addin.RevitTooltip.UI
         private NewImageForm()
         {
             InitializeComponent();
+            _child = new ChildForm();
+            _child.FatherForm = this;
         }
-
+        /// <summary>
+        /// 引用子窗口
+        /// </summary>
+        private ChildForm _child;
+        public ChildForm Child {
+            get {
+                if (_child == null || _child.IsDisposed) {
+                    _child = new ChildForm();
+                    _child.FatherForm = this;
+                }
+                return _child;
+            }
+        }
         private DrawEntityData _entityData;
         /// <summary>
         /// 保存某一个实体的数据
