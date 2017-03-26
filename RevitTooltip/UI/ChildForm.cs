@@ -43,14 +43,16 @@ namespace Revit.Addin.RevitTooltip.UI
             g.SmoothingMode = SmoothingMode.AntiAlias;
             float height = this.splitContainer1.Panel2.ClientRectangle.Height;
             float width = this.splitContainer1.Panel2.ClientRectangle.Width;
-            float startX = width / 10, endX = width - 10;
-            float startY = height - 30, endY = 10;
+            float startX = width / 10, endX = width - 15;
+            float startY = height - 15, endY = 30;
             Font font = new Font("Arial", 9, System.Drawing.FontStyle.Regular);
             if (details.Count == 0)
             {
                 g.DrawString("没有数据", font, Brushes.Black, (startX + endX - g.MeasureString("没有数据", font).Width) / 2, (startY + endY) / 2);
                 return;
             }
+            StringFormat format = new StringFormat();
+            format.FormatFlags = StringFormatFlags.DirectionVertical;
             float MaxValue = 0L;
             float MinValue = float.MaxValue;
             int CountX = 0;
@@ -63,11 +65,13 @@ namespace Revit.Addin.RevitTooltip.UI
                 if (v_min - MinValue < 0.01) { MinValue = v_min; }
                 if (len > CountX) { CountX = len; }
             }
-            float divX = (endX - startX) / CountX;
-            float divY =  (startY-endY)/ (MaxValue - MinValue);
+            float divX = (endX - startX) /(MaxValue - MinValue) ;
+            float divY =  (startY-endY)/CountX ;
 
             float divYY = (startY - endY) / 10;
             float divYV = (MaxValue - MinValue) / 10;
+            float divXX = (endX - startX) / 10;
+            float divXV = (MaxValue - MinValue) / 10;
                 Pen mypen = new Pen(System.Drawing.Color.Blue, 1);
                 //画坐标轴使用
                 Pen mypen1 = new Pen(System.Drawing.Color.Blue, 2);
@@ -78,30 +82,30 @@ namespace Revit.Addin.RevitTooltip.UI
                 //用于画正常的线段
                 dotPen.DashStyle = DashStyle.Dot;
                 //画X轴
-                g.DrawLine(mypen1, startX, startY, endX, startY);
+                g.DrawLine(mypen1, startX, endY, endX, endY);
                 //画Y轴
                 g.DrawLine(mypen1, startX, endY, startX, startY);
-                //画横线
+                //画竖线
                 for (int i = 0; i <= 10; i++)
                 {
-                    float newY = startY - i * divYY;
-                    float v_Y = (float)Math.Round(MinValue + i * divYV, 2, MidpointRounding.AwayFromZero);
-                    g.DrawLine(dotPen, startX, newY, endX, newY);
-                    String s_Y = v_Y.ToString();
-                    g.DrawString(s_Y, font, Brushes.Black, startX - g.MeasureString(s_Y, font).Width, newY);
+                    float newX = startX + i * divXX;
+                    float v_X = (float)Math.Round(MinValue + i * divXV, 2, MidpointRounding.AwayFromZero);
+                    g.DrawLine(dotPen, newX, startY, newX, endY);
+                    String s_Y = v_X.ToString();
+                    g.DrawString(s_Y, font, Brushes.Black, newX- g.MeasureString(s_Y, font).Width/2, endY- g.MeasureString(s_Y, font).Height);
                 }
-                //画竖线
+                //画横线
                 for (int j = 0; j <= CountX; j++)
                 {
-                    float newX = startX + j * divX;
-                    g.DrawLine(dotPen, newX, startY, newX, endY);
-                    float v_X = (float)(j * 0.5);
-                    String s_X = v_X.ToString();
-                    if (j!=0&&j % 5 == 0&&CountX-j>2) {
-                    g.DrawString(s_X, font, Brushes.Black, newX- g.MeasureString(s_X, font).Width/2, startY + g.MeasureString(s_X, font).Height/2);
+                    float newY = endY +j * divY;
+                    g.DrawLine(dotPen, startX, newY, endX, newY);
+                    float v_Y = (float)(j * 0.5);
+                    String s_X = v_Y.ToString();
+                    if (j % 5 == 0&&CountX-j>3) {
+                    g.DrawString(s_X, font, Brushes.Black, startX- g.MeasureString(s_X, font).Width, newY);
                     }
                     if (j == CountX) {
-                    g.DrawString(s_X, font, Brushes.Black, newX - g.MeasureString(s_X, font).Width, startY + g.MeasureString(s_X, font).Height/2);
+                    g.DrawString(s_X, font, Brushes.Black, startX - g.MeasureString(s_X, font).Width, newY- g.MeasureString(s_X, font).Height/2);
                     }
                 }
                 foreach (DrawData one in details)
@@ -114,22 +118,24 @@ namespace Revit.Addin.RevitTooltip.UI
                     int c_r = radom.Next(100,255);
                     int c_g = radom.Next(100,255);
                     int c_b = 0;
-                    if (c_r + c_g < 400) { c_b = 400 - c_r - c_g; }
+                    if (c_r + c_g < 350) { c_b = 350 - c_r - c_g; }
+                    Color color = Color.FromArgb(c_r, c_g, c_b);
+                    SolidBrush brush = new SolidBrush(color);
 
-                    Pen temp_pen = new Pen(Color.FromArgb(c_r, c_g, c_b), 1);
+                    Pen temp_pen = new Pen(color, 1);
                     for (int h = 0; h < len; h++)
                     {
                         String[] s_arr = arr[h].Split(':');
                         int y_index = (int)(Convert.ToSingle(s_arr[0]) / 0.5);
-                        float v_y = Convert.ToSingle(s_arr[1]);
-                        float curr_x = startX + y_index * divX;
-                        float curr_y = startY - (v_y - MinValue) * divY;
+                        float v_x = Convert.ToSingle(s_arr[1]);
+                        float curr_x = startX + (v_x - MinValue) * divX;
+                        float curr_y = endY + y_index * divY;
 
                         if (h != 0)
                         {
                             g.DrawLine(temp_pen, pre_x, pre_y, curr_x, curr_y);
                             if (h == len / 2) {
-                                g.DrawString(one.UniId, font, Brushes.Black, (pre_x+curr_x-g.MeasureString(one.UniId,font).Width)/2,(pre_y+curr_y)/2);
+                                g.DrawString(one.UniId, font, brush, (pre_x+curr_x-g.MeasureString(one.UniId,font).Width)/2,(pre_y+curr_y- g.MeasureString(one.UniId,font).Width)/2,format);
                             }
                         }
                         pre_x = curr_x;
