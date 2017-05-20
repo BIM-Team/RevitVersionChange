@@ -463,8 +463,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                     result.Id = reader.GetInt32(0);
                     result.CurrentFile = reader.GetString(1);
                     result.Signal = reader.GetString(2);
-                    result.Total_hold = reader.GetFloat(3);
-                    result.Diff_hold = reader.GetFloat(4);
+                    result.Total_hold = reader.GetString(3);
+                    result.Diff_hold = reader.GetString(4);
                     result.History = reader.GetString(5);
                 }
             }
@@ -485,7 +485,7 @@ namespace Revit.Addin.RevitTooltip.Impl
        /// <param name="Total_hold"></param>
        /// <param name="Diff_hold"></param>
        /// <returns></returns>
-        public bool ModifyThreshold(string signal, float Total_hold, float Diff_hold,string TotalOpr,string DiffOpr)
+        public bool ModifyThreshold(string signal, string Total_hold, string Diff_hold,string TotalOpr,string DiffOpr)
         {
             
             bool flag = false;
@@ -538,8 +538,8 @@ namespace Revit.Addin.RevitTooltip.Impl
                     one.Id = reader.GetInt32(0);
                     one.CurrentFile = reader.GetString(1);
                     one.Signal = reader.GetString(2);
-                    one.Total_hold = reader.GetFloat(3);
-                    one.Diff_hold = reader.GetFloat(4);
+                    one.Total_hold = reader.GetString(3);
+                    one.Diff_hold = reader.GetString(4);
                     one.History = reader.GetString(5);
                     one.TotalOperator = reader.GetString(6);
                     one.DiffOperator = reader.GetString(7);

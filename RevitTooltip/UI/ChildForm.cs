@@ -17,6 +17,7 @@ namespace Revit.Addin.RevitTooltip.UI
         {
             InitializeComponent();
             this.dataGridView1.AutoGenerateColumns = false;
+            this.dataGridView2.AutoGenerateColumns = false;
             List<CEntityName> items= App.Instance.Sqlite.SelectAllEntitiesAndErr("CX");
             this.comboBox1.DisplayMember = "EntityName";
             this.comboBox1.ValueMember = "EntityName";
@@ -108,18 +109,28 @@ namespace Revit.Addin.RevitTooltip.UI
                     g.DrawString(s_X, font, Brushes.Black, startX - g.MeasureString(s_X, font).Width, newY- g.MeasureString(s_X, font).Height/2);
                     }
                 }
-                foreach (DrawData one in details)
+                Random radom = new Random();
+                Color color_b = Color.FromArgb(radom.Next(80, 128),radom.Next(0,128), radom.Next(0, 128));
+                for(int k=0;k<details.Count;k++)
                 {
+                    DrawData one = details[k];
                     String[] arr = one.Detail.Split(';');
                     int len = arr.Count();
                     float pre_x = 0;
                     float pre_y = 0;
-                    Random radom = new Random();
-                    int c_r = radom.Next(100,255);
-                    int c_g = radom.Next(100,255);
-                    int c_b = 0;
-                    if (c_r + c_g < 350) { c_b = 350 - c_r - c_g; }
+                    int add = radom.Next(32, 128);
+                    int which = radom.Next(0,2);
+                    int c_r = color_b.R;
+                    int c_g = color_b.G;
+                    int c_b = color_b.B;
+                    switch (which) {
+                        case 0: c_r=(color_b.R + add ) % 255;break;
+                        case 1: c_g = (color_b.G + add ) % 255;break;
+                        case 2:c_b= (color_b.B + add ) % 255;break;
+                    }
+                    
                     Color color = Color.FromArgb(c_r, c_g, c_b);
+                    color_b = color;
                     SolidBrush brush = new SolidBrush(color);
 
                     Pen temp_pen = new Pen(color, 1);
@@ -163,6 +174,7 @@ namespace Revit.Addin.RevitTooltip.UI
             if (item != null) {
                 DrawEntityData drawEntityData= App.Instance.Sqlite.SelectDrawEntityData(item.EntityName,null,null);
                 this.dataGridView1.DataSource = drawEntityData.Data;
+                this.dataGridView2.DataSource = null;
             }
         }
 
@@ -188,10 +200,22 @@ namespace Revit.Addin.RevitTooltip.UI
             int index = this.dataGridView1.CurrentRow.Index;
             if (dataViewSource != null && index < dataViewSource.Count && index >= 0)
             {
-                this.details.Add(dataViewSource[this.dataGridView1.CurrentRow.Index]);
+                this.details.Add(dataViewSource[index]);
                 this.splitContainer1.Panel2.Invalidate(this.splitContainer1.Panel2.ClientRectangle);
+                this.dataGridView2.DataSource = App.Instance.Sqlite.SelectDrawData("CX", dataViewSource[this.dataGridView1.CurrentRow.Index].Date);
             }
 
+        }
+
+        private void dataGridView2_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            List<DrawData> dataViewSource = this.dataGridView2.DataSource as List<DrawData>;
+            int index = this.dataGridView2.CurrentRow.Index;
+            if (dataViewSource != null && index < dataViewSource.Count && index >= 0)
+            {
+                this.details.Add(dataViewSource[index]);
+                this.splitContainer1.Panel2.Invalidate(this.splitContainer1.Panel2.ClientRectangle);
+            }
         }
     }
 }

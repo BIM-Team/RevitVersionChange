@@ -746,7 +746,9 @@
             ">",
             "<",
             ">=",
-            "<="});
+            "<=",
+            "IN",
+            "OUT"});
             this.totalOpr.Name = "totalOpr";
             // 
             // Column2
@@ -765,7 +767,9 @@
             ">",
             "<",
             ">=",
-            "<="});
+            "<=",
+            "IN",
+            "OUT"});
             this.diffOpr.Name = "diffOpr";
             this.diffOpr.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             // 

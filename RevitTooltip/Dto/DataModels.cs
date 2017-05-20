@@ -28,12 +28,12 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// 用于查询返回
         /// 累计阈值
         /// </summary>
-        public float? Total_hold { get; set; }
+        public string Total_hold { get; set; }
         /// <summary>
         /// 用于查询返回
         /// 相邻阈值
         /// </summary>
-        public float? Diff_hold { get; set; }
+        public string Diff_hold { get; set; }
         /// <summary>
         /// 记录所有导入过的文件
         /// </summary>
@@ -91,6 +91,7 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// 用于唯一标识
         /// </summary>
         public String UniId { set; get; }
+        public String EntityName { set; get; }
 
         DateTime date;
         /// <summary>
@@ -166,12 +167,12 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// 用于查询返回
         /// 累计阈值
         /// </summary>
-        public float Total_hold { get; set; }
+        public string Total_hold { get; set; }
         /// <summary>
         /// 用于查询返回
         /// 相邻阈值
         /// </summary>
-        public float Diff_hold { get; set; }
+        public string Diff_hold { get; set; }
         /// <summary>
         /// 记录该Excel的测量数据的比较方式
         /// TotalThrehold的计算方式

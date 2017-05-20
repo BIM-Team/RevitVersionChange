@@ -1,5 +1,7 @@
-﻿using Res = Revit.Addin.RevitTooltip.Properties.Resources;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
+using Revit.Addin.RevitTooltip.Dto;
+using Revit.Addin.RevitTooltip.Impl;
+using Revit.Addin.RevitTooltip.Intface;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,9 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Revit.Addin.RevitTooltip.Intface;
-using Revit.Addin.RevitTooltip.Impl;
-using Revit.Addin.RevitTooltip.Dto;
+using Res = Revit.Addin.RevitTooltip.Properties.Resources;
 
 namespace Revit.Addin.RevitTooltip.UI
 {
@@ -244,17 +244,29 @@ namespace Revit.Addin.RevitTooltip.UI
                 this.combExcel.DataSource = tables;
             }
         }
-
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             int row = e.RowIndex;
             string Signal = this.dataGridView1.CurrentRow.Cells[1].Value.ToString();
             try
             {
-                float Total_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[4].Value.ToString());
+                string Total_hold = this.dataGridView1.CurrentRow.Cells[4].Value.ToString();
                 string TotalOpr=this.dataGridView1.CurrentRow.Cells[3].Value.ToString();
-                float Diff_hold = float.Parse(this.dataGridView1.CurrentRow.Cells[6].Value.ToString());
+                if (!System.Text.RegularExpressions.Regex.IsMatch(Total_hold,@"^\d+([,，]\d+)?$")) {
+                   throw new Exception("阈值不符合规则");
+                }
+                if (!TotalOpr.Equals("IN") &&!TotalOpr.Equals("OUT")) {
+                    Total_hold = Total_hold.Split(new Char[] {',','，' })[0];
+                }
+                string Diff_hold = this.dataGridView1.CurrentRow.Cells[6].Value.ToString();
                 string DiffOpr = this.dataGridView1.CurrentRow.Cells[5].Value.ToString();
+                if (!System.Text.RegularExpressions.Regex.IsMatch(Diff_hold, @"^\d+([,，]\d+)?$"))
+                {
+                    throw new Exception("阈值不符合规则");
+                }
+                if (!DiffOpr.Equals("IN") && !DiffOpr.Equals("OUT")) {
+                    Diff_hold = Diff_hold.Split(new Char[] { ',', '，' })[0];
+                }
                 if (useSqliteThreshold.Checked)
                 {
                     App.Instance.Sqlite.ModifyThreshold(Signal, Total_hold, Diff_hold,TotalOpr,DiffOpr);

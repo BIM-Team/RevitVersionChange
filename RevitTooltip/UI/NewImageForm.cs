@@ -68,10 +68,19 @@ namespace Revit.Addin.RevitTooltip.UI
                 return;
             }
             List<DrawData> data2 = _entityData.Data;
-
-
-            float diff_hold = _entityData.Diff_hold;
-            float total_hold = _entityData.Total_hold;
+            string[] diff_holds = _entityData.Diff_hold.Split(new char[] { ',', '，' });
+            string[] total_holds = _entityData.Total_hold.Split(new char[] { ',', '，' });
+            float diff_hold1 = Convert.ToSingle(diff_holds[0]);
+            float diff_hold2 = 0;
+            float total_hold1 = Convert.ToSingle(total_holds[0]);
+            float total_hold2 = 0;
+            if (diff_holds.Length > 1) {
+                diff_hold2 = Convert.ToSingle(diff_holds[1]);
+            }
+            if (total_holds.Length > 1)
+            {
+                total_hold2 = Convert.ToSingle(total_holds[1]);
+            }
             string totalOpr = _entityData.TotalOperator;
             string diffOpr = _entityData.DiffOperator;
             int length = data2.Count;
@@ -157,51 +166,113 @@ namespace Revit.Addin.RevitTooltip.UI
                         g.DrawString(str, font, Brushes.Black, endX - g.MeasureString(str, font).Width, startY + g.MeasureString(str, font).Height / 2);
                     }
 
-                    if (value_b != 0)
-                    {
+                    
                         bool totalResult = false;
                         if (totalOpr.Equals(">"))
                         {
-                            totalResult = value - total_hold > 0.01f;
+                            totalResult = value - total_hold1 > 0.01f||value_b-total_hold1>0.01f;
                         }
                         else if (totalOpr.Equals(">="))
                         {
-                            totalResult = value - total_hold >= 0.01f;
+                            totalResult = value - total_hold1 >= 0.01f || value_b - total_hold1 >= 0.01f;
                         }
                         else if (totalOpr.Equals("<"))
                         {
-                            totalResult = value - total_hold < -0.01f;
+                            totalResult = value - total_hold1 < -0.01f || value_b - total_hold1 <0.01f;
                         }
                         else if (totalOpr.Equals("<="))
                         {
-                            totalResult = value - total_hold <= -0.01f;
+                            totalResult = value - total_hold1 <= -0.01f || value_b - total_hold1 <= 0.01f;
                         }
+                        else {
+                            float total_max = Math.Max(total_hold1, total_hold2);
+                            float total_min = Math.Min(total_hold1, total_hold2);
+                            if (totalOpr.Equals("IN"))
+                            {
+                                totalResult = value>total_min&&value<total_max;
+                            totalResult=totalResult || value_b > total_min && value_b < total_max;
+                            }
+                            else {
+                                totalResult = value < total_min || value > total_max;
+                            totalResult = totalResult||value_b < total_min || value_b > total_max;
+                        }
+
+                        } 
                         bool diffResult = false;
                         float diff = Math.Abs(value - value_b);
                         if (diffOpr.Equals(">"))
                         {
-                            diffResult = diff - diff_hold > 0.01f;
+                            diffResult = diff - diff_hold1 > 0.01f;
                         }
                         else if (diffOpr.Equals(">="))
                         {
-                            diffResult = diff - diff_hold >= 0.01f;
+                            diffResult = diff - diff_hold1 >= 0.01f;
                         }
                         else if (diffOpr.Equals("<"))
                         {
-                            diffResult = diff - diff_hold < -0.01f;
+                            diffResult = diff - diff_hold1 < -0.01f;
                         }
                         else if (diffOpr.Equals("<="))
                         {
-                            diffResult = diff - diff_hold <= -0.01f;
+                            diffResult = diff - diff_hold1 <= -0.01f;
+                        }
+                        else {
+                            float diff_max = Math.Max(diff_hold1, diff_hold2);
+                            float diff_min = Math.Min(diff_hold1, diff_hold2);
+                            if (totalOpr.Equals("IN"))
+                            {
+                                diffResult = diff > diff_min && diff < diff_max;
+                            }
+                            else
+                            {
+                                diffResult = diff < diff_min || diff > diff_max;
+                            }
 
                         }
                         if (totalResult)
                         {
+                            if ((value_b - total_hold1) * (value - total_hold1) < 0) {
+                                float y_mid = startY-(total_hold1 - Min) * divY;
+                                float x_mid = x_b;
+                                if (y - y_b != 0) {
+                                    x_mid = (y_mid - y_b) * (x - x_b) / (y - y_b) + x_b;
+                                }
+                                if (totalOpr.Equals("<") || totalOpr.Equals("<=") || totalOpr.Equals("OUT"))
+                                {
+                                    g.DrawLine(pen_error, x_b, y_b, x_mid, y_mid);
+                                    g.DrawLine(mypen, x_mid, y_mid, x, y);
+                                }
+                                else {
+                                    g.DrawLine(mypen, x_b, y_b, x_mid, y_mid);
+                                    g.DrawLine(pen_error, x_mid, y_mid, x, y);
+                                }
 
-                            g.DrawLine(pen_error, x_b, y_b, x, y);
+                            } else if ((value_b - total_hold2) * (value - total_hold2) < 0) {
+                                float y_mid = startY-(total_hold2 - Min) * divY;
+                                float x_mid = x_b;
+                                if (y - y_b != 0)
+                                {
+                                    x_mid = (y_mid - y_b) * (x - x_b) / (y - y_b) + x_b;
+                                }
+                                if (totalOpr.Equals("OUT"))
+                                {
+                                    g.DrawLine(mypen, x_b, y_b, x_mid, y_mid);
+                                    g.DrawLine(pen_error, x_mid, y_mid, x, y);
+                                }
+                                else if(totalOpr.Equals("IN"))
+                                {
+                                    g.DrawLine(pen_error, x_b, y_b, x_mid, y_mid);
+                                    g.DrawLine(mypen, x_mid, y_mid, x, y);
+                                }
+
+                            } else {
+                                g.DrawLine(pen_error, x_b, y_b, x, y);
+                            }
+                       
+                            
 
                         }
-                        else if (diffResult)
+                        else if (diffResult&&i>0)
                         {
                             g.DrawLine(pen_error1, x_b, y_b, x, y);
                         }
@@ -209,16 +280,24 @@ namespace Revit.Addin.RevitTooltip.UI
                         {
                             g.DrawLine(mypen, x_b, y_b, x, y);
                         }
-                    }
+                    
                     y_b = y;
                     x_b = x;
                     value_b = value;
 
                 }
-                if (total_hold - Min > 0 && total_hold < Max)
+                if (total_hold1 - Min > 0 && total_hold1 < Max)
                 {
-                    float alert = (float)(startY - (total_hold - Min) * divY);
-                    string str_alert = _entityData.Total_hold.ToString();
+                    float alert = (float)(startY - (total_hold1 - Min) * divY);
+                    string str_alert = total_hold1.ToString();
+                    g.DrawString(str_alert, font, Brushes.Red, (startX + endX) / 2 -
+                        g.MeasureString(str_alert, font).Width, alert - g.MeasureString(str_alert, font).Height / 2);
+                    g.DrawLine(dotPen1, startX, alert, endX, alert);
+                }
+                if (total_hold2 - Min > 0 && total_hold2 < Max)
+                {
+                    float alert = (float)(startY - (total_hold2 - Min) * divY);
+                    string str_alert = total_hold2.ToString();
                     g.DrawString(str_alert, font, Brushes.Red, (startX + endX) / 2 -
                         g.MeasureString(str_alert, font).Width, alert - g.MeasureString(str_alert, font).Height / 2);
                     g.DrawLine(dotPen1, startX, alert, endX, alert);
