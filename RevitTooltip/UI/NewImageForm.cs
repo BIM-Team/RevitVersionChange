@@ -231,7 +231,7 @@ namespace Revit.Addin.RevitTooltip.UI
                         }
                         if (totalResult)
                         {
-                            if ((value_b - total_hold1) * (value - total_hold1) < 0) {
+                            if (total_hold1>Min&&(value_b - total_hold1) * (value - total_hold1) < 0) {
                                 float y_mid = startY-(total_hold1 - Min) * divY;
                                 float x_mid = x_b;
                                 if (y - y_b != 0) {
@@ -247,7 +247,7 @@ namespace Revit.Addin.RevitTooltip.UI
                                     g.DrawLine(pen_error, x_mid, y_mid, x, y);
                                 }
 
-                            } else if ((value_b - total_hold2) * (value - total_hold2) < 0) {
+                            } else if (total_hold2>Min&&(value_b - total_hold2) * (value - total_hold2) < 0) {
                                 float y_mid = startY-(total_hold2 - Min) * divY;
                                 float x_mid = x_b;
                                 if (y - y_b != 0)
