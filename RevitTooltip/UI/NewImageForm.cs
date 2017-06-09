@@ -99,7 +99,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 }
             }
             float divX = (endX - startX) / length;
-            float divY = (startY - endY) / (Max - Min);
+            float divY = (Max - Min)==0?0:(startY - endY) / (Max - Min);
             try
             {
                 //清除屏幕
@@ -135,7 +135,7 @@ namespace Revit.Addin.RevitTooltip.UI
                 {
                     float y10 = startY - i * div_height;
                     float x10 = startX + i * div_width;
-                    string str_va = Math.Round((div_value * i + Min), 2, MidpointRounding.AwayFromZero).ToString();
+                    string str_va = Math.Round((div_value * i + Min), 5, MidpointRounding.AwayFromZero).ToString();
                     g.DrawLine(dotPen, startX, y10, endX, y10);
                     g.DrawLine(dotPen, x10, startY, x10, endY);
                     g.DrawString(str_va, font, Brushes.Black, startX - g.MeasureString(str_va, font).Width, y10);
@@ -170,19 +170,19 @@ namespace Revit.Addin.RevitTooltip.UI
                         bool totalResult = false;
                         if (totalOpr.Equals(">"))
                         {
-                            totalResult = value - total_hold1 > 0.01f||value_b-total_hold1>0.01f;
+                            totalResult = value - total_hold1 > 0.00001f||value_b-total_hold1>0.000001f;
                         }
                         else if (totalOpr.Equals(">="))
                         {
-                            totalResult = value - total_hold1 >= 0.01f || value_b - total_hold1 >= 0.01f;
+                            totalResult = value - total_hold1 >= 0.00001f || value_b - total_hold1 >= 0.00001f;
                         }
                         else if (totalOpr.Equals("<"))
                         {
-                            totalResult = value - total_hold1 < -0.01f || value_b - total_hold1 <0.01f;
+                            totalResult = value - total_hold1 < -0.00001f || value_b - total_hold1 <0.00001f;
                         }
                         else if (totalOpr.Equals("<="))
                         {
-                            totalResult = value - total_hold1 <= -0.01f || value_b - total_hold1 <= 0.01f;
+                            totalResult = value - total_hold1 <= -0.00001f || value_b - total_hold1 <= 0.00001f;
                         }
                         else {
                             float total_max = Math.Max(total_hold1, total_hold2);
@@ -202,19 +202,19 @@ namespace Revit.Addin.RevitTooltip.UI
                         float diff = Math.Abs(value - value_b);
                         if (diffOpr.Equals(">"))
                         {
-                            diffResult = diff - diff_hold1 > 0.01f;
+                            diffResult = diff - diff_hold1 > 0.00001f;
                         }
                         else if (diffOpr.Equals(">="))
                         {
-                            diffResult = diff - diff_hold1 >= 0.01f;
+                            diffResult = diff - diff_hold1 >= 0.00001f;
                         }
                         else if (diffOpr.Equals("<"))
                         {
-                            diffResult = diff - diff_hold1 < -0.01f;
+                            diffResult = diff - diff_hold1 < -0.00001f;
                         }
                         else if (diffOpr.Equals("<="))
                         {
-                            diffResult = diff - diff_hold1 <= -0.01f;
+                            diffResult = diff - diff_hold1 <= -0.00001f;
                         }
                         else {
                             float diff_max = Math.Max(diff_hold1, diff_hold2);

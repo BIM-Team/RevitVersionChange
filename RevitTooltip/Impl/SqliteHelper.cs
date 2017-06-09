@@ -1090,7 +1090,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                     reader.Close();
                     if (TotalOpr==null||DiffOpr==null)
                     {
-                        throw new Exception("无效操作符");
+                        return Entities;
                     }
                     string sql_Total = null;
                     if (TotalOpr.Equals(">") || TotalOpr.Equals(">="))

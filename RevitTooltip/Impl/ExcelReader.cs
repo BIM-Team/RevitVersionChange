@@ -117,7 +117,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                                             catch (Exception) {
                                                 continue;
                                             }
-                                            dValue = (float)Math.Round(dValue, 2, MidpointRounding.AwayFromZero);
+                                            dValue = (float)Math.Round(dValue, 5, MidpointRounding.AwayFromZero);
                                             double date = Convert.ToDouble(eHelper.GetCellValue(0, c));
                                             DateTime dateTime;
                                             try
@@ -178,7 +178,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                                 {
                                     continue;
                                 }
-                                min = (float)Math.Round(min,2,MidpointRounding.AwayFromZero);
+                                min = (float)Math.Round(min,5,MidpointRounding.AwayFromZero);
                                 float mid = min;
                                 float max = min;
                                 int minCount = 0;
@@ -198,7 +198,7 @@ namespace Revit.Addin.RevitTooltip.Impl
                                         {
                                             continue;
                                         }
-                                        dValue = (float)Math.Round(dValue, 2, MidpointRounding.AwayFromZero);
+                                        dValue = (float)Math.Round(dValue, 5, MidpointRounding.AwayFromZero);
                                         text.Append(eHelper.GetCellValue(r, 0) + ":" + dValue + ";");
                                         //计算最小值
                                         if (min > dValue)
