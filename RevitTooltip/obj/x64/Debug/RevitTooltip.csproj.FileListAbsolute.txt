@@ -56,4 +56,3 @@ C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sou
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.dll
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.pdb
 C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\Revit.Addin.RevitTooltip.UI.ChildForm.resources
-C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Debug\RevitTooltip.csprojResolveAssemblyReference.cache
