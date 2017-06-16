@@ -379,6 +379,7 @@ namespace Revit.Addin.RevitTooltip
                 {
                     ExtensibleStorage.StoreTooltipInfo(CurrentDoc.ProjectInformation, settings);
                     App.Instance.CurrentDoc.Save();
+                    isThresholdChanged = false;
                     isSettingChange = false;
                 }
             }
@@ -408,7 +409,9 @@ namespace Revit.Addin.RevitTooltip
                         try
                         {
                             uidoc.ShowElements(keyNameToElementMap[selectedNoInfoEntity]);
-                            currentUIView.ZoomSheetSize();
+                            //currentUIView.ZoomSheetSize();
+                   
+                            currentUIView.Zoom(0.1d);
                         }
                         catch (Exception)
                         {
