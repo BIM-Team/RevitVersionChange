@@ -63,9 +63,16 @@ namespace Revit.Addin.RevitTooltip
         {
             try
             {
-                NewSettings settingForm = new NewSettings(App.Instance.settings);
-                settingForm.Show();
-                commandData.Application.Idling += App.Instance.SettingIdlingHandler;
+                if (App.Instance.SettingsForm == null || App.Instance.SettingsForm.IsDisposed) {
+                    NewSettings settingForm = new NewSettings(App.Instance.settings);
+                    commandData.Application.Idling += App.Instance.SettingIdlingHandler;
+                    App.Instance.SettingsForm = settingForm;
+                }
+                if (!App.Instance.SettingsForm.Visible)
+                {
+                    App.Instance.SettingsForm.Show();
+                }
+                
                 return Result.Succeeded;
             }
             catch (Exception ex)
@@ -86,19 +93,24 @@ namespace Revit.Addin.RevitTooltip
     {
         public override Result RunIt(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            try
+            if (MessageBox.Show("确定同步本地文件与Mysql一致?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                if (App.Instance.Sqlite.LoadDataToSqlite()) {
-                    App.Instance.ThresholdChanged = true;
-                    MessageBox.Show("数据更新成功");
+                try
+                {
+                    if (App.Instance.Sqlite.LoadDataToSqlite())
+                    {
+                        App.Instance.ThresholdChanged = true;
+                        MessageBox.Show("数据更新成功");
+                    }
+                    return Result.Succeeded;
                 }
-                return Result.Succeeded;
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    return Result.Failed;
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                return Result.Failed;
-            }
+            return Result.Cancelled;
         }
     }
     #endregion
@@ -180,31 +192,7 @@ namespace Revit.Addin.RevitTooltip
             commandData.Application.Idling += App.Instance.IdlingHandler;
             commandData.Application.Idling += App.Instance.ImageControlIdlingHandler;
 
-            //对模型的处理，后续可能删除
-            //Material color_red = null;
-            //Material color_gray = null;
-            //Material color_blue = null;
-            //FilteredElementCollector elementCollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
-            //IEnumerable<Material> allMaterial = elementCollector.OfClass(typeof(Material)).Cast<Material>();
-            //        foreach (Material elem in allMaterial)
-            //        {
-            //            if (elem.Name.Equals(Res.String_Color_Red))
-            //            {
-            //                color_red = elem;
-            //            }
-            //            if (elem.Name.Equals(Res.String_Color_Gray))
-            //            {
-            //                color_gray = elem;
-            //            }
-            //            if (elem.Name.Equals(Res.String_Color_Blue))
-            //            {
-            //                color_blue = elem;
-            //            }
-            //            if (color_gray != null && color_red != null&& color_blue!=null)
-            //            {
-            //                break;
-            //            }
-            //        }
+            
 
 
             return Result.Succeeded;

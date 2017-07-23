@@ -90,7 +90,9 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// <summary>
         /// 用于唯一标识
         /// </summary>
-        public String UniId { set; get; }
+        public String UniId { get {
+                return EntityName + "-"+date.ToString("yyMMdd-HH"); 
+            } }
         public String EntityName { set; get; }
 
         DateTime date;
@@ -307,6 +309,9 @@ namespace Revit.Addin.RevitTooltip.Dto
         /// err1,err2,err3,noErr
         /// </summary>
         public string ErrMsg { get; set; }
+        //记录最大值
+        public String maxValue { get; set; }
+        public String minValue { get; set; }
 
     }
 }

@@ -4,7 +4,7 @@
 library
 C#
 .cs
-C:\Users\Administrator\Documents\GitHub\RevitProject\Sources7-15\Sources5-16\Sources\SmartBIM\Sources\obj\x64\Release\
+C:\Users\Administrator\Documents\GitHub\RevitProject\SmartBIM\Sources\obj\x64\Release\
 Revit.Addin.RevitTooltip
 none
 false
@@ -13,7 +13,7 @@ TRACE;Enable_License
 5-208631373
 
 271935346153
-311414445578
+301801666795
 Styles\MetroStyle.xaml;UI\ElementInfoHost.xaml;UI\ElementInfoPanel.xaml;UI\ImageControl.xaml;UI\TabItemControl.xaml;
 
 False
